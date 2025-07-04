@@ -10,12 +10,13 @@
 
 ## 🚀 기술 스택
 
--- **Frontend Framework**: React
--- **Language**: TypeScript
--- **Styling**: Tailwind CSS
--- **State Management**: Recoil (or Zustand)
--- **API Communication**: Axios
--- **Routing**: react-router-dom
+- **Frontend Framework:** `React`  
+- **Language:** `TypeScript`  
+- **Styling:** `Tailwind CSS`  
+- **State Management:** `Recoil` (or `Zustand`)  
+- **API Communication:** `Axios`  
+- **Routing:** `react-router-dom`
+
 
 ---
 
