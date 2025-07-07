@@ -6,7 +6,7 @@ import HeartIcon from '../../assets/Heart.svg';
 
 
 // 메뉴 타입 정의
-type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
+export type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
 
 interface BottomNavigationProps {
   active: MenuType;
