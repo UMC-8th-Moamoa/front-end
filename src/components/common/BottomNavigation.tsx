@@ -6,7 +6,7 @@ import HeartIcon from '../../assets/Heart.svg';
 
 
 // 메뉴 타입 정의
-type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
+export type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
 
 interface BottomNavigationProps {
   active: MenuType;
@@ -31,7 +31,7 @@ function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
     borderTop: '1px solid #ddd',
     position: 'fixed',
     bottom: 0,
-    width: '375px', // 아이폰 크기 고정
+    width: '393px', // 아이폰 크기 고정
     margin: '0 auto', // 중앙 정렬
     left: 0, // 화면 왼쪽에서 시작
     right: 0, // 화면 오른쪽에서 끝
