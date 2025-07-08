@@ -22,9 +22,9 @@ const SortDropdown = ({ selected, onChange }: SortDropdownProps) => {
       {/* 버튼 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between border border-gray-300 rounded-md px-3 py-[6px] w-[108px] h-[32px] bg-white"
+        className="flex items-center justify-between border border-gray-400 rounded-md px-3 py-[6px] w-[128px] h-[32px] bg-white"
       >
-        <span>{selected}</span>
+        <span className="mr-2">{selected}</span>
         {isOpen ? (
           <ChevronUp size={20} className="text-black" />
         ) : (

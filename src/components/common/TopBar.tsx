@@ -3,7 +3,7 @@ const TopBar = () => {
     <div className="w-full h-14 relative flex items-center justify-center px-4">
 
       <img
-        src="/MoaLogo.svg"
+        src="/MoamoaLogo.svg"
         alt="MOA MOA"
         className="h-5 absolute left-1/2 transform -translate-x-1/2"
       />
