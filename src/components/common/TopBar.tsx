@@ -1,6 +1,6 @@
 const TopBar = () => {
   return (
-    <div className="w-full h-14 relative flex items-center justify-center px-4">
+    <div className="w-[393px] h-14 relative flex items-center justify-center px-4">
 
       <img
         src="/assets/MoamoaLogo.svg"

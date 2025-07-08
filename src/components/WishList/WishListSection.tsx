@@ -7,7 +7,7 @@ const WishListSection = () => {
   const [sort, setSort] = useState("등록순");
 
   return (
-      <div className="w-[393px] justify-center px-4 py-6 space-y-2">
+      <div className="w-[393px] px-4 py-6 space-y-2">
         {/* 상단 헤더 */}
         <div className="flex items-center justify-between">
           <h2 className="text-[18px] font-semibold text-black px-2">나의 위시리스트</h2>

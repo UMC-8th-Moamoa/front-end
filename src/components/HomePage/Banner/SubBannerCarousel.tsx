@@ -16,7 +16,7 @@ const SubBannerCarousel = () => {
   const currentItem = dummySubBanners[currentIndex];
 
   return (
-    <div className="w-full max-w-[390px] h-[120px] flex items-center justify-center transition-all duration-500">
+    <div className="w-full py-6 space-y-2 transition-all duration-500">
       <SubBanner
         imageSrc={currentItem.imageSrc}
         content={currentItem.content}

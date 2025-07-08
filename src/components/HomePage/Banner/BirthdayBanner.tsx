@@ -17,7 +17,7 @@ const BirthdayBanner = ({ name, birthday }: BirthdayBannerProps) => {
   const dday = differenceInCalendarDays(targetDate, today);
 
   return (
-    <div className="w-[350px] h-[81px] flex items-center justify-center bg-gray-300 rounded-2xl text-black font-semibold">
+    <div className="max-w-[393px] w-full h-[81px] flex items-center justify-center bg-gray-300 rounded-2xl text-black font-semibold">
       <div className="flex-1 flex items-center justify-center text-4xl">D-{dday}</div>
       <div className="w-px h-6 bg-white mx-2" />
       <div className="flex-1 flex items-center justify-center text-lg">

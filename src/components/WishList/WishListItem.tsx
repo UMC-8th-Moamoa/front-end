@@ -12,7 +12,7 @@ const WishlistItem = ({ imageSrc, title, price }: WishlistItemProps) => {
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   return (
-    <div className="w-full justify-center bg-white rounded-[14px] shadow-sm flex p-2 gap-4 relative">
+    <div className="w-full bg-white rounded-[14px] shadow-sm flex p-2 gap-4 relative">
       <img
         src={imageSrc}
         alt={title}
