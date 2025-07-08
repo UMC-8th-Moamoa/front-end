@@ -40,7 +40,7 @@ const SubBanner = ({ imageSrc, content, buttonText, onClick, variant}: SubBanner
         <span
           onClick={onClick}
           className={clsx(
-            "absolute bottom-3 top-[53px] text-gray-400 right-4 text-[12px] cursor-pointer hover:opacity-80 transition-colors"
+            "absolute bottom-3 top-[53px] text-gray-400 right-4 text-[12px] cursor-pointer hover:opacity-75 transition-colors"
           )}
         >
           {buttonText} &gt;
