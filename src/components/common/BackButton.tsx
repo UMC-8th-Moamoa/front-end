@@ -19,6 +19,7 @@ function BackButton() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        zIndex: 10
       }}
     >
       <img src={BackIcon} alt="뒤로가기" style={{ width: '40px', height: '40px' }} />
