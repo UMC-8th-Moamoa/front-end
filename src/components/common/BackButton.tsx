@@ -1,4 +1,3 @@
-// src/components/common/BackButton.tsx
 import { useNavigate } from 'react-router-dom';
 import BackIcon from '../../assets/backbutton.svg';
 
@@ -7,7 +6,7 @@ function BackButton() {
 
   return (
     <button
-      onClick={() => navigate(-1)}
+      onClick={() => {navigate(-1)}}
        style={{
         background: 'none',
         border: 'none',
@@ -19,6 +18,7 @@ function BackButton() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        zIndex: 10
       }}
     >
       <img src={BackIcon} alt="뒤로가기" style={{ width: '40px', height: '40px' }} />
