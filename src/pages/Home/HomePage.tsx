@@ -1,4 +1,4 @@
-import { Calendar } from "lucide-react";
+
 import TopBar from "../../components/common/TopBar";
 import BirthdayBanner from "../../components/HomePage/Banner/BirthdayBanner";
 import MainBanner from "../../components/HomePage/Banner/MainBanner";
@@ -8,6 +8,7 @@ import UpcomingFriendList from "../../components/HomePage/List/Birthday/Upcoming
 import PopularList from "../../components/HomePage/List/WishList/PopularList";
 import BottomNavigation from "../../components/common/BottomNavigation";
 import { dummyBirthdayBanner, dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
+import Calendar from "../../components/HomePage/Calendar";
 
 const HomePage = () => {
   return (
