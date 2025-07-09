@@ -13,7 +13,7 @@ const PopularItem = ({ imageUrl, title }: PopularItemProps) => {
           className="w-full h-full object-cover rounded-[16px]"
         />
         <img
-          src="/assets/Plus.svg"
+          src="/assets/WhitePlus.svg"
           alt="추가"
           className="absolute bottom-2 right-2 w-[24px] h-[24px]"
         />

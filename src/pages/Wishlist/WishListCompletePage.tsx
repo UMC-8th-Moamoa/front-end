@@ -19,7 +19,7 @@ const WishListRegisterCompletePage = () => {
           onClick={() => window.location.href = "/wishlist/register"}
           className="w-[70px] h-[70px] rounded-full bg-[#D9D9D9] flex items-center justify-center fixed bottom-[84px] right-5 z-50"
         >
-          <img src="/assets/Plus.svg" alt="추가하기" className="w-[24px] h-[24px]" />
+          <img src="/assets/GrayPlus.svg" alt="추가하기" className="w-[24px] h-[24px]" />
         </button>
 
         <BottomNavigation />
