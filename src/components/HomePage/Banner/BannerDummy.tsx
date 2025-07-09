@@ -23,3 +23,11 @@ export const dummyMainBanner: MainBannerProps = {
   imageSrc: "/assets/Moa.png"
 
 };
+
+export const dummyBirthdayBanner = {
+  name: "채원", // 예시 이름
+  birthday: "2025-01-19", // 생일 날짜
+};
+
+
+

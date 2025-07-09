@@ -1,0 +1,35 @@
+import { differenceInCalendarDays } from "date-fns";
+
+interface UpcomingFriendItemProps {
+  name: string;
+  birthday: string;
+  image: string;
+}
+
+const UpcomingFriendItem = ({ name, birthday, image }: UpcomingFriendItemProps) => {
+  const today = new Date();
+  const birthDate = new Date(birthday);
+  if (birthDate < today) birthDate.setFullYear(today.getFullYear() + 1);
+  const dday = differenceInCalendarDays(birthDate, today);
+
+  const formattedDate = `${birthDate.getMonth() + 1}월 ${birthDate.getDate()}일`;
+  const isUrgent = dday <= 7;
+
+  return (
+    <div className="flex items-center gap-4 mb-4">
+      <img src={image} alt={name} className="w-[64px] h-[64px] rounded-full bg-gray-300" />
+      <div className="flex-1">
+        <p className="text-[16px] font-semibold text-black">{name}</p>
+        <p className="text-[16px] text-gray-500">
+          {formattedDate}
+          <span className={isUrgent ? "text-red-500" : "text-gray-400"}> (D-{dday})</span>
+        </p>
+      </div>
+      {isUrgent && (
+        <button className="bg-gray-500 text-white text-sm px-4 py-1.5 rounded-lg">모아 참여</button>
+      )}
+    </div>
+  );
+};
+
+export default UpcomingFriendItem;
