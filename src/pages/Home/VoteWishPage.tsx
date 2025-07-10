@@ -4,10 +4,9 @@ import { recipientDummy } from "../../components/HomePage/Participation/Recipien
 import RecommendationWishList from "../../components/HomePage/Recommend/RecommendationWishList";
 import VoteWishContainer from "../../components/HomePage/Vote/VoteWishContainer";
 
-
 const VoteWishPage = () => {
   return (
-    <div className="w-full h-screen flex flex-col overflow-hidden relative">
+    <div className="w-full min-h-screen flex flex-col items-center bg-white">
       {/* 상단 헤더 */}
       <div className="w-full px-4 pt-[9px] flex items-center justify-between max-w-[430px] mx-auto">
         <BackButton />
@@ -17,20 +16,20 @@ const VoteWishPage = () => {
         <div className="w-[40px] h-[40px]" />
       </div>
 
-      <div
-        className="flex-1 overflow-y-auto px-4 max-w-[430px] mx-auto"
-        style={{ height: "calc(100vh - 260px)" }} // 헤더 60px + 추천 100px + 바텀 100px 고려
-      >
+      {/* 투표 위시 리스트 */}
+      <div className="w-full px-4 max-w-[430px] mt-4">
         <VoteWishContainer />
       </div>
 
-      {/* 고정 추천 위시리스트 */}
-      <div className="w-full max-w-[430px] mx-auto px-4 absolute bottom-[58px] z-10">
+      {/* 추천 위시리스트 */}
+      <div className="w-full px-4 max-w-[430px] mt-6 mb-[100px]">
         <RecommendationWishList />
       </div>
 
       {/* 하단 네비게이션 */}
-      <BottomNavigation />
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50">
+        <BottomNavigation />
+      </div>
     </div>
   );
 };

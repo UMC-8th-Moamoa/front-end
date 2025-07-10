@@ -17,7 +17,7 @@ export const dummySubBanners: SubBannerProps[] = [
 
 // MainBanner 더미 데이터
 export const dummyMainBanner: MainBannerProps = {
-  title: "채원님을 위한\n모아가 진행 중이에요!",
+  title: "채원님을 위한\n모아가 완성됐어요!",
   buttonText: "모아모아 보러가기",
   onClick: () => console.log("메인배너 클릭!"),
   imageSrc: "/assets/Moa.png"

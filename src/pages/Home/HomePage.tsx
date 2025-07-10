@@ -1,4 +1,4 @@
-
+import { useNavigate } from "react-router-dom";
 import TopBar from "../../components/common/TopBar";
 import BirthdayBanner from "../../components/HomePage/Banner/BirthdayBanner";
 import MainBanner from "../../components/HomePage/Banner/MainBanner";
@@ -11,6 +11,8 @@ import { dummyBirthdayBanner, dummyMainBanner } from "../../components/HomePage/
 import Calendar from "../../components/HomePage/Calendar/Calendar";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
   return (
     <main className="min-h-screen bg-white flex justify-center">
       <div className="max-w-[393px] w-full flex flex-col justify-center relative">
@@ -21,7 +23,7 @@ const HomePage = () => {
 
         {/* 스크롤 가능한 콘텐츠 */}
         <div className="flex flex-col items-center flex-1 overflow-y-auto pb-[60px]">
-          <MainBanner {...dummyMainBanner} />
+          <MainBanner {...dummyMainBanner} onClick={() => navigate("/moa-collected")} />
           <SubBannerCarousel />
           <FriendLetterList />
           <PopularList />

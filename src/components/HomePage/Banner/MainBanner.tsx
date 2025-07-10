@@ -3,7 +3,10 @@ import type { MainBannerProps } from "../../../types/banner";
 const MainBanner = ({ title, buttonText, onClick, imageSrc }: MainBannerProps) => {
   return (
     <div className="w-[393px] flex justify-center px-5 py-2">
-      <div className="w-full h-[155px] bg-gray-300 rounded-2xl p-4 relative overflow-hidden">
+      <div
+        className="w-full h-[155px] bg-gray-300 rounded-2xl p-4 relative overflow-hidden cursor-pointer"
+        onClick={onClick}
+      >
         {imageSrc && (
           <img
             src={imageSrc}
@@ -17,10 +20,7 @@ const MainBanner = ({ title, buttonText, onClick, imageSrc }: MainBannerProps) =
         </h2>
 
         <div className="absolute bottom-3 right-4">
-          <span
-            onClick={onClick}
-            className="text-[12px] text-white cursor-pointer hover:text-white transition-colors"
-          >
+          <span className="text-[12px] text-white">
             {buttonText} &gt;
           </span>
         </div>
@@ -28,6 +28,5 @@ const MainBanner = ({ title, buttonText, onClick, imageSrc }: MainBannerProps) =
     </div>
   );
 };
-
 
 export default MainBanner;

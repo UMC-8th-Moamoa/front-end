@@ -8,6 +8,7 @@ import SearchPage from "./pages/Home/SearchPage";
 import ParticipationPage from "./pages/Home/ParticipationPage";
 import VoteWishPage from "./pages/Home/VoteWishPage";
 import RecommendWishPage from "./pages/Home/RecommendWishPage";
+import MoaCollectedPage from "./pages/Home/MoaCollectPage";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/participation" element={<ParticipationPage />} />
         <Route path="/vote-wish" element={<VoteWishPage />} />
         <Route path="/recommend-wish-list" element={<RecommendWishPage/>}/>
+        <Route path="/moa-collected" element={<MoaCollectedPage />} />
       </Routes>
     </Router>
   );
