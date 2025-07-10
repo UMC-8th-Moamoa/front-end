@@ -24,7 +24,7 @@ const SearchUserList = ({ keyword }: SearchUserListProps) => {
   }, [keyword]);
 
   return (
-    <div className="w-[350px] space-y-2">
+    <div className="w-full px-4 space-y-2 max-w-[350px] mx-auto">
       {filteredUsers.map((user, index) => (
         <SearchUserItem
           key={`${user.userId}-${index}`}

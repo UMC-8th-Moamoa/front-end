@@ -8,7 +8,7 @@ interface SearchTopBarProps {
 
 const SearchTopBar = ({ searchKeyword, setSearchKeyword }: SearchTopBarProps) => {
   return (
-    <div className="w-full flex items-center justify-between px-4 pt-2">
+    <div className="max-w-[393px] w-full flex items-center justify-between px-4 pt-2">
       {/* 뒤로가기 버튼 */}
       <BackButton />
 

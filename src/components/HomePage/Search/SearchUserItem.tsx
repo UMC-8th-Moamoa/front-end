@@ -12,10 +12,10 @@ const SearchUserItem = ({
   onDelete,
 }: SearchUserItemProps) => {
   return (
-    <div className="w-[350px] h-[64px] flex items-center justify-between">
+    <div className="w-full h-[64px] mt-[20px] flex items-center justify-between">
       {/* 프로필 + 텍스트 */}
-      <div className="flex items-center">
-        <div className="w-[64px] h-[64px] bg-gray-300 rounded-full mr-4" />
+      <div className="flex items-center gap-[12px]">
+        <div className="w-[64px] h-[64px] bg-gray-300 rounded-full" />
         <div className="flex flex-col justify-center">
           <span className="text-[16px] font-medium text-black">{name}</span>
           <span className="text-[16px] font-semibold text-gray-500">
