@@ -13,7 +13,7 @@ const ParticipationPage = () => {
         {/* 상단 Back 버튼 + 참여인원 텍스트 */}
         <div className="flex items-center space-x-[8px] px-4 pt-5 mb-5">
           <BackButton />
-          <p className="text-[17px] font-semibold text-black">
+          <p className="text-[18px] font-bold text-black">
             참여인원 {participantDummy.length}명
           </p>
         </div>
