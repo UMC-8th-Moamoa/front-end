@@ -8,7 +8,7 @@ import UpcomingFriendList from "../../components/HomePage/List/Birthday/Upcoming
 import PopularList from "../../components/HomePage/List/WishList/PopularList";
 import BottomNavigation from "../../components/common/BottomNavigation";
 import { dummyBirthdayBanner, dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
-import Calendar from "../../components/HomePage/Calendar";
+import Calendar from "../../components/HomePage/Calendar/Calendar";
 
 const HomePage = () => {
   return (

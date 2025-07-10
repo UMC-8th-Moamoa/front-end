@@ -11,7 +11,7 @@ import {
   subMonths,
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { FriendBirthdayDummy } from './List/Birthday/FriendBirthdayDummy';
+import { FriendBirthdayDummy } from '../List/Birthday/FriendBirthdayDummy';
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
