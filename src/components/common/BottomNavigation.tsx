@@ -4,7 +4,12 @@ import ShoppingBagIcon from '../../assets/Shopping_bag.svg';
 import UserIcon from '../../assets/User.svg';
 import HeartIcon from '../../assets/Heart.svg';
 
+<<<<<<< HEAD
 // ✅ 메뉴 타입 정의
+=======
+
+// 메뉴 타입 정의
+>>>>>>> develop
 export type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
 
 interface BottomNavigationProps {
@@ -23,20 +28,21 @@ function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
 
   return (
     <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-around',
-        padding: '10px 0',
-        borderTop: '1px solid #ddd',
-        position: 'fixed',
-        bottom: 0,
-        width: '393px',
-        margin: '0 auto',
-        left: 0,
-        right: 0,
-        backgroundColor: '#fff',
-      }}
-    >
+  style={{
+    display: 'flex',
+    justifyContent: 'space-around',
+    padding: '10px 0',
+    borderTop: '1px solid #ddd',
+    position: 'fixed',
+    bottom: 0,
+    width: '393px', // 아이폰 크기 고정
+    margin: '0 auto', // 중앙 정렬
+    left: 0, // 화면 왼쪽에서 시작
+    right: 0, // 화면 오른쪽에서 끝
+    backgroundColor: '#fff',
+  }}
+>
+
       {menuList.map((menu) => (
         <div
           key={menu.key}
@@ -46,8 +52,8 @@ function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
             flexDirection: 'column',
             alignItems: 'center',
             cursor: 'pointer',
-            transition: 'transform 0.2s ease',
-            transform: active === menu.key ? 'scale(1.2)' : 'scale(1)',
+            transition: 'transform 0.2s ease', // 클릭 시 부드럽게 확대
+            transform: active === menu.key ? 'scale(1.2)' : 'scale(1)', // 선택 시 확대
           }}
         >
           <img
@@ -56,8 +62,13 @@ function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
             height={24}
             style={{
               marginBottom: '4px',
+<<<<<<< HEAD
               transition: 'filter 0.2s ease',
               filter: active === menu.key ? 'brightness(0)' : 'brightness(0.6)',
+=======
+              transition: 'filter 0.2s ease', // 클릭 시 색상 부드럽게 변경
+              filter: active === menu.key ? 'brightness(0)' : 'brightness(0.6)', // 진하게/연하게
+>>>>>>> develop
             }}
           />
         </div>

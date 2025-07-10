@@ -8,13 +8,21 @@ function BackButton() {
   return (
     <button
       onClick={() => navigate(-1)}
-      style={{
+       style={{
         background: 'none',
         border: 'none',
         cursor: 'pointer',
+        width: '40px',
+        height: '40px',
+        flexShrink: 0,
+        aspectRatio: '1 / 1',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10
       }}
     >
-      <img src={BackIcon} alt="뒤로가기" style={{ width: '24px', height: '24px' }} />
+      <img src={BackIcon} alt="뒤로가기" style={{ width: '40px', height: '40px' }} />
     </button>
   );
 }

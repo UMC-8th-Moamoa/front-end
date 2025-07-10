@@ -162,6 +162,18 @@ Feat: 로그인 기능 구현 (#5)
 
 | 이름 | 담당 |
 | --- | --- |
+<<<<<<< HEAD
 | 주디 | Login |
 | 지니 | Shopping, WishList, Home |
 | 주니 | MoaLetter, MyPage |
+=======
+<<<<<<< HEAD
+| 주디 | 로그인, 회원가입, 설정, 공용 버튼 |
+| 지니 | 홈, 위시리스트, 쇼핑, 상품 카드 |
+| 주니 | 마이페이지, 모아편지, 롤링페이퍼, 편지지 |
+=======
+| 주디 | Login |
+| 지니 | Shopping, WishList, Home |
+| 주니 | MoaLetter, MyPage |
+>>>>>>> d51d00f8fa47f4e558a84e58cd71d7fdc394b8fc
+>>>>>>> develop
