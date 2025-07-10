@@ -5,6 +5,7 @@ import './index.css';
 import WishListRegisterPage from "./pages/Wishlist/WishListRegisterPage";
 import WishListRegisterCompletePage from "./pages/Wishlist/WishListCompletePage";
 import SearchPage from "./pages/Home/SearchPage";
+import ParticipationPage from "./pages/Home/ParticipationPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/wishlist/register" element={<WishListRegisterPage />} />
         <Route path="/wishlist/register/complete" element={<WishListRegisterCompletePage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/participation" element={<ParticipationPage />} />
       </Routes>
     </Router>
   );

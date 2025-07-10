@@ -32,9 +32,6 @@ importers:
       react-router-dom:
         specifier: ^7.6.3
         version: 7.6.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      tailwindcss:
-        specifier: ^4.1.11
-        version: 4.1.11
     devDependencies:
       '@eslint/js':
         specifier: ^9.29.0
@@ -63,6 +60,9 @@ importers:
       postcss-nesting:
         specifier: ^13.0.2
         version: 13.0.2(postcss@8.5.6)
+      tailwindcss:
+        specifier: ^4.1.11
+        version: 4.1.11
       typescript:
         specifier: ~5.8.3
         version: 5.8.3

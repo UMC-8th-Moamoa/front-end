@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { differenceInCalendarDays } from "date-fns";
 
 interface UpcomingFriendItemProps {
@@ -7,6 +8,7 @@ interface UpcomingFriendItemProps {
 }
 
 const UpcomingFriendItem = ({ name, birthday }: UpcomingFriendItemProps) => {
+  const navigate = useNavigate();
   const today = new Date();
   const birthDate = new Date(birthday);
   if (birthDate < today) birthDate.setFullYear(today.getFullYear() + 1);
@@ -14,6 +16,10 @@ const UpcomingFriendItem = ({ name, birthday }: UpcomingFriendItemProps) => {
 
   const formattedDate = `${birthDate.getMonth() + 1}월 ${birthDate.getDate()}일`;
   const isUrgent = dday <= 7;
+
+  const handleClick = () => {
+    navigate("/participation");
+  };
 
   return (
     <div className="w-[350px] flex items-center gap-4 mb-4 mx-auto">
@@ -32,7 +38,10 @@ const UpcomingFriendItem = ({ name, birthday }: UpcomingFriendItemProps) => {
       </div>
 
       {isUrgent && (
-        <button className="w-[99px] h-[33px] rounded-[8px] bg-[#888] text-white text-[14px]">
+        <button
+          onClick={handleClick}
+          className="w-[99px] h-[33px] rounded-[8px] bg-[#888] text-white text-[14px]"
+        >
           모아 참여
         </button>
       )}
