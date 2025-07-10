@@ -12,6 +12,7 @@ const ManualInputSection = () => {
       <InputBox
         placeholder="제품명을 입력해 주세요"
         className="w-[350px] h-[44px] bg-gray-200 mt-2 placeholder:text-gray-400 rounded-xl"
+        hasBorder={false}
       />
 
       {/* 가격 입력 */}
@@ -19,6 +20,7 @@ const ManualInputSection = () => {
         placeholder="가격을 입력해 주세요"
         className="w-[350px] h-[44px] bg-gray-200 placeholder:text-gray-400 rounded-xl"
         type="number"
+        hasBorder={false}
       />
     </section>
   );
