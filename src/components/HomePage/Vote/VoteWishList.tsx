@@ -1,5 +1,6 @@
+
+import { recipientDummy } from "../Participation/RecipientDummy";
 import VoteWishItem from "./VoteWishItem";
-import { recipientDummy } from "./RecipientDummy";
 
 interface VoteWishListProps {
   selectedId: number | null;

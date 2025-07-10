@@ -5,7 +5,7 @@ import MainBanner from "../../components/HomePage/Banner/MainBanner";
 import SubBannerCarousel from "../../components/HomePage/Banner/SubBannerCarousel";
 import FriendLetterList from "../../components/HomePage/List/Birthday/FriendLetterList";
 import UpcomingFriendList from "../../components/HomePage/List/Birthday/UpcomingFriendList";
-import PopularList from "../../components/HomePage/List/WishList/PopularList";
+import PopularList from "../../components/HomePage/List/Popular/PopularList";
 import BottomNavigation from "../../components/common/BottomNavigation";
 import { dummyBirthdayBanner, dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
 import Calendar from "../../components/HomePage/Calendar/Calendar";

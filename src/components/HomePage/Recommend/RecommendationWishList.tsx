@@ -1,4 +1,4 @@
-import MemberWishItem from "./MemberWishItem";
+import MemberWishItem from "../Participation/MemberWishItem";
 import { recommendationwishDummy } from "./RecommendationWishDummy";
 import { useNavigate } from "react-router-dom";
 
@@ -14,7 +14,7 @@ const RecommendationWishList = () => {
         </h2>
         <button
           className="text-[12px] text-gray-400"
-          onClick={() => navigate("/recommend-gift")}
+          onClick={() => navigate("/recommend-wish-list")} 
         >
           생일 선물 추천하기 &gt;
         </button>

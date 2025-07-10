@@ -1,8 +1,9 @@
-import { recipientDummy } from "../../components/HomePage/Participation/RecipientDummy";
-import VoteWishContainer from "../../components/HomePage/Participation/VoteWishContainer";
-import RecommendationWishList from "../../components/HomePage/Participation/RecommendationWishList";
-import BottomNavigation from "../../components/common/BottomNavigation";
 import BackButton from "../../components/common/BackButton";
+import BottomNavigation from "../../components/common/BottomNavigation";
+import { recipientDummy } from "../../components/HomePage/Participation/RecipientDummy";
+import RecommendationWishList from "../../components/HomePage/Recommend/RecommendationWishList";
+import VoteWishContainer from "../../components/HomePage/Vote/VoteWishContainer";
+
 
 const VoteWishPage = () => {
   return (

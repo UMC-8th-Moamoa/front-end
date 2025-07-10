@@ -1,4 +1,4 @@
-import { recipientDummy } from "./RecipientDummy";
+import { recipientDummy } from "../Participation/RecipientDummy";
 
 const VoteWishResult = () => {
   const maxVotes = Math.max(...recipientDummy.wishList.map((item) => item.voteCount));
