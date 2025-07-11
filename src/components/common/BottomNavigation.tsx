@@ -4,12 +4,8 @@ import ShoppingBagIcon from '../../assets/Shopping_bag.svg';
 import UserIcon from '../../assets/User.svg';
 import HeartIcon from '../../assets/Heart.svg';
 
-<<<<<<< HEAD
-// ✅ 메뉴 타입 정의
-=======
 
 // 메뉴 타입 정의
->>>>>>> develop
 export type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
 
 interface BottomNavigationProps {
@@ -62,13 +58,8 @@ function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
             height={24}
             style={{
               marginBottom: '4px',
-<<<<<<< HEAD
-              transition: 'filter 0.2s ease',
-              filter: active === menu.key ? 'brightness(0)' : 'brightness(0.6)',
-=======
               transition: 'filter 0.2s ease', // 클릭 시 색상 부드럽게 변경
               filter: active === menu.key ? 'brightness(0)' : 'brightness(0.6)', // 진하게/연하게
->>>>>>> develop
             }}
           />
         </div>

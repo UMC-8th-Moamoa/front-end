@@ -6,7 +6,7 @@ function ProfileImageSection() {
   const [nickname, setNickname] = useState('chaoni_gold');
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
-  const [profileImage, setProfileImage] = useState('https://via.placeholder.com/80'); // 기본 이미지
+  const [profileImage, setProfileImage] = useState('https://via.placeholder.com/85');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,63 +19,72 @@ function ProfileImageSection() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '24px' }}>
-      {/* 프로필 사진 */}
-      <div
-        onClick={() => setIsModalOpen(true)}
-        style={{
-          width: '80px',
-          height: '80px',
-          borderRadius: '50%',
-          backgroundColor: '#ddd',
-          marginBottom: '8px',
-          position: 'relative',
-          cursor: 'pointer',
-          overflow: 'hidden',
-        }}
-      >
-        <img src={profileImage} style={{ width: '100%', height: '100%' }} />
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '24px 20px 12px' }}>
+      {/* 프로필 이미지 + 연필 아이콘 */}
+      <div style={{ position: 'relative', width: '85px', height: '85px', cursor: 'pointer' }} onClick={() => setIsModalOpen(true)}>
+        <div
+          style={{
+            width: '85px',
+            height: '85px',
+            borderRadius: '50%',
+            backgroundColor: '#B6B6B6',
+            overflow: 'hidden',
+          }}
+        >
+          <img src={profileImage} style={{ width: '100%', height: '100%' }} alt="프로필" />
+        </div>
         <img
           src={PencilIcon}
-          alt="프로필 수정"
-          style={{ width: '16px', height: '16px', position: 'absolute', right: 0, bottom: 0 }}
+          alt="프로필 이미지 수정"
+          style={{
+            width: '40px',
+            height: '40px',
+            position: 'absolute',
+            bottom: '-10px',
+            left: '-8px',
+          }}
         />
       </div>
 
-      {/* 닉네임 + 연필 */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-        {isEditing ? (
-          <input
-            value={nickname}
-            onChange={handleChange}
-            onBlur={() => setIsEditing(false)}
-            style={{
-              fontSize: '18px',
-              border: 'none',
-              borderBottom: '1px solid #000',
-              outline: 'none',
-              textAlign: 'center',
-            }}
+      {/* 텍스트 영역 */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* 닉네임 + 수정 아이콘 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {isEditing ? (
+            <input
+              value={nickname}
+              onChange={handleChange}
+              onBlur={() => setIsEditing(false)}
+              style={{
+                fontSize: '20px',
+                fontWeight: 'bold',
+                border: 'none',
+                outline: 'none',
+                flex: 1,
+              }}
+            />
+          ) : (
+            <span style={{ fontSize: '20px', fontWeight: 'bold', flex: 1 }}>{nickname}</span>
+          )}
+          <img
+            src={PencilIcon}
+            alt="닉네임 수정"
+            onClick={() => setIsEditing(true)}
+            style={{ width: '24px', height: '24px', cursor: 'pointer' }}
           />
-        ) : (
-          <span style={{ fontWeight: 'bold', fontSize: '18px' }}>{nickname}</span>
-        )}
+        </div>
 
-        <img
-          src={PencilIcon}
-          alt="닉네임 수정"
-          onClick={() => setIsEditing(true)}
-          style={{ width: '16px', height: '16px', cursor: 'pointer', marginLeft: '8px' }}
-        />
+        {/* 밑줄 */}
+        <div style={{ height: '1px', backgroundColor: '#B6B6B6', margin: '8px 0' }} />
+
+        {/* 생년월일 */}
+        <span style={{ fontSize: '14px', color: '#8F8F8F', fontWeight: 'bold' }}>2002.09.11</span>
+
+        {/* 에러 메시지 */}
+        {error && <div style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>{error}</div>}
       </div>
 
-      {/* 중복 에러 */}
-      {error && <div style={{ color: 'red', fontSize: '12px', marginBottom: '4px' }}>{error}</div>}
-
-      {/* 생년월일 */}
-      <div style={{ fontSize: '14px', color: '#888888' }}>2002.09.11</div>
-
-      {/* 프로필 사진 선택 모달 */}
+      {/* 모달 */}
       {isModalOpen && (
         <ProfilePhotoModal
           onClose={() => setIsModalOpen(false)}

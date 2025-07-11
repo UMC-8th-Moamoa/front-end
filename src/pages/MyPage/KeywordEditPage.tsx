@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import BackButton from '../common/BackButton';
-import BottomNavigation from '../common/BottomNavigation';
-import KeywordCategorySection from './KeywordCategorySection';
+import BackButton from '../../components/common/BackButton';
+import BottomNavigation from '../../components/common/BottomNavigation';
+import KeywordCategorySection from '../../components/mypage/KeywordCategorySection';
 
 function KeywordEditPage() {
   const [myKeywords, setMyKeywords] = useState<string[]>([]);
@@ -26,7 +26,7 @@ function KeywordEditPage() {
   };
 
   return (
-    <div style={{ maxWidth: '430px', margin: '0 auto', paddingBottom: '80px' }}>
+    <div style={{ maxWidth: '393px', margin: '0 auto', paddingBottom: '80px' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', padding: '16px' }}>
         <BackButton />
@@ -39,7 +39,7 @@ function KeywordEditPage() {
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="나의 키워드를 만들어보기"
+          placeholder="나의 키워드 만들기"
           style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #ddd' }}
         />
         <button

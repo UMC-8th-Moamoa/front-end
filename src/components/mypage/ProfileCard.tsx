@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import PencilIcon from '../../assets/pencil_line.svg';
 import { useState } from 'react';
 
 function ProfileCard() {
@@ -15,60 +14,86 @@ function ProfileCard() {
     setIsEditing(false);
   };
 
+  const goToFollowList = (tab: 'follower' | 'following') => {
+    navigate(`/mypage/follow-list?tab=${tab}`);
+  };
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', padding: '16px' }}>
-      {/* 프로필 사진 */}
-      <div
-        style={{
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          backgroundColor: '#ddd',
-          marginRight: '16px',
-        }}
-      />
+    <div style={{ padding: '20px' }}>
+      {/* 프로필 영역 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* 프로필 이미지 */}
+        <div
+          style={{
+            width: '67px',
+            height: '67px',
+            borderRadius: '100px',
+            backgroundColor: '#B6B6B6',
+          }}
+        />
 
-      {/* 유저 정보 */}
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 'bold', fontSize: '18px' }}>금채원</div>
-        <div style={{ color: '#888', fontSize: '14px' }}>2002.09.11</div>
+        {/* 유저 정보 */}
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '20px', fontWeight: 'bold' }}>금채원</span>
+            <span style={{ fontSize: '14px', color: '#8F8F8F' }}>2002.09.11</span>
+          </div>
 
-        {/* 아이디 + 연필 */}
-        <div style={{ display: 'flex', alignItems: 'center', marginTop: '4px' }}>
-          {isEditing ? (
-            <input
-              value={userId}
-              onChange={handleChange}
-              onBlur={handleSave}
-              style={{ fontSize: '14px', border: '1px solid #ddd', borderRadius: '4px', padding: '2px 4px' }}
-            />
-          ) : (
-            <span style={{ fontSize: '14px' }}>{userId}</span>
-          )}
-          <img src={PencilIcon} alt="수정" style={{ width: '16px', height: '16px', cursor: 'pointer', marginLeft: '8px' }} onClick={() => setIsEditing(true)} />
+          {/* 아이디 */}
+          <div style={{ marginTop: '4px', fontWeight: 'bold', fontSize: '15px' }}>
+            {isEditing ? (
+              <input
+                value={userId}
+                onChange={handleChange}
+                onBlur={handleSave}
+                style={{
+                  fontSize: '14px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  padding: '2px 4px',
+                }}
+              />
+            ) : (
+              <span>{userId}</span>
+            )}
+          </div>
+
+          {/* 팔로워 / 팔로잉 */}
+          <div style={{ display: 'flex', gap: '20px', marginTop: '8px' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              onClick={() => goToFollowList('follower')}
+            >
+              <span style={{ fontSize: '15px', color: '#7A7A7A', fontWeight: 'bold' }}>팔로워</span>
+              <span style={{ fontSize: '18px', fontWeight: 'bold' }}>31</span>
+            </div>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              onClick={() => goToFollowList('following')}
+            >
+              <span style={{ fontSize: '15px', color: '#7A7A7A', fontWeight: 'bold' }}>팔로잉</span>
+              <span style={{ fontSize: '18px', fontWeight: 'bold' }}>21</span>
+            </div>
+          </div>
         </div>
 
-        {/* 팔로워/팔로잉 */}
-        <div style={{ display: 'flex', gap: '8px', fontSize: '14px', marginTop: '4px' }}>
-          <div>팔로워 <span style={{ fontWeight: 'bold' }}>31</span></div>
-          <div>팔로잉 <span style={{ fontWeight: 'bold' }}>21</span></div>
-        </div>
+        {/* 프로필 편집 버튼 */}
+        <button
+          onClick={() => navigate('/profile/edit')}
+          style={{
+            backgroundColor: '#D9D9D9',
+            borderRadius: '10px',
+            padding: '4px 10px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            border: 'none',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          프로필 편집
+        </button>
       </div>
-
-      {/* 프로필 편집 버튼 */}
-      <button
-        onClick={() => navigate('/profile/edit')}
-        style={{
-          border: '1px solid #ddd',
-          borderRadius: '12px',
-          padding: '4px 8px',
-          fontSize: '12px',
-          backgroundColor: 'white',
-          cursor: 'pointer',
-        }}
-      >
-        프로필 편집
-      </button>
     </div>
   );
 }
