@@ -4,10 +4,13 @@ import BottomNavigation from "../../components/common/BottomNavigation";
 import WishListDummy from "../../components/WishList/WishListDummy";
 import { PickGiftList } from "../../components/HomePage/PickGift/PickGiftList";
 import { Modal } from "../../components/common/Modal";
+import { useNavigate } from "react-router-dom";
+
 
 
 const PickGiftPage = () => {
-  const [withMyMoney, setWithMyMoney] = useState(false); // 초기 false로 해놨어
+  const navigate = useNavigate(); 
+  const [withMyMoney, setWithMyMoney] = useState(false); 
   const [sortOption, setSortOption] = useState("등록순");
   const [checkedItems, setCheckedItems] = useState<number[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -35,7 +38,7 @@ const PickGiftPage = () => {
     if (isWarning) {
       setIsModalOpen(true);
     } else {
-      console.log("정산 시작");
+      navigate("/before-transfer", { state: { amount: totalPrice } });
     }
   };
 

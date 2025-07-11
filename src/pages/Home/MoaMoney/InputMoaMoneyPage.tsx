@@ -1,8 +1,8 @@
 import { useState } from "react";
-import BackButton from "../../components/common/BackButton";
-import InputBox from "../../components/common/InputBox";
-import Button from "../../components/common/Button";
-import BottomNavigation from "../../components/common/BottomNavigation";
+import BackButton from "../../../components/common/BackButton";
+import InputBox from "../../../components/common/InputBox";
+import Button from "../../../components/common/Button";
+import BottomNavigation from "../../../components/common/BottomNavigation";
 
 const InputMoaMoneyPage = () => {
   const [amount, setAmount] = useState("");

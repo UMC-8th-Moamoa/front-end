@@ -10,7 +10,18 @@ import VoteWishPage from "./pages/Home/VoteWishPage";
 import RecommendWishPage from "./pages/Home/RecommendWishPage";
 import MoaCollectedPage from "./pages/Home/MoaCollectPage";
 import PickGiftPage from "./pages/Home/PickGiftPage";
-import InputMoaMoneyPage from "./pages/Home/InputMoaMoneyPage";
+import InputMoaMoneyPage from "./pages/Home/MoaMoney/InputMoaMoneyPage";
+import BeforeTransferPage from "./pages/Home/MoaMoney/BeforeTransferPage";
+import ReceiveCompletePage from "./pages/Home/MoaMoney/ReceiveCompletePage";
+import RemainMoneySelectPage from "./pages/Home/MoaMoney/RemainMoneySelectPage";
+import DonationSelectPage from "./pages/Home/MoaMoney/DonationSelectPage";
+import DonationToGoodneighborsPage from "./pages/Home/MoaMoney/DonationToGoodneighborsPage";
+import ConvertToMongPage from "./pages/Home/MoaMoney/ConvertToMongPage";
+import ConvertToMongCompletePage from "./pages/Home/MoaMoney/ConvertToMongCompletePage";
+import ReturnToFriendCompletePage from "./pages/Home/MoaMoney/ReturnToFriendCompletePage";
+import ReceiveBalancePage from "./pages/Home/MoaMoney/ReceiveBalancePage";
+import ReturnToFriendPage from "./pages/Home/MoaMoney/ReturnToFriendPage";
+import GiftCertificationPage from "./pages/Home/GiftCertificationPage";
 
 function App() {
   return (
@@ -28,6 +39,17 @@ function App() {
         <Route path="/moa-collected" element={<MoaCollectedPage />} />
         <Route path="/pick-gift" element={<PickGiftPage />} />
         <Route path="/input-moa-money" element={<InputMoaMoneyPage />} />
+        <Route path="/before-transfer" element={<BeforeTransferPage />} />
+        <Route path="/receive-complete" element={<ReceiveCompletePage />} />
+        <Route path="/remain-money-select" element={<RemainMoneySelectPage />} />
+        <Route path="/donation-select" element={<DonationSelectPage />} />
+        <Route path="/donation-complete-goodneighbors" element={<DonationToGoodneighborsPage />} />
+        <Route path="/convert-to-mong" element={<ConvertToMongPage />} />
+        <Route path="/convert-to-mong-complete" element={<ConvertToMongCompletePage />} />
+        <Route path="/return-to-friend" element={<ReturnToFriendPage/>} />
+        <Route path="/return-to-friend/return-to-friend-complete" element={<ReturnToFriendCompletePage />} />
+        <Route path="/receive-balance" element={<ReceiveBalancePage />} />
+        <Route path="/gift-certification" element={<GiftCertificationPage />} />
       </Routes>
     </Router>
   );

@@ -1,10 +1,8 @@
 import type { SubBannerProps } from "../../../types/banner";
-import clsx from "clsx"; 
+import clsx from "clsx";
 
-const SubBanner = ({ imageSrc, content, buttonText, onClick, variant}: SubBannerProps) => {
+const SubBanner = ({ imageSrc, content, buttonText, onClick, variant }: SubBannerProps) => {
   const isHighlight = variant === "highlight";
-
-  console.log("SubBanner variant:", variant);
 
   return (
     <div
@@ -16,13 +14,12 @@ const SubBanner = ({ imageSrc, content, buttonText, onClick, variant}: SubBanner
       )}
     >
       <div className="flex items-center space-x-4">
-        {imageSrc && (
-          <div
-            className={clsx(
-              "w-[57px] h-[57px] flex-shrink-0 flex items-center justify-center rounded-full"
-            )}
-          >
-            <img src={imageSrc} alt="아이콘"/>
+        {/* 아이콘 렌더링 */}
+        {imageSrc === "user" ? (
+          <div className="w-[57px] h-[57px] rounded-full bg-gray-300" />
+        ) : (
+          <div className="w-[57px] h-[57px] flex items-center justify-center">
+            <img src={imageSrc} alt="아이콘" />
           </div>
         )}
 

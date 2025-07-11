@@ -50,6 +50,7 @@ const ParticipationActionBox = ({
             편지 작성하러 가기
           </Button>
         );
+
       default:
         return null;
     }
