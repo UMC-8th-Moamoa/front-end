@@ -10,6 +10,7 @@ import VoteWishPage from "./pages/Home/VoteWishPage";
 import RecommendWishPage from "./pages/Home/RecommendWishPage";
 import MoaCollectedPage from "./pages/Home/MoaCollectPage";
 import PickGiftPage from "./pages/Home/PickGiftPage";
+import InputMoaMoneyPage from "./pages/Home/InputMoaMoneyPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/recommend-wish-list" element={<RecommendWishPage/>}/>
         <Route path="/moa-collected" element={<MoaCollectedPage />} />
         <Route path="/pick-gift" element={<PickGiftPage />} />
+        <Route path="/input-moa-money" element={<InputMoaMoneyPage />} />
       </Routes>
     </Router>
   );

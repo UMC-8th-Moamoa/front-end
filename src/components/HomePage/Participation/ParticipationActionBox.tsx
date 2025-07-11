@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import Button from "../../common/Button";
 
 interface ParticipationActionBoxProps {
@@ -11,6 +12,8 @@ const ParticipationActionBox = ({
   participationStatus,
   onClick,
 }: ParticipationActionBoxProps) => {
+  const navigate = useNavigate();
+
   const getButton = () => {
     switch (participationStatus) {
       case "none":
@@ -18,7 +21,7 @@ const ParticipationActionBox = ({
           <Button
             width="fixed"
             size="medium"
-            onClick={onClick}
+            onClick={() => navigate("/input-moa-money")}
             className="text-white w-[288px] h-[50px]"
           >
             마음 보태러 가기

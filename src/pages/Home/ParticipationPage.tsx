@@ -40,7 +40,7 @@ const ParticipationPage = () => {
         <div className="fixed bottom-[72px] left-1/2 transform -translate-x-1/2 w-full max-w-[393px] px-4 z-50">
           <ParticipationActionBox
             isMyPage={false}
-            participationStatus="pending"
+            participationStatus="none"
             onClick={() => console.log("버튼 클릭")}
           />
         </div>
