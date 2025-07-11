@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Modal from '../../../common/Modal';
+import { Modal } from '../../../common/Modal';
 
 interface PopularItemProps {
   imageUrl: string;

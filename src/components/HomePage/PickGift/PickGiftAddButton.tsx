@@ -10,7 +10,7 @@ const PickGiftAddButton = () => {
       onClick={() => navigate("/wishlist-register")}
     >
       {/* 진한 회색 구분선 */}
-      <hr className="w-full border-t h-[1px] border-[#D9D9D9] mb-5" />
+      <hr className="w-full border-t h-[1px] border-[#D9D9D9] mb-4" />
 
       {/* 위시리스트 추가 버튼 */}
       <div className="flex items-center justify-center mb-2">
