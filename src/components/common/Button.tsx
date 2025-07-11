@@ -1,6 +1,6 @@
 import React from "react";
 
-type Variant = "primary" | "secondary" | "kakao" | "gray" | "outline";
+type Variant = "primary" | "secondary" | "kakao" | "gray" | "outline" | "text";
 type Size = "small" | "medium" | "large";
 type Width = "full" | "fit" | "fixed";
 
@@ -37,7 +37,7 @@ const Button = ({
   // 너비 스타일
    const widthStyle =
     width === "full"
-      ? "w-full"
+      ? "w-full max-w-[350px] mx-auto"
       : width === "fit"
       ? "w-fit"
       : {
@@ -64,6 +64,9 @@ const variantMap: Record<NonNullable<ButtonProps["variant"]>, string> = {
   outline: disabled
     ? "border-2 border-gray-300 text-gray-300"
     : "border-2 border-gray-400 text-gray-400 hover:bg-gray-100",
+  text: disabled
+    ? "text-gray-300"
+    : "hover:text-gray-200 hover:font-medium transition-all duration-200",
 };
 
 const variantStyle = variantMap[variant];
