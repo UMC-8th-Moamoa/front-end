@@ -1,12 +1,18 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
 import ParticipantList from "../../components/HomePage/Participation/ParticipantList";
 
 const MoaCollectedPage = () => {
   const moaMoney = 80000;
-
   const [activeMenu, setActiveMenu] = React.useState<MenuType>("home");
+
+  const navigate = useNavigate(); // 👈 라우터 훅
+
+  const handleClick = () => {
+    navigate("/pick-gift"); // 👈 경로 이동
+  };
 
   return (
     <div className="relative w-[393px] min-h-screen bg-[#8F8F8F] mx-auto pb-[100px] overflow-hidden">
@@ -34,7 +40,7 @@ const MoaCollectedPage = () => {
 
       {/* 선물 고르기 버튼 */}
       <div className="w-[350px] absolute bottom-[80px] left-1/2 -translate-x-1/2">
-        <Button>
+        <Button onClick={handleClick}>
           <p className="text-[20px] text-white text-center">선물 고르기</p>
         </Button>
       </div>
