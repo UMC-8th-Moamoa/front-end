@@ -1,12 +1,11 @@
-import React from 'react';
-
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  className?: string; // 추가
 }
 
-const Modal = ({ isOpen, onClose, children }: ModalProps) => {
+export const Modal = ({ isOpen, onClose, children, className = "" }: ModalProps) => {
   if (!isOpen) return null;
 
   return (
@@ -15,7 +14,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-[20px] w-[350px] h-[130px] flex flex-col items-center justify-center"
+        className={`bg-white rounded-[20px] flex flex-col items-center justify-center ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -23,5 +22,3 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     </div>
   );
 };
-
-export default Modal;
