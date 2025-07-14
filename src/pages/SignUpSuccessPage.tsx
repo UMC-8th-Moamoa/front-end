@@ -1,8 +1,12 @@
 import Button from '../components/common/Button';
+import BackButton from '../components/common/BackButton';
 
 const SignUpSuccessPage = () => {
   return (
-    <div className="min-h-screen flex flex-col justify-center bg-white px-4">
+    <div className="relative min-h-screen flex flex-col justify-center bg-white px-4">
+      <div className="absolute top-6 left-0 z-10">
+        <BackButton />
+      </div>
      <h1 className="mb-7 mx-3">
         <span className="text-3xl font-bold">금채원님</span>
         <span className='text-3xl font-light'>의  <br/>가입을 축하합니다!</span>

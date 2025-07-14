@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import BackButton from "../components/common/BackButton";
 import InputBox from "../components/common/InputBox";
 import Button from "../components/common/Button";
 import InputWithButton from "../components/signUp/InputWithButton";
 import VisibilityToggle from "../components/common/VisibilityToggle";
 import EmailInputWithSelect from "../components/signUp/EmailInputWithSelect";
 import TermsAgreement from "../components/signUp/TermsAgreement";
+import Modal from "../components/common/Modal";
 import Logo from "../assets/Logo_black.svg";
 import { useNavigate } from "react-router-dom";
 
@@ -21,6 +23,8 @@ function SignUpPage() {
   const [email, setEmail] = useState("");
   const [emailDomain, setEmailDomain] = useState("");
   const [authCode, setAuthCode] = useState("");
+  const [showAuthInput, setShowAuthInput] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
 
@@ -51,8 +55,11 @@ const [terms, setTerms] = useState({
 });
 
   return (
-    <div className="min-h-screen max-w-[393px] mx-auto px-4 pt-10 pb-10 flex flex-col items-center justify-between overflow-auto hide-scrollbar">
+    <div className="relative min-h-screen max-w-[393px] mx-auto px-4 pt-10 pb-10 flex flex-col items-center justify-between overflow-auto hide-scrollbar">
       <div className="w-full flex flex-col items-center">
+        <div className="absolute top-6 left-0 z-10">
+        <BackButton />
+      </div>
         <img src={Logo} alt="Logo" className="w-40 h-20 mb-4" />
 
         {/* 아이디 + 중복확인 */}
@@ -130,21 +137,40 @@ const [terms, setTerms] = useState({
             onChangeEmailDomain={(e) => setEmailDomain(e.target.value)}
             onClickVerify={() => {
                 // 인증 로직
+            setShowAuthInput(true);
             }}
             />
 
         {/* 인증 코드 입력 */}
+        {showAuthInput && (
         <InputWithButton
           value={authCode}
           onChange={(e) => setAuthCode(e.target.value)}
           onClickButton={() => {
-            // 인증 코드 확인 로직
+            // 인증 코드 재전송 로직
+            setShowModal(true);
           }}
           placeholder="인증 코드를 입력해 주세요"
-          buttonText="인증 확인"
+          buttonText="다시 보내기"
           disabled={!authCode}
           className="mb-4"
         />
+      )}
+
+      {showModal && (
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+        <p className="text-gray-600">인증 코드를 다시 전송했습니다</p>
+        <Button
+          variant="primary"
+          size="small"
+          width="fit"
+          onClick={() => setShowModal(false)}
+          className="mt-6 bg-[#8f8f8f]"
+        >
+          확인
+        </Button>
+      </Modal>
+    )}
 
         <div className="text-xs text-gray-500 mt-1 mb-4 leading-snug">
         <p>• 앱의 모든 기능을 원활하게 사용하기 위해서 정확한 정보를 입력해야 합니다</p>

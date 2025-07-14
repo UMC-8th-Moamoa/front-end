@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Button from "../components/common/Button";
 import InputBox from "../components/common/InputBox";
+import BackButton from "../components/common/BackButton";
+import VisibilityToggle from "../components/common/VisibilityToggle";
 import Logo from "../assets/Logo_black.svg";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -12,6 +14,8 @@ function ResetPasswordPage() {
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
   const [error, setError] = useState("");
+  const [visibleNewPw, setVisibleNewPw] = useState(false);
+  const [visibleConfirmPw, setVisibleConfirmPw] = useState(false);
 
   const navigate = useNavigate();
 
@@ -37,7 +41,7 @@ function ResetPasswordPage() {
     if (!newPw || !confirmPw) {
       setError("* 비밀번호를 입력해 주세요");
     } else if (newPw.length < 6) {
-      setError("* 6자 이상, 특수문자 포함하여 입력해 주세요");
+      setError("* 숫자, 문자, 특수문자 포함 8자 이상");
     } else if (newPw !== confirmPw) {
       setError("* 비밀번호가 일치하지 않습니다");
     } else {
@@ -47,8 +51,11 @@ function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen max-w-[393px] mx-auto px-4 pt-20 pb-10 flex flex-col items-center justify-between">
+    <div className="relative min-h-screen max-w-[393px] mx-auto px-4 pt-20 pb-10 flex flex-col items-center justify-between">
       <div className="w-full flex flex-col items-center">
+        <div className="absolute top-6 left-0 z-10">
+        <BackButton />
+      </div>
         <img src={Logo} alt="Logo" className="w-40 h-20 mb-2 mt-10" />
         <h1 className="text-xl font-semibold mb-20">비밀번호 변경</h1>
 
@@ -139,26 +146,36 @@ function ResetPasswordPage() {
             <div className="h-5 mb-1 w-full text-left text-sm text-red-500">
               {error ? error : <>&nbsp;</>}
             </div>
+            <div className="relative mb-2 w-full max-w-[350px] mx-auto">
             <InputBox
-              type="password"
-              placeholder="새로운 비밀번호를 입력해 주세요"
-              value={newPw}
-              onChange={(e) => {
+                type={visibleNewPw ? 'text' : 'password'}
+                placeholder="새로운 비밀번호를 입력해 주세요"
+                value={newPw}
+                onChange={(e) => {
                 setNewPw(e.target.value);
                 setError("");
-              }}
-              className="mb-2 bg-gray-200"
+                }}
+                className="bg-gray-200 pr-10"
             />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <VisibilityToggle onToggle={setVisibleNewPw} />
+            </div>
+            </div>
+           <div className="relative mb-4 w-full max-w-[350px] mx-auto">
             <InputBox
-              type="password"
-              placeholder="비밀번호를 다시 입력해 주세요"
-              value={confirmPw}
-              onChange={(e) => {
+                type={visibleConfirmPw ? 'text' : 'password'}
+                placeholder="비밀번호를 다시 입력해 주세요"
+                value={confirmPw}
+                onChange={(e) => {
                 setConfirmPw(e.target.value);
                 setError("");
-              }}
-              className="mb-4 bg-gray-200"
+                }}
+                className="bg-gray-200 pr-10"
             />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <VisibilityToggle onToggle={setVisibleConfirmPw} />
+            </div>
+            </div>
             <Button variant="primary" onClick={handleStep3}>
               비밀번호 변경하기
             </Button>

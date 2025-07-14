@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../components/common/Button';
 import BirthdayPicker from '../components/signUp/BirthdayPicker';
+import BackButton from '../components/common/BackButton';
 import { useNavigate } from 'react-router-dom';
 
 const SignupBirthdayPage = () => {
@@ -18,7 +19,10 @@ const SignupBirthdayPage = () => {
   };
 
   return (
-    <div className="min-h-screen max-w-[393px] flex flex-col justify-center pt-20 px-4 bg-white">
+    <div className="relative min-h-screen max-w-[393px] flex flex-col justify-center pt-20 px-4 bg-white">
+      <div className="absolute top-6 left-0 z-10">
+        <BackButton />
+      </div>
      {/* 제목 */}
       <h1 className="mb-5">
         <span className="text-3xl font-bold">생일</span>

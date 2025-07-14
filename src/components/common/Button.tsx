@@ -25,7 +25,7 @@ const Button = ({
   width = "full",
   className = "",
 }: ButtonProps) => {
-  const baseStyle = "rounded-xl font-semibold transition-colors duration-200 text-center";
+  const baseStyle = "rounded-lg font-semibold transition-colors duration-200 text-center";
 
   // 크기 스타일
   const sizeStyle = {

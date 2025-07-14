@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Button from "../components/common/Button";
 import InputBox from "../components/common/InputBox";
 import Logo from "../assets/Logo_black.svg";
+import BackButton from "../components/common/BackButton";
 import { Link, useNavigate } from "react-router-dom";
 
 function FindIdPage() {
@@ -19,10 +20,12 @@ function FindIdPage() {
   };
 
   return (
-    <div className="min-h-screen max-w-[393px] mx-auto px-4 pt-20 pb-10 flex flex-col items-center justify-between">
+    <div className="relative min-h-screen max-w-[393px] mx-auto px-4 pt-20 pb-10 flex flex-col items-center justify-between">
       {/* 상단: 뒤로가기 & 로고 */}
       <div className="w-full flex flex-col items-center">
-
+      <div className="absolute top-6 left-0 z-10">
+              <BackButton />
+            </div>
         <img src={Logo} alt="Logo" className="w-40 h-20 mb-2 mt-10" />
         <h1 className="text-xl font-semibold mb-25">아이디 찾기</h1>
 

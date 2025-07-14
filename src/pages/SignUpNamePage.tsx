@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InputBox from '../components/common/InputBox';
 import Button from '../components/common/Button';
+import BackButton from '../components/common/BackButton';
 
 const SignupNamePage = () => {
   const [name, setName] = useState('');
@@ -14,8 +15,12 @@ const SignupNamePage = () => {
   };
 
   return (
-    <div className="min-h-screen max-w-[393px] px-6 pt-10 pb-6 flex flex-col justify-center">
+    
+    <div className="relative min-h-screen max-w-[393px] px-6 pt-10 pb-6 flex flex-col justify-center">
       {/* 뒤로가기 버튼 */}
+        <div className="absolute top-6 left-0 z-10">
+        <BackButton />
+      </div>
       
       {/* 제목 */}
       <h1 className="mb-5">

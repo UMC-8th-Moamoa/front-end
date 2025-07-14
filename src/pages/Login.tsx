@@ -4,7 +4,7 @@ import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import KakaoIcon from '../assets/Kakao.svg';
 import Logo from '../assets/Logo_white.svg';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
   const [id, setId] = useState("");
@@ -12,6 +12,7 @@ function Login() {
   const [idError, setIdError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = () => {
     // 초기화
@@ -38,6 +39,7 @@ function Login() {
 
     // 로그인 성공 로직
     alert("로그인 성공!");
+    navigate("/signup/name");
   };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -130,9 +132,9 @@ function Login() {
     
     {/* 모달 */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-        <p className="mb-4">존재하지 않는 아이디입니다</p>
-        <Button variant="secondary" size="small" width="full" onClick={() => setShowModal(false)}>
-          확인
+        <p className="text-gray-600">존재하지 않는 아이디입니다</p>
+        <Button variant="primary" size="small" width="fit" onClick={() => setShowModal(false)} className="mt-6 bg-[#8f8f8f]">
+           닫기  
         </Button>
       </Modal>
     </div>

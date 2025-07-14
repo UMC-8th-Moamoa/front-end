@@ -13,7 +13,7 @@ const InputBox = ({ type = "text", className = "", error, ...props }: InputBoxPr
         type={type}
         className={`
           w-full px-4 py-3
-          rounded-xl
+          rounded-lg
           bg-[#EAEAEA]
           text-black text-sm
           focus:outline-none
