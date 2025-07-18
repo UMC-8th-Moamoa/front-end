@@ -13,7 +13,7 @@ const InputBox = ({
   return (
     <input
       type={type}
-      className={`w-[350px] h-[50px] px-4 py-2 rounded-[12px] text-sm placeholder-gray-400
+      className={`w-[350px] h-[50px] px-4 py-2 rounded-[12px] text-sm placeholder-[gray-400]
         ${hasBorder
           ? "border border-red-500"
           : "appearance-none outline-none border-none"} 
