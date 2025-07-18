@@ -1,44 +1,48 @@
 import HomeIcon from '../../assets/Home.svg';
 import MailIcon from '../../assets/Mail.svg';
+import MailIconActive from '../../assets/Mail_color.svg';
 import ShoppingBagIcon from '../../assets/Shopping_bag.svg';
 import UserIcon from '../../assets/User.svg';
 import HeartIcon from '../../assets/Heart.svg';
 
-
-// 메뉴 타입 정의
+// 각 메뉴의 키 타입을 정의함
 export type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
 
 interface BottomNavigationProps {
-  active: MenuType;
-  onNavigate: (menu: MenuType) => void;
+  active: MenuType; // 현재 선택된 메뉴
+  onNavigate: (menu: MenuType) => void; // 메뉴 클릭 시 실행할 함수
 }
 
 function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
+  // 하단바에 표시할 메뉴 아이콘 목록 정의 (letter는 선택된 아이콘 따로 있음)
   const menuList = [
     { key: 'shopping', icon: ShoppingBagIcon },
     { key: 'heart', icon: HeartIcon },
     { key: 'home', icon: HomeIcon },
-    { key: 'letter', icon: MailIcon },
+    { key: 'letter', icon: MailIcon, activeIcon: MailIconActive },
     { key: 'mypage', icon: UserIcon },
   ];
 
   return (
     <div
-  style={{
-    display: 'flex',
-    justifyContent: 'space-around',
-    padding: '10px 0',
-    borderTop: '1px solid #ddd',
-    position: 'fixed',
-    bottom: 0,
-    width: '393px', // 아이폰 크기 고정
-    margin: '0 auto', // 중앙 정렬
-    left: 0, // 화면 왼쪽에서 시작
-    right: 0, // 화면 오른쪽에서 끝
-    backgroundColor: '#fff',
-  }}
->
-
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '40px', // 아이콘 간 간격
+        width: '393px',
+        height: '70px',
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        margin: '0 auto', // 화면 중앙 정렬
+        borderTop: '1px solid #ddd', // 상단 테두리
+        borderRadius: '20px 20px 0 0', // 상단 모서리 둥글게
+        background: '#FFF',
+        zIndex: 1000, // 다른 요소보다 위에 배치
+      }}
+    >
       {menuList.map((menu) => (
         <div
           key={menu.key}
@@ -48,19 +52,17 @@ function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
             flexDirection: 'column',
             alignItems: 'center',
             cursor: 'pointer',
-            transition: 'transform 0.2s ease', // 클릭 시 부드럽게 확대
-            transform: active === menu.key ? 'scale(1.2)' : 'scale(1)', // 선택 시 확대
           }}
         >
           <img
-            src={menu.icon}
-            width={24}
-            height={24}
+            // 선택된 메뉴일 경우 별도 색상 아이콘 사용
+            src={active === menu.key && menu.activeIcon ? menu.activeIcon : menu.icon}
+            width={30}
+            height={30}
             style={{
-              marginBottom: '4px',
-              transition: 'filter 0.2s ease', // 클릭 시 색상 부드럽게 변경
-              filter: active === menu.key ? 'brightness(0)' : 'brightness(0.6)', // 진하게/연하게
+              transition: 'filter 0.2s ease',
             }}
+            alt={`${menu.key} icon`}
           />
         </div>
       ))}
