@@ -1,7 +1,9 @@
+import React from "react";
+
 interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   type?: "text" | "password" | "email" | "number" | "search";
   className?: string;
-  hasBorder?: boolean; 
+  hasBorder?: boolean;
 }
 
 const InputBox = ({
@@ -13,10 +15,9 @@ const InputBox = ({
   return (
     <input
       type={type}
-      className={`w-[350px] h-[50px] px-4 py-2 rounded-[12px] text-sm placeholder-[gray-400]
-        ${hasBorder
-          ? "border border-red-500"
-          : "appearance-none outline-none border-none"} 
+      className={`w-[350px] h-[50px] px-4 py-2 rounded-[12px] text-sm 
+        text-[#1F1F1F] placeholder:text-[#97B1FF] bg-[#E7EDFF]
+        ${hasBorder ? "border border-[#97B1FF]" : "appearance-none outline-none border-none"} 
         ${className}`}
       {...props}
     />

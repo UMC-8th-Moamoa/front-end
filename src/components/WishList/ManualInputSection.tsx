@@ -25,23 +25,20 @@ const ManualInputSection = () => {
       {/* 제품명 입력 */}
       <InputBox
         placeholder="제품명을 입력해 주세요"
-        className="w-[350px] h-[44px] bg-[#EAEAEA] mt-2 placeholder:text-[#B6B6B6] rounded-xl"
+        className="w-[350px] h-[44px] mt-2 rounded-xl"
         hasBorder={false}
       />
 
-      {/* 가격 입력 (숫자 바로 뒤에 원 붙이기) */}
-      <div className="relative w-[350px] h-[44px]">
-        {/* 실제 Input (숫자만 입력) */}
-        <input
+      {/* 가격 입력 (InputBox 활용) */}
+      <div className="relative w-[350px] h-[50px]">
+        <InputBox
           type="text"
           inputMode="numeric"
           value={price}
           onChange={handlePriceChange}
           placeholder="가격을 입력해 주세요"
-          className={`w-full h-full bg-gray-200 placeholder:text-[#B6B6B6] rounded-xl px-4 text-transparent caret-black ${
-            price ? "text-[24px] font-bold" : "text-sm"
-          }`}
-          style={{ WebkitTextFillColor: "transparent" }} // placeholder만 보이게
+          className="text-transparent caret-black pr-10" // 글자 투명하게
+          style={{ WebkitTextFillColor: "transparent" }}
         />
 
         {/* 겹쳐서 보여줄 텍스트 (입력값 + 원) */}
