@@ -18,7 +18,7 @@ const SearchTopBar = ({ searchKeyword, setSearchKeyword }: SearchTopBarProps) =>
           type="search"
           placeholder="아이디, 이름을 검색하세요"
           hasBorder={false}
-          className="w-full h-full rounded-xl bg-[#EDEDED] text-[16px] pr-10"
+          className="w-full h-full rounded-xl bg-[#EDEDED] placeholder:text-[#B7B7B7] text-[#000000] text-[16px] pr-10"
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
         />
