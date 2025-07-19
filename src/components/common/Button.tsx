@@ -1,8 +1,11 @@
 import React from "react";
 
-type Variant = "primary" | "secondary" | "kakao" | "gray" | "outline";
-type Size = "small" | "medium" | "large";
+
+type Variant = "primary" | "secondary" | "kakao" | "login" | "text";
+type FontSize = "xs" | "sm" | "md" | "lg" | "xl";
+type PaddingSize = "xs" | "sm" | "md" | "lg" | "xl";
 type Width = "full" | "fit" | "fixed";
+type FontWeight = "light" | "normal" | "medium" | "semibold" | "bold";
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -10,7 +13,9 @@ interface ButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   variant?: Variant;
-  size?: Size;
+  fontSize?: FontSize;
+  size?: PaddingSize;
+  fontWeight?: FontWeight;
   width?: Width;
   className?: string;
 }
@@ -21,59 +26,81 @@ const Button = ({
   onClick,
   disabled = false,
   variant = "primary",
-  size = "medium",
+  fontSize = "md",
+  size = "md",
   width = "full",
+  fontWeight = "semibold",
   className = "",
 }: ButtonProps) => {
-  const baseStyle = "rounded-xl font-semibold transition-colors duration-200 text-center";
 
-  // 크기 스타일
-  const sizeStyle = {
-    small: "text-sm py-1.5 px-3",
-    medium: "text-base py-2.5 px-4",
-    large: "text-lg py-3 px-5",
-  }[size];
+  const baseStyle = "rounded-lg transition-colors duration-200 text-center";
 
-  // 너비 스타일
-   const widthStyle =
+
+  const fontSizeMap: Record<FontSize, string> = {
+    xs: "text-xs",
+    sm: "text-sm",
+    md: "text-base",
+    lg: "text-lg",
+    xl: "text-xl",
+  };
+
+  const paddingSizeMap: Record<PaddingSize, string> = {
+    xs: "py-1 px-2",
+    sm: "py-1.5 px-3",
+    md: "py-2.5 px-4",
+    lg: "py-3 px-5",
+    xl: "py-4 px-6",
+  };
+
+  const fixedWidths: Record<PaddingSize, string> = {
+    xs: "w-[100px]",
+    sm: "w-[160px]",
+    md: "w-[200px]",
+    lg: "w-[260px]",
+    xl: "w-[320px]",
+  };
+
+  const widthStyle =
     width === "full"
       ? "w-full"
       : width === "fit"
       ? "w-fit"
-      : {
-          small: "w-[200px]",
-          medium: "w-[300px]",
-          large: "w-[350px]",
-        }[size];
+      : fixedWidths[size];
 
+  const fontWeightMap: Record<FontWeight, string> = {
+    light: "font-light",
+    normal: "font-normal",
+    medium: "font-medium",
+    semibold: "font-semibold",
+    bold: "font-bold",
+  };
 
-  // variant에 따라 버튼 스타일 설정
-const variantMap: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary: disabled
-    ? "bg-[#D9D9D9] text-white"
-    : "bg-black text-white hover:bg-gray-800",
-  secondary: disabled
-    ? "bg-gray-100 text-gray-400 border border-gray-300"
-    : "bg-white text-gray-700 hover:bg-gray-100",
-  kakao: disabled
-    ? "bg-[#FEE500] text-gray-400"
-    : "bg-[#FEE500] text-black hover:brightness-95",
-  gray: disabled
-    ? "bg-[#D9D9D9] text-black"
-    : "bg-[#D9D9D9] text-black hover:brightness-85",
-  outline: disabled
-    ? "border-2 border-gray-300 text-gray-300"
-    : "border-2 border-gray-400 text-gray-400 hover:bg-gray-100",
-};
+  const fontWeightClass = fontWeightMap[fontWeight];
 
-const variantStyle = variantMap[variant];
+  const variantMap: Record<Variant, string> = {
+    primary: disabled
+      ? "bg-[#C7D5FF] text-white"
+      : "bg-[#6282E1] text-white hover:bg-[#7090ED] active:bg-[#5A7DE3]",
+    secondary:
+      "bg-white text-[#6282E1] border border-[#6282E1] hover:bg-[#F1F4FF] active:border-2",
+    kakao: disabled
+      ? "bg-[#FEE500] text-gray-400"
+      : "bg-[#FEE500] text-black hover:bg-[#F1F4FF] active:bg-[#F1F4FF]",
+    login:
+      "bg-white text-[#6282E1] hover:bg-[#F1F4FF] active:bg-white",
+    text: disabled
+      ? "text-gray-300"
+      : "hover:text-gray-200 hover:font-medium transition-all duration-200",
+  };
+
+  const finalClassName = `${baseStyle} ${fontSizeMap[fontSize]} ${paddingSizeMap[size]} ${fontWeightClass} ${variantMap[variant]} ${widthStyle} ${className}`.trim();
 
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseStyle} ${sizeStyle} ${variantStyle} ${widthStyle} ${className}`}
+      className={finalClassName}
     >
       {children}
     </button>
