@@ -59,7 +59,7 @@ const ParticipationActionBox = ({
   return (
     <section className="w-full flex flex-col items-center mt-[32px]">
       {!isMyPage && (
-        <p className="text-[16px] font-medium text-black mb-2 text-center">
+        <p className="text-[16px] text-[#6282E1] mb-2 text-center">
           모아를 공유해서 친구끼리 큰 선물을 준비해봐요!
         </p>
       )}

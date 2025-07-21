@@ -17,11 +17,11 @@ const BirthdayBanner = ({ name, birthday }: BirthdayBannerProps) => {
   const dday = differenceInCalendarDays(targetDate, today);
 
   return (
-    <div className="w-[350px] h-[81px] mt-[20px] mx-auto flex items-center justify-center bg-gray-300 rounded-2xl text-black font-semibold">
-      <div className="flex-1 flex items-center justify-center text-4xl">D-{dday}</div>
+    <div className="w-[350px] h-[81px] mt-[20px] mx-auto flex items-center justify-center bg-gradient-to-r from-[#94B2F5] to-[#FFFFFF] rounded-2xl">
+      <div className="flex-1 flex items-center justify-center text-4xl font-bold text-white">D-{dday}</div>
       <div className="w-px h-6 bg-white mx-2" />
-      <div className="flex-1 flex items-center justify-center text-lg">
-        {name}님의 생일
+      <div className="flex-1 flex items-center justify-center text-lg text-[#6282E1]">
+        <span className = "font-bold">{name}님</span>의 생일
       </div>
     </div>
   );

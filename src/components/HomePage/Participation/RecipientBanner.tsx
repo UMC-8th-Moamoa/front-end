@@ -16,12 +16,20 @@ const RecipientBanner = () => {
   return (
     <div className="w-[350px] h-[152px] bg-white rounded-[20px] shadow-md flex items-center justify-center ml-[6px]">
       {/* 왼쪽 - 프로필 */}
-      <div className="flex flex-col items-center justify-center w-[69px]">
-        <div className="w-[69px] h-[69px] rounded-full bg-[#D9D9D9]" />
+      <div className="flex flex-col mr-3 items-center justify-center w-[69px]">
+        {recipientDummy.profile ? (
+          <img
+            src={`/assets/${recipientDummy.profile}`}
+            alt={`${recipientDummy.name}의 프로필`}
+            className="w-[69px] h-[69px] rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-[69px] h-[69px] rounded-full bg-[#D9D9D9]" />
+        )}
         <div className="mt-2 text-[15px] font-medium text-black">
           {recipientDummy.name}
         </div>
-        <div className="text-[11px] font-normal text-[#8F8F8F]">
+        <div className="text-[11px] font-normal text-[#B7B7B7]">
           {recipientDummy.userId}
         </div>
       </div>
@@ -31,11 +39,7 @@ const RecipientBanner = () => {
 
       {/* 오른쪽 - 디데이 & 보탬 인원 */}
       <div className="flex flex-col items-center justify-center">
-        <div className="text-[52px] font-semibold text-black">D-{dday}</div>
-        <div className="text-[14px] font-medium text-[#8F8F8F] mt-1">
-          마음을 보탠 인원{" "}
-          <span className="text-[20px] font-medium">{numParticipants}명</span>
-        </div>
+        <div className="text-[52px] font-semibold text-transparent ml-4 bg-clip-text bg-gradient-to-b from-[#6282E1] to-[#FEC3FF]">D-{dday}</div>
       </div>
     </div>
   );

@@ -30,6 +30,7 @@ const SearchUserList = ({ keyword }: SearchUserListProps) => {
           key={`${user.userId}-${index}`}
           name={user.name}
           userId={user.userId}
+          profile={user.profile}
         />
       ))}
     </div>

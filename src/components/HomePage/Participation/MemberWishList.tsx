@@ -12,7 +12,7 @@ const MemberWishList = ({ isMyPage }: MemberWishListProps) => {
   return (
     <section className="w-full mt-[32px] flex flex-col items-center">
       <div className="w-full max-w-[350px] px-2 flex justify-between items-center mb-[16px]">
-        <h2 className="text-[18px] ml-2 font-semibold text-black">
+        <h2 className="text-[18px] ml-2 font-semibold text-[#6282E1]">
           {recipientDummy.name}님 위시리스트
         </h2>
         {!isMyPage && (
@@ -24,7 +24,7 @@ const MemberWishList = ({ isMyPage }: MemberWishListProps) => {
           </button>
         )}
       </div>
-      <div className="w-full max-w-[350px] flex overflow-x-auto scrollbar-hide px-2">
+      <div className="w-full max-w-[350px] font-normal flex overflow-x-auto scrollbar-hide px-2">
         {recipientDummy.wishList.map((item, idx) => (
           <MemberWishItem
             key={idx}

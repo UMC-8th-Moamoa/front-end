@@ -1,5 +1,11 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css");
 @import "tailwindcss";
 
+body {
+  font-family: 'Pretendard Variable', sans-serif;
+}
+
+/* 스크롤바 숨기기 */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -7,4 +13,3 @@
   -ms-overflow-style: none; /* IE, Edge */
   scrollbar-width: none; /* Firefox */
 }
-
