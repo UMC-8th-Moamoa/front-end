@@ -22,6 +22,8 @@ import ReturnToFriendCompletePage from "./pages/Home/MoaMoney/ReturnToFriendComp
 import ReceiveBalancePage from "./pages/Home/MoaMoney/ReceiveBalancePage";
 import ReturnToFriendPage from "./pages/Home/MoaMoney/ReturnToFriendPage";
 import GiftCertificationPage from "./pages/Home/GiftCertificationPage";
+import ShoppingListPage from "./pages/Shopping/ShoppingListPage";
+import ShoppingList from "./pages/Shopping/ShoppingList";
 
 function App() {
   return (
@@ -50,6 +52,8 @@ function App() {
         <Route path="/return-to-friend/return-to-friend-complete" element={<ReturnToFriendCompletePage />} />
         <Route path="/receive-balance" element={<ReceiveBalancePage />} />
         <Route path="/gift-certification" element={<GiftCertificationPage />} />
+        <Route path="/shopping1" element={<ShoppingListPage />} />
+        <Route path="/shopping" element={<ShoppingList />} />
       </Routes>
     </Router>
   );

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import InputBox from '../components/common/InputBox';
-import Button from '../components/common/Button';
-import Modal from '../components/common/Modal';
+import InputBox from '../../components/common/InputBox';
+import Button from '../../components/common/Button';
+import Modal from '../../components/common/Modal';
 import KakaoIcon from '../assets/Kakao.svg';
 import Logo from '../assets/Logo_white.svg';
 import { Link, useNavigate } from "react-router-dom";

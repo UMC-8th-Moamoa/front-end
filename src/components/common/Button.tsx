@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 
 
 type Variant = "primary" | "secondary" | "kakao" | "login" | "text";
@@ -93,7 +94,15 @@ const Button = ({
       : "hover:text-gray-200 hover:font-medium transition-all duration-200",
   };
 
-  const finalClassName = `${baseStyle} ${fontSizeMap[fontSize]} ${paddingSizeMap[size]} ${fontWeightClass} ${variantMap[variant]} ${widthStyle} ${className}`.trim();
+  const finalClassName = clsx(
+    baseStyle,
+    fontSizeMap[fontSize],
+    paddingSizeMap[size],
+    fontWeightClass,
+    variantMap[variant],
+    widthStyle,
+    className
+  );
 
   return (
     <button
