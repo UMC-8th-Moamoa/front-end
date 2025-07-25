@@ -1,4 +1,5 @@
 import React from "react";
+import WhiteCheck from "../../../assets/WhiteCheck.svg";
 
 interface PickGiftItemProps {
   id: number;
@@ -43,8 +44,12 @@ const PickGiftItem = ({ id, imageSrc, title, price, checked, onChange }: PickGif
           type="checkbox"
           checked={checked}
           onChange={() => onChange(id)}
-          className="w-[20px] h-[20px] appearance-none rounded-sm border border-gray-400 checked:bg-[#6C4AB6] checked:border-[#6C4AB6] checked:bg-[url('/assets/WhiteCheck.svg')] checked:bg-center checked:bg-no-repeat"
+          className="w-[20px] h-[20px] appearance-none rounded-sm border border-gray-400 checked:bg-[#6C4AB6] checked:border-[#6C4AB6] bg-center bg-no-repeat"
+          style={{
+            backgroundImage: checked ? `url(${WhiteCheck})` : undefined,
+          }}
         />
+
       </div>
     </div>
   );

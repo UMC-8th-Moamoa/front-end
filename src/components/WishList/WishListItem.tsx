@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import locked from "../../assets/locked.svg";
+import unlocked from "../../assets/unlocked.svg";
+
 
 interface WishlistItemProps {
   imageSrc: string;
@@ -12,9 +15,9 @@ const WishlistItem = ({ imageSrc, title, price, openOption }: WishlistItemProps)
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   const iconSrc =
-    openOption === 'locked'
-      ? '/assets/locked.svg'
-      : '/assets/unlocked.svg';
+    openOption === locked
+      ? locked
+      : unlocked;
 
   return (
     <div className="w-full bg-white rounded-[14px] shadow-sm flex p-2 gap-4 relative">

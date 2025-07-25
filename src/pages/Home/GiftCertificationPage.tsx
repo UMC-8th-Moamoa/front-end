@@ -3,6 +3,7 @@ import BackButton from "../../components/common/BackButton";
 import BottomNavigation from "../../components/common/BottomNavigation";
 import InputBox from "../../components/common/InputBox";
 import ParticipantList from "../../components/HomePage/Participation/ParticipantList";
+import WhitePhoto from "../../assets/WhitePhoto.svg";
 
 const GiftCertificationPage = () => {
 
@@ -28,7 +29,7 @@ const GiftCertificationPage = () => {
 
       {/* 이미지 업로드 영역 */}
       <div className="w-[350px] h-[201px] bg-[#D9D9D9] rounded-[20px] flex items-center justify-center mb-4">
-        <img src="/assets/WhitePhoto.svg" alt="사진 업로드 아이콘" className="w-10 h-10" />
+        <img src={WhitePhoto} alt="사진 업로드 아이콘" className="w-10 h-10" />
       </div>
 
       {/* 소감 입력 */}

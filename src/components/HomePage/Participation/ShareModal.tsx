@@ -1,3 +1,11 @@
+import X_logo from "../../../assets/X_logo.png";
+import Kakaotalk_logo from "../../../assets/Kakaotalk_logo.svg";
+import Instagram_logo from "../../../assets/Instagram_logo.svg";
+import Discord_logo from "../../../assets/Discord_logo.svg";
+import Gmail_logo from "../../../assets/Gmail_logo.svg";
+
+
+
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -5,11 +13,11 @@ interface ShareModalProps {
 }
 
 const icons = [
-  { name: "Gmail", src: "/assets/Gmail_logo.svg" },
-  { name: "카카오톡", src: "/assets/Kakaotalk_logo.svg" },
-  { name: "Discord", src: "/assets/Discord_logo.svg" },
-  { name: "Instagram", src: "/assets/Instagram_logo.svg" },
-  { name: "X", src: "/assets/X_logo.png" },
+  { name: "Gmail", src: Gmail_logo },
+  { name: "카카오톡", src: Kakaotalk_logo },
+  { name: "Discord", src: Discord_logo },
+  { name: "Instagram", src: Instagram_logo },
+  { name: "X", src: X_logo },
 ];
 
 const ShareModal = ({ isOpen, onClose, onCopy }: ShareModalProps) => {

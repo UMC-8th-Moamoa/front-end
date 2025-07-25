@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import WhiteCheck from "../../../assets/WhiteCheck.svg";
 
 interface VoteWishItemProps {
   imageUrl: string;
@@ -16,12 +16,7 @@ const VoteWishItem = ({
   onSelect,
 }: VoteWishItemProps) => {
   return (
-    <label
-      className={clsx(
-        "flex items-center w-[350px] h-[90px] bg-white rounded-[14px] px-2 py-2 gap-3 shadow-md cursor-pointer"
-        // 선택 효과에서 테두리 제거: border 관련 삭제
-      )}
-    >
+    <label className="flex items-center w-[350px] h-[90px] bg-white rounded-[14px] px-2 py-2 gap-3 shadow-md cursor-pointer">
       {/* 이미지 */}
       <img
         src={imageUrl}
@@ -45,7 +40,10 @@ const VoteWishItem = ({
         type="checkbox"
         checked={selected}
         onChange={onSelect}
-        className="w-[20px] h-[20px] mr-2 appearance-none rounded-sm border border-gray-400 checked:bg-[#6C4AB6] checked:border-[#6C4AB6] checked:bg-[url('/assets/WhiteCheck.svg')] checked:bg-center checked:bg-no-repeat"
+        className="w-[20px] h-[20px] mr-2 appearance-none rounded-sm border border-gray-400 checked:bg-[#6C4AB6] checked:border-[#6C4AB6] bg-center bg-no-repeat"
+        style={{
+          backgroundImage: selected ? `url(${WhiteCheck})` : undefined,
+        }}
       />
     </label>
   );

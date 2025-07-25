@@ -1,3 +1,5 @@
+import X from "../../../assets/X.svg";
+
 interface SearchUserItemProps {
   name: string;
   userId: string;
@@ -37,7 +39,7 @@ const SearchUserItem = ({
       {/* X 버튼 (optional) */}
       {showDeleteButton && (
         <button onClick={onDelete}>
-          <img src="/assets/X.svg" alt="삭제" className="w-5 h-5" />
+          <img src={X} alt="삭제" className="w-5 h-5" />
         </button>
       )}
     </div>

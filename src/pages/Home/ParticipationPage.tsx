@@ -24,7 +24,7 @@ const ParticipationPage = () => {
 
         <div className="flex items-center space-x-[8px] px-4 pt-5 mb-5">
           <BackButton />
-          <p className="text-[18px] font-bold text-black">
+          <p className="text-[18px] font-semibold text-black">
             참여인원 {participantDummy.length}명
           </p>
         </div>

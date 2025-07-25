@@ -1,5 +1,6 @@
 import { useState } from "react";
 import InputBox from "../common/InputBox";
+import WhitePhoto from "../../assets/WhitePhoto.svg";
 
 const ManualInputSection = () => {
   const [price, setPrice] = useState("");
@@ -9,7 +10,7 @@ const ManualInputSection = () => {
     <section className="w-full max-w-[393px] px-4 flex mt-3 flex-col items-center gap-4">
       {/* 회색 이미지 박스 */}
       <div className="w-[350px] h-[201px] bg-[#F2F2F2] rounded-[20px] flex items-center justify-center border border-[#C7D5FF]">
-        <img src="/assets/WhitePhoto.svg" alt="사진 업로드 아이콘" className="w-10 h-10" />
+        <img src={WhitePhoto} alt="사진 업로드 아이콘" className="w-10 h-10" />
       </div>
 
       {/* 제품명 입력 */}

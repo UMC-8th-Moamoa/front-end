@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../../common/Button";
+import ShareButton from "../../../assets/ShareButton.svg";
 
 interface ParticipationActionBoxProps {
   isMyPage: boolean;
@@ -72,7 +73,7 @@ const ParticipationActionBox = ({
           aria-label="공유하기"
           onClick={onShareClick}
         >
-          <img src="/assets/ShareButton.svg" alt="공유 버튼" />
+          <img src={ShareButton} alt="공유 버튼" />
         </button>
       </div>
     </section>

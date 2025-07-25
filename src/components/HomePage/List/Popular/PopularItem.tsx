@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Modal } from '../../../common/Modal';
+import WhitePlus from "../../../../assets/WhitePlus.svg";
+
 
 interface PopularItemProps {
   imageUrl: string;
@@ -18,7 +20,7 @@ const PopularItem = ({ imageUrl, title }: PopularItemProps) => {
           className="w-full h-full object-cover rounded-[16px]"
         />
         <img
-          src="/assets/WhitePlus.svg"
+          src={WhitePlus}
           alt="추가"
           className="absolute bottom-2 right-2 w-[24px] h-[24px] cursor-pointer"
           onClick={() => setIsOpen(true)}

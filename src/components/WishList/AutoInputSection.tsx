@@ -1,5 +1,6 @@
 import { useState } from "react";
 import LinkInputModal from "./LinkInputModal"; 
+import PurplePhoto from "../../assets/PurplePhoto.svg";
 // 이미지 아이콘 경로도 필요 시 조정
 
 const AutoInputSection = () => {
@@ -43,7 +44,7 @@ const AutoInputSection = () => {
 
         {/* 사진 버튼 */}
         <button className="flex-1 flex flex-col items-center justify-center gap-1 py-3">
-          <img src="/assets/Photo.svg" alt="사진" className="w-[30px] h-[30px]" />
+          <img src={PurplePhoto} alt="사진" className="w-[30px] h-[30px]" />
           <span className="text-sm font-semibold text-[#6282E1]">사진 넣기</span>
         </button>
       </div>
