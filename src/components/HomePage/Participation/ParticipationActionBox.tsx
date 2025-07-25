@@ -5,12 +5,14 @@ interface ParticipationActionBoxProps {
   isMyPage: boolean;
   participationStatus: "none" | "pending" | "confirmed";
   onClick?: () => void;
+  onShareClick?: () => void; // 공유 버튼 클릭 시 실행할 콜백
 }
 
 const ParticipationActionBox = ({
   isMyPage,
   participationStatus,
   onClick,
+  onShareClick,
 }: ParticipationActionBoxProps) => {
   const navigate = useNavigate();
 
@@ -22,7 +24,7 @@ const ParticipationActionBox = ({
             width="fixed"
             size="medium"
             onClick={() => navigate("/input-moa-money")}
-            className="text-white w-[288px] h-[50px]"
+            className="text-white w-[288px] h-[50px] !bg-[#6282E1]"
           >
             마음 보태러 가기
           </Button>
@@ -34,7 +36,7 @@ const ParticipationActionBox = ({
             size="medium"
             variant="gray"
             disabled
-            className="text-white w-[288px] h-[50px]"
+            className="text-white w-[288px] h-[50px] !bg-[#6282E1]"
           >
             송금 내역을 확인 중입니다
           </Button>
@@ -45,12 +47,11 @@ const ParticipationActionBox = ({
             width="fixed"
             size="medium"
             onClick={onClick}
-            className="text-white w-[288px] h-[50px]"
+            className="text-white w-[288px] h-[50px] !bg-[#6282E1]"
           >
             편지 작성하러 가기
           </Button>
         );
-
       default:
         return null;
     }
@@ -69,6 +70,7 @@ const ParticipationActionBox = ({
         <button
           className="w-[50px] h-[50px] flex items-center justify-center"
           aria-label="공유하기"
+          onClick={onShareClick}
         >
           <img src="/assets/ShareButton.svg" alt="공유 버튼" />
         </button>

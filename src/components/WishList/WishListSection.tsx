@@ -10,7 +10,7 @@ const WishListSection = () => {
     <div className="w-[393px] px-4 py-6 space-y-2">
       {/* 상단 헤더 */}
       <div className="flex items-center justify-between">
-        <h2 className="text-[18px] font-semibold text-black px-2">나의 위시리스트</h2>
+        <h2 className="text-[18px] font-semibold text-[#6282E1] px-2">나의 위시리스트</h2>
         <SortDropdown selected={sort} onChange={setSort} />
       </div>
 
@@ -22,6 +22,7 @@ const WishListSection = () => {
             imageSrc={item.imageSrc}
             title={item.title}
             price={item.price}
+            openOption={item.openOption}
           />
         ))}
       </div>

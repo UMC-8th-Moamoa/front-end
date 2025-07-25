@@ -18,30 +18,30 @@ const SortDropdown = ({ selected, onChange }: SortDropdownProps) => {
   };
 
   return (
-    <div className="relative text-[14px]">
+    <div className="relative text-[14px] text-[#6282E1]">
       {/* 버튼 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between border border-gray-400 rounded-md px-3 py-[6px] w-[128px] h-[32px] bg-white"
+        className="flex items-center justify-between border border-[#C7D5FF] rounded-md px-3 py-[6px] w-[128px] h-[32px] bg-white"
       >
         <span className="mr-2">{selected}</span>
         {isOpen ? (
-          <ChevronUp size={20} className="text-black" />
+          <ChevronUp size={20} className="text-[#6282E1]" />
         ) : (
-          <ChevronDown size={20} className="text-black" />
+          <ChevronDown size={20} className="text-[#6282E1]" />
         )}
       </button>
 
       {/* 드롭다운 */}
       {isOpen && (
-        <ul className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-md border border-gray-200 overflow-hidden">
+        <ul className="absolute z-10 mt-1 w-full bg-white rounded-md border border-[#C7D5FF] overflow-hidden">
           {SORT_OPTIONS.map((option) => (
             <li
               key={option}
               onClick={() => handleSelect(option)}
               className={clsx(
                 "px-3 py-2 cursor-pointer hover:bg-gray-100",
-                option === selected && "text-primary font-semibold"
+                option === selected && "text-primary"
               )}
             >
               {option}

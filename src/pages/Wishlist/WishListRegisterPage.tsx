@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import WishListRegisterTopBar from "../../components/WishList/WishListRegisterTopBar";
 import AutoInputSection from "../../components/WishList/AutoInputSection";
 import ManualInputSection from "../../components/WishList/ManualInputSection";
-import BottomNavigation from "../../components/common/BottomNavigation";
 import Button from "../../components/common/Button";
 
 const WishListRegisterPage = () => {
@@ -32,7 +31,7 @@ const WishListRegisterPage = () => {
         </div>
 
         {/* 버튼 & 체크박스 영역 */}
-        <div className="w-full max-w-[393px] px-4 absolute bottom-[64px] z-20 bg-white">
+        <div className="w-full max-w-[393px] px-4 absolute bottom-[35px] z-20 bg-white">
           <div className="flex flex-col gap-2 py-3">
             <label className="flex items-center space-x-2 ml-3 mb-1 text-sm text-gray-400">
               <input
@@ -43,14 +42,11 @@ const WishListRegisterPage = () => {
               />
               <span>{isPrivate ? "비공개" : "공개"}</span>
             </label>
-            <Button variant="primary" size="medium" width="full" onClick={handleSubmit} className="text-[20px] font-semibold">
+            <Button variant="primary" size="medium" width="full" onClick={handleSubmit} className="text-[20px] !bg-[#6282E1] font-semibold">
               등록하기
             </Button>
           </div>
         </div>
-
-        {/* 하단 네비게이션 */}
-        <BottomNavigation />
       </div>
     </main>
   );
