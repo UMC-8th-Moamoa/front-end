@@ -39,10 +39,10 @@ const filteredHistory = history.filter(item => {
 
 
       {/* 드롭다운 */}
-      <div className="flex justify-end px-4 mt-[9px] relative z-10">
+      <div className="flex justify-end  relative z-10">
         {/* 드롭다운 전체 박스 */}
         <div
-          className="absolute top-0 w-full max-w-[111px] right-4 z-20 inline-flex flex-col items-center border border-[#C7D5FF] rounded-[8px] bg-white shadow-md"
+          className="absolute text-[14px] w-full max-w-[99px] right-4 z-20 inline-flex flex-col items-center border border-[#C7D5FF] rounded-[8px] bg-white shadow-md"
           style={{ padding: '6px 9px 6px 9px', gap: '17px', backgroundColor: '#FFF' }}
         >
 
@@ -56,7 +56,7 @@ const filteredHistory = history.filter(item => {
             <img
               src={open ? UpIcon : DownIcon}
               alt="화살표"
-              className=" ml-[5px] w-[20px] h-[20px]"
+              className=" ml-[10px] w-[20px] h-[20px]"
             />
           </div>
 
@@ -102,14 +102,16 @@ const filteredHistory = history.filter(item => {
 
               {/* 둘째 줄: 몽코인 + 값 */}
               <div className="flex justify-between mt-[8px] mb-[25px] items-center">
-                <span className="text-[20px] font-pretendard font-bold text-[#1F1F1F]">{item.desc}</span>
+                <span className="text-[20px] font-pretendard font-bold text-[#1F1F1F]"style={{ fontWeight: 700 }}
+>{item.desc}</span>
                 <span
                   className={`text-[24px] font-pretendard font-bold ${
                     item.value?.startsWith('-')
                       ? 'text-[#1F1F1F]'
                       : 'text-[#6282E1]'
                   }`}
-                >
+                style={{ fontWeight: 700 }}
+>
                   {item.value}
                 </span>
               </div>

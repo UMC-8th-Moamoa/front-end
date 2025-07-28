@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import ProfileImg from '../../assets/profile.svg';
 
 function ProfileCard() {
   const navigate = useNavigate();
@@ -19,39 +20,40 @@ function ProfileCard() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      {/* 프로필 영역 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        {/* 프로필 이미지 */}
-        <div
-          style={{
-            width: '67px',
-            height: '67px',
-            borderRadius: '100px',
-            backgroundColor: '#B6B6B6',
-          }}
-        />
+    <div className="px-[20px] mt-[10px]  ">
+      {/* 프로필 전체 박스 */}
+      <div className="flex items-start gap-[12px]">
+        {/* 왼쪽: 프로필 이미지와 버튼 */}
+        <div className="flex flex-col items-center gap-[8px]">
+          {/* 프로필 이미지 */}
+          <img
+            src={ProfileImg}
+            alt="프로필 이미지"
+            className="w-[80px] h-[80px] rounded-full object-cover bg-[#B6B6B6]"
+          />
 
-        {/* 유저 정보 */}
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ fontSize: '20px', fontWeight: 'bold' }}>금채원</span>
-            <span style={{ fontSize: '14px', color: '#8F8F8F' }}>2002.09.11</span>
+
+        </div>
+
+        {/* 오른쪽: 이름, 생일, 아이디, 팔로워/팔로잉 */}
+        <div className="flex-1 mt-[10px] ml-[16px]">
+          {/* 이름 + 생년월일 */}
+          <div className="flex items-center gap-[110px]">
+            <span className="text-[18px] font-semibold text-[#1F1F1F] font-pretendard"
+              style={{ fontWeight: 600 }}
+>금채원</span>
+            <span className="text-[16px] font-normal text-[#B7B7B7] font-pretendard">2002.09.11</span>
           </div>
 
           {/* 아이디 */}
-          <div style={{ marginTop: '4px', fontWeight: 'bold', fontSize: '15px' }}>
+          <div className="mt-[4px] text-[16px] font-medium text-[#1F1F1F] font-pretendard"   style={{ fontWeight: 600 }}
+>
             {isEditing ? (
               <input
                 value={userId}
                 onChange={handleChange}
                 onBlur={handleSave}
-                style={{
-                  fontSize: '14px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  padding: '2px 4px',
-                }}
+                className="text-[14px] border border-[#ddd] rounded px-2 py-1 font-pretendard"
               />
             ) : (
               <span>{userId}</span>
@@ -59,41 +61,35 @@ function ProfileCard() {
           </div>
 
           {/* 팔로워 / 팔로잉 */}
-          <div style={{ display: 'flex', gap: '20px', marginTop: '8px' }}>
+          <div className="flex gap-[20px] mt-[8px]">
+            {/* 팔로워 */}
             <div
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              className="flex items-center gap-[6px] cursor-pointer"
               onClick={() => goToFollowList('follower')}
             >
-              <span style={{ fontSize: '15px', color: '#7A7A7A', fontWeight: 'bold' }}>팔로워</span>
-              <span style={{ fontSize: '18px', fontWeight: 'bold' }}>31</span>
+              <span className="text-[18px] font-medium text-[#B7B7B7] font-pretendard">팔로워</span>
+              <span className="text-[18px] font-medium text-[#1F1F1F] font-pretendard "style={{ fontWeight: 500 }}>31</span>
             </div>
+
+            {/* 팔로잉 */}
             <div
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              className="flex items-center gap-[6px] cursor-pointer"
               onClick={() => goToFollowList('following')}
             >
-              <span style={{ fontSize: '15px', color: '#7A7A7A', fontWeight: 'bold' }}>팔로잉</span>
-              <span style={{ fontSize: '18px', fontWeight: 'bold' }}>21</span>
+              <span className="text-[18px] font-medium text-[#B7B7B7] font-pretendard">팔로잉</span>
+              <span className="text-[18px] font-medium text-[#1F1F1F] font-pretendard"style={{ fontWeight: 500 }}>21</span>
             </div>
           </div>
         </div>
-
-        {/* 프로필 편집 버튼 */}
-        <button
-          onClick={() => navigate('/profile/edit')}
-          style={{
-            backgroundColor: '#D9D9D9',
-            borderRadius: '10px',
-            padding: '4px 10px',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            border: 'none',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          프로필 편집
-        </button>
       </div>
+          {/* 개인정보 편집 버튼 */}
+<button
+  onClick={() => navigate('/profile/edit')}
+  className="flex justify-center items-center gap-[8px] w-[350px] h-[35px] mt-[11px] px-[px] py-0 rounded-[10px] border-[1px] border-[#6282E1] bg-white text-[#6282E1] text-[16px] font-SemiBold font-pretendard"
+style={{ fontWeight: 600 }}>
+  개인정보 편집
+</button>
+
     </div>
   );
 }

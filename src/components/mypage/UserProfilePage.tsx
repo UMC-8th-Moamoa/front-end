@@ -27,7 +27,7 @@ export default function UserProfilePage() {
       {/* 상단바 */}
       <div className="flex items-center justify-between px-4 pt-6 pb-4">
         <BackButton />
-        <h1 className="text-xl font-semibold text-center flex-1 -ml-6">프로필</h1>
+        <h1 className="text-xl font-semibold font-pretendard text-center flex-1 -ml-6">프로필</h1>
         <div className="w-6 h-6" />
       </div>
 

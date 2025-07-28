@@ -1,30 +1,45 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color-scheme: light; /* 다크모드 제거 */
+  color-scheme: light;
   color: #000000;
   background-color: #ffffff;
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Pretendard';
   line-height: 1.5;
-  font-weight: 400;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 이하 동일 */
+
+html, body {
+  height: 100%;
+    position: relative;
+
+}
+
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  min-width: 350px;
   min-height: 100vh;
-  background-color: white;
+  background-color: #FFF;
   color: black;
+  overflow-x: hidden; /* 혹시 body에서 튀는 걸 방지 */
 }
+
+#root {
+  max-width: 393px;
+  margin: 0 auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
 
 button {
   all: unset;

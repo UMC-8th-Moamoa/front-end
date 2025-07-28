@@ -18,18 +18,19 @@ function ParticipationSummary() {
         borderRadius: '20px',
         backgroundColor: '#FFFFFF',
         boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.15)', // 그림자
-        margin: '20px',
+        margin: '18px',
       }}
     >
       {summaryList.map((item, index) => (
         <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-          <img
-            src={item.icon}
-            alt={item.title}
-            style={{ height: index === 1 ? '30px' : '34px', marginBottom: '4px' }}
-          />
-          <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#000' }}>{item.title}</div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#7A7A7A' }}>{item.count}</div>
+    <img
+      src={item.icon}
+      alt={item.title}
+      style={{ height: '34px' }} // 모두 동일하게 맞춤
+    />
+
+          <div style={{ fontSize: '12px', fontWeight: 'medium', color: '#000' }}>{item.title}</div>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#B7B7B7' }}>{item.count}</div>
         </div>
       ))}
     </div>

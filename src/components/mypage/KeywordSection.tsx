@@ -1,57 +1,64 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import WhiteArrow from '../../assets/white_button.svg'; // 16px 아이콘
 
 function KeywordSection() {
   const navigate = useNavigate();
 
-  const keywords = ['#향수', '#반려용품', '#목걸이', '#디저트', '#캠핑'];
+  // 저장된 키워드를 가져오는 로직
+  const [keywords, setKeywords] = useState<string[]>([]);
+
+  useEffect(() => {
+    const savedKeywords = localStorage.getItem('myKeywords');
+    if (savedKeywords) {
+      setKeywords(JSON.parse(savedKeywords));
+    }
+  }, []);
 
   return (
-    <div style={{ padding: '0 16px' }}>
+    <div className="w-[350px] px-[20px] py-[10px] ">
       {/* 타이틀 + 편집 버튼 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <div style={{ fontWeight: 700, fontSize: '16px', color: '#000000' }}>나의 키워드</div>
+      <div className="flex justify-between items-center mb-[8px]">
+        <div className="text-[18px] font-bold text-[#1F1F1F] font-pretendard leading-[22px]"style={{ fontWeight: 700 }}
+>
+          나의 키워드 
+        </div>
         <button
           onClick={() => navigate('/keyword/edit')}
           style={{
-            border: '1px solid #DDDDDD',
-            borderRadius: '12px',
-            padding: '4px 12px',
+            all: 'unset',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
+            padding: '4px 8px',
+            borderRadius: '100px',
+            backgroundColor: '#6282E1',
+            color: '#fff',
             fontSize: '12px',
-            backgroundColor: '#FFFFFF',
-            color: '#000',
-            height: '28px',
-            lineHeight: '16px',
-            cursor: 'pointer',
+            fontWeight: 500,
+            fontFamily: 'Pretendard',
           }}
         >
           편집
+          <img src={WhiteArrow} alt="편집 화살표" style={{ width: '16px', height: '16px' }} />
         </button>
       </div>
 
-      {/* 키워드 리스트 */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '10px 8px', // row gap 10px, column gap 8px (피그마 기준)
-        }}
-      >
-        {keywords.map((keyword, index) => (
-          <div
-            key={index}
-            style={{
-              backgroundColor: '#F5F5F5',
-              color: '#000',
-              padding: '6px 12px',
-              borderRadius: '16px',
-              fontSize: '14px',
-              lineHeight: '22px',
-              border: '1px solid #E0E0E0',
-            }}
-          >
-            {keyword}
-          </div>
-        ))}
+      {/* 키워드 리스트 (가로 스크롤) */}
+      <div className="flex overflow-x-auto no-scrollbar gap-[8px]">
+        {keywords.length === 0 ? (
+          <div className="text-[#B7B7B7] text-[14px] font-pretendard">키워드를 추가해보세요</div>
+        ) : (
+          keywords.map((keyword, index) => (
+            <div
+              key={index}
+              className="flex-shrink-0 px-[14px] py-[6px] rounded-full bg-[#E7EDFF] text-[#6282E1] text-[14px] font-medium font-pretendard flex items-center justify-center"
+            >
+              {keyword}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

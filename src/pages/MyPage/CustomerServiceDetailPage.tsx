@@ -1,41 +1,44 @@
-// src/pages/MyPage/CustomerServiceDetailPage.tsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import TopBar from '../../components/common/TopBar';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BackButton from '../../components/common/BackButton';
 
 export default function CustomerServiceDetailPage() {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const { title, content, date, username } = state || {};
 
   return (
-    <div className="flex flex-col max-w-[393px] mx-auto text-black px-5 py-4 bg-white h-screen">
-      <TopBar />
-      <div className="flex items-center mb-5">
-        <BackButton />
-        <span className="text-lg font-bold ml-[90px]">문의 상세</span>
-      </div>
-
-      {/* 유저 정보 */}
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center">
-          <img
-            src="https://via.placeholder.com/30"
-            className="w-[30px] h-[30px] rounded-full mr-2"
-          />
-          <span className="text-sm font-semibold">chaoni_gold</span>
+    <div className="mt-[12px] flex flex-col max-w-[393px] mx-auto text-black bg-white min-h-screen px-5 pt-4">
+      {/* 상단바: 백버튼 + 유저정보 + 날짜 (한 줄 정렬) */}
+      <div className="flex justify-between items-center mb-[15px]">
+        <div className="flex items-center gap-[8px]">
+          <BackButton />
+          <div className="w-[34px] h-[34px] bg-[#97B1FF] rounded-full" />
+          <span className="text-[16px] font-semibold text-[#1F1F1F] font-pretendard">{username}</span>
         </div>
-        <span className="text-xs text-gray-500">2025.04.06</span>
+        <span className="text-[14px] font-normal text-[#B7B7B7] font-pretendard">{date}</span>
       </div>
 
-      {/* 제목 */}
-      <div className="text-md font-bold mb-2">결제에 문제가 생겼습니다</div>
-      <p className="text-sm text-gray-700 leading-relaxed mb-4">
-        Amet magna et consectetur egestas faucibus praesent libero. Ut turpis orci amet fames magna donec tincidunt.
-        Ut sagittis adipiscing porta lorem auctor porta vestibulum risus. A at fermentum bibendum maecenas sit.
-      </p>
+      {/* 구분선 */}
+      <div className="mb-[40px] w-[350px] h-[1px] bg-[#E1E1E1] mb-[20px] mx-auto" />
 
-      {/* 답변 영역 */}
-      <div className="text-center text-sm text-gray-400 mt-10">아직 답변이 없습니다</div>
+  {/* 제목 */}
+      <div className="w-[350px] mx-auto text-[18px] font-medium text-[#1F1F1F] font-pretendard mb-[8px]">
+        결제에 문제가 생겼습니다
+      </div>
+
+      {/* 내용 */}
+      <div className="w-[350px] mx-auto text-[16px] font-normal text-[#1F1F1F] font-pretendard leading-[24px] whitespace-pre-line mb-[40px]">
+        Amet magna et consectetur egestas faucibus praesent libero. Ut turpis orci amet fames magnis
+        donec tincidunt. Ut sagittis adipiscing porta lorem auctor porta vestibulum risus. A at
+        fermentum bibendum maecenas sit.
+      </div>
+
+      {/* 답변 없음 */}
+      <div className="w-[350px] mx-auto mt-[129px] text-center text-[18px] text-[#B7B7B7] font-pretendard">
+        아직 답변이 없습니다
+   </div>
+
     </div>
   );
 }

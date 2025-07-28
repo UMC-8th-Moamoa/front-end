@@ -1,5 +1,13 @@
-function ProfilePhotoModal({ onClose, onSelect }: { onClose: () => void; onSelect: (imgUrl: string) => void }) {
-  // 테스트용 샘플 이미지 9개
+// ProfilePhotoModal.tsx
+import FrameIcon from '../../assets/Frame.svg';
+
+function ProfilePhotoModal({
+  onClose,
+  onSelect,
+}: {
+  onClose: () => void;
+  onSelect: (imgUrl: string) => void;
+}) {
   const images = [
     'https://via.placeholder.com/80/FFB6C1',
     'https://via.placeholder.com/80/87CEFA',
@@ -13,46 +21,82 @@ function ProfilePhotoModal({ onClose, onSelect }: { onClose: () => void; onSelec
   ];
 
   return (
+    // 배경을 클릭하면 닫힘
     <div
+      onClick={onClose}
       style={{
         position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: '#fff',
-        padding: '16px',
-        borderTopLeftRadius: '16px',
-        borderTopRightRadius: '16px',
-        boxShadow: '0 -2px 6px rgba(0,0,0,0.2)',
+        inset: 0,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        display: 'flex',
+        justifyContent: 'center', // 가운데 정렬
+        alignItems: 'flex-end',     // 가운데 정렬
+        zIndex: 1000,
+        
       }}
     >
-      <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '16px', marginBottom: '16px' }}>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-        {images.map((img, idx) => (
-          <div
-            key={idx}
-            onClick={() => onSelect(img)}
-            style={{
-              width: '80px',
-              height: '80px',
-              backgroundColor: '#ddd',
-              borderRadius: '50%',
-              overflow: 'hidden',
-              cursor: 'pointer',
-            }}
-          >
-          </div>
-        ))}
-      </div>
-
-      <div style={{ textAlign: 'center', marginTop: '16px' }}>
+      {/* 콘텐츠 클릭 시 닫히지 않게 처리 */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '400px',
+          padding: '28px 44px 42px 44px',
+          borderRadius: '40px',
+          background: 'var(--MOA-White, #FFF)',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* 사진 불러오기 버튼 */}
         <button
-          onClick={onClose}
-          style={{ border: 'none', backgroundColor: '#ddd', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+          style={{
+            display: 'flex',
+            padding: '13.5px 88px 12.5px 89px',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: '10px',
+            border: '1px solid #B7B7B7',
+            background: '#FFF',
+            width: '150px',
+          }}
         >
+          <img
+            src={FrameIcon}
+            alt="사진 아이콘"
+            style={{ width: '24px', height: '24px', color: '#B7B7B7' }}
+          />
+          <span style={{ marginLeft: '8px', fontWeight: 500, color: '#B7B7B7' }}>
+            사진 불러오기
+          </span>
         </button>
+
+        {/* 사진 선택 목록 */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '24px',
+            marginTop: '30px',
+            justifyItems: 'center',
+          }}
+        >
+          {images.map((img, idx) => (
+            <div
+              key={idx}
+              onClick={() => onSelect(img)}
+              style={{
+                width: '85px',
+                height: '85px',
+                borderRadius: '100px',
+                background: '#E1E1E1',
+                overflow: 'hidden',
+                cursor: 'pointer',
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

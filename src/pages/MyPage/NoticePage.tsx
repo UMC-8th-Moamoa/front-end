@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import BackButton from "../../components/common/BackButton";
-import BottomNavigation from "../../components/common/BottomNavigation";
-import type { MenuType } from "../../components/common/BottomNavigation";
-import DownIcon from "../../assets/Down.svg";
-import UpIcon from "../../assets/Up.svg";
+import BackIcon from "../../assets/backbutton.svg";
+import DownIcon from "../../assets/Down_gray.svg";
+import UpIcon from "../../assets/Up_gray.svg";
 
 const notices = [
   {
@@ -17,14 +15,14 @@ const notices = [
     id: 2,
     date: "2025.06.13",
     title: "앱의 알림 문제 피드백",
-    content: "공지 내용입니다. 예시 텍스트입니다.",
-  },
+content:
+      "Pharetra tortor suscipit erat arcu ante non. Cursus fames dictumst morbi et eget euismod. Tincidunt cursus adipiscing donec sagittis arcu vel et viverra. Adipiscing leo pharetra tincidunt curabitur neque ut lectus netus dolor. Volutpat aliquam vulputate nec facilisis ac elit sagittis pellentesque semper.",  },
   {
     id: 3,
     date: "2025.06.13",
     title: "앱의 알림 문제 피드백",
-    content: "공지 내용입니다. 예시 텍스트입니다.",
-  },
+content:
+      "Pharetra tortor suscipit erat arcu ante non. Cursus fames dictumst morbi et eget euismod. Tincidunt cursus adipiscing donec sagittis arcu vel et viverra. Adipiscing leo pharetra tincidunt curabitur neque ut lectus netus dolor. Volutpat aliquam vulputate nec facilisis ac elit sagittis pellentesque semper.",  },
 ];
 
 const NoticePage = () => {
@@ -34,60 +32,65 @@ const NoticePage = () => {
     setOpenId(openId === id ? null : id);
   };
 
-  const handleNavigate = (menu: MenuType) => {
-    // 네비게이션 처리
-  };
-
   return (
-    <div className="max-w-[430px] mx-auto px-4 pt-4 pb-20 bg-white text-black min-h-screen">
-      {/* 상단 바 */}
-      <div className="relative flex items-center justify-center mb-4">
-        <div className="absolute left-0">
-          <BackButton />
-        </div>
-        <h1 className="text-lg font-semibold">공지사항</h1>
+    <div className="max-w-[350px] mx-auto px-4 pt-4 bg-white text-black min-h-screen">
+      {/* 상단바 */}
+      <div className="relative flex items-center justify-center mb-5 h-[60px]">
+        {/* BackIcon - 이미지로 사용 */}
+        <img
+          src={BackIcon}
+          alt="back"
+          className="absolute left-[2px] top-1/2 -translate-y-1/2 w-[40px] h-[40px] cursor-pointer"
+          onClick={() => window.history.back()}
+        />
+
+        <h1 className="text-[18px] font-bold text-[#1F1F1F] leading-[22px] font-pretendard">
+          공지사항
+        </h1>
       </div>
 
-      {/* 공지사항 목록 */}
-      <div className="space-y-3">
+      {/* 공지사항 리스트 */}
+      <div>
         {notices.map((notice, index) => (
-          <div
-            key={notice.id}
-            className="border border-[#E5E5E5] rounded-[10px] px-4 py-3"
-          >
-            <button
-              className="w-full flex justify-between items-center"
-              onClick={() => toggleNotice(notice.id)}
-            >
-              <div className="text-left">
-                <p className="text-[11px] text-gray-400">{notice.date}</p>
-                <p className="text-[15px] font-semibold">{notice.title}</p>
-              </div>
-              <div className="w-[30px] h-[30px]">
-                <img
-                  src={openId === notice.id ? UpIcon : DownIcon}
-                  alt="toggle icon"
-                  className="w-full h-full"
-                />
-              </div>
-            </button>
+          <div key={notice.id} className="w-full ">
+<button
+  onClick={() => toggleNotice(notice.id)}
+  className="w-full flex flex-col items-start "
+>
+  {/* 날짜 + 화살표 한 줄 */}
+<div className="w-full flex justify-between items-center">
+  <p className="text-[12px] text-[#B7B7B7] font-medium font-pretendard">
+    {notice.date}
+  </p>
+  <img
+    src={openId === notice.id ? UpIcon : DownIcon}
+    alt="toggle"
+    className="w-[30px] h-[30px] self-center translate-y-[1px]" 
+  />
+</div>
 
-            {/* 펼쳐진 내용과 구분선 */}
+
+  {/* 제목 아래 줄 */}
+  <p className="mt-[0px] text-[18px] font-bold text-[#1F1F1F] leading-[2px] font-pretendard"style={{ fontWeight: 700 }}
+>
+    {notice.title}
+  </p>
+</button>
+
+            {/* 펼쳐진 본문 내용 */}
             {openId === notice.id && (
-              <>
-                <div className="mt-3 text-[13px] text-gray-700 leading-snug">
-                  {notice.content}
-                </div>
-                {index < notices.length - 1 && (
-                  <hr className="my-3 border-t border-[#E5E5E5]" />
-                )}
-              </>
+              <p className="mt-0 text-[16px] leading-[20px] text-[#1F1F1F] font-pretendard font-normal">
+                {notice.content}
+              </p>
+            )}
+
+            {/* 구분선 */}
+            {index < notices.length - 1 && (
+              <hr className="mt-[1px] border-t border-[#E1E1E1]" />
             )}
           </div>
         ))}
       </div>
-
-      <BottomNavigation active="mypage" onNavigate={handleNavigate} />
     </div>
   );
 };

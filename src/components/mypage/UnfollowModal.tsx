@@ -10,7 +10,7 @@ interface UnfollowConfirmModalProps {
 export default function UnfollowConfirmModal({ isOpen, onClose, onConfirm }: UnfollowConfirmModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="text-[16px] font-semibold text-black mb-[16px]">팔로우를 취소하시겠습니까?</div>
+      <div className="text-[16px] font-semibold font-pretendard text-black mb-[16px]">팔로우를 취소하시겠습니까?</div>
       <div className="flex justify-between w-full px-[24px]">
         <button
           onClick={onClose}

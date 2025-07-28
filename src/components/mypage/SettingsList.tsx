@@ -1,49 +1,56 @@
 import { useNavigate } from "react-router-dom";
+import GrayButtonIcon from "../../assets/gray_button.svg";
 
 function SettingsList() {
   const navigate = useNavigate();
-  const settings = ['설정', '공지사항', '고객센터'];
-
-
-  const handleClick = (item: string) => {
-    if (item === '설정') {
-      navigate('/mypage/settings');
-    } else if (item === '공지사항') {
-      navigate('/mypage/notice'); // 공지사항 이동
-    } else if (item === '고객센터') {
-      navigate('/mypage/customer-service'); // 고객센터 이동
-    }
-  };
+  const settings = [
+    { label: "설정", route: "/mypage/settings" },
+    { label: "구매 내역", route: "/mypage/purchase-history" },
+    { label: "공지사항", route: "/mypage/notice" },
+    { label: "고객센터", route: "/mypage/customer-service" },
+  ];
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', padding: '0 20px' }}>
+    <div
+      style={{
+        width: "350px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        backgroundColor: "#FFFFFF",
+      }}
+    >
       {settings.map((item, index) => (
-        <div key={index} style={{ paddingTop: index === 0 ? '24px' : '12px' }}>
-          {/* 항목 */}
-          <div
-            onClick={() => handleClick(item)}
+        <div
+          key={index}
+          onClick={() => navigate(item.route)}
+          style={{
+            width: "100%",
+            height: "55px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 20px",
+            cursor: "pointer",
+            borderBottom: index !== settings.length - 1 ? "1px solid #EAEAEA" : "none",
+          }}
+        >
+          <span
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 0',
-              cursor: 'pointer',
+              marginLeft :"8px",
+              fontSize: "18px",
+              fontWeight: 500,
+              color: "#1F1F1F",
+              fontFamily: "Pretendard",
             }}
           >
-            <span style={{ fontSize: '17px', fontWeight: 'bold', color: '#000' }}>{item}</span>
-            <span style={{ fontSize: '22px', color: '#A0A0A0' }}>{'>'}</span>
-          </div>
-
-          {/* 구분선 */}
-          {index !== settings.length - 1 && (
-            <div
-              style={{
-                height: '1px',
-                backgroundColor: '#EAEAEA',
-                width: '100%',
-              }}
-            />
-          )}
+            {item.label}
+          </span>
+          <img
+            src={GrayButtonIcon}
+            alt="화살표"
+            style={{ width: "30px", height: "30px" }}
+          />
         </div>
       ))}
     </div>

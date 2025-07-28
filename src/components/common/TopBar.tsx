@@ -1,21 +1,36 @@
 import React from "react";
+import AlarmIcon from "../../assets/Alarm.svg";
+import SearchIcon from "../../assets/Search.svg";
+import MoamoaLogo from "../../assets/MoamoaLogo.svg";
 
 const TopBar = () => {
   return (
-    <div className="w-full h-14 flex items-center justify-between px-4 relative max-w-[393px] mx-auto">
-      {/* 좌측 (빈 공간 or 뒤로가기 아이콘 자리) */}
-      <div className="w-5 h-5" />
+    <div className="w-[350px] h-[44px] px-[20px] flex items-center justify-between mx-auto fixed top-0 left-1/2 -translate-x-1/2 z-[1000] bg-[#FFF]">
+      {/* 알람 아이콘 */}
+      <div className="w-[24px] h-[24px] ml-[10px] flex items-center justify-center">
+        <img
+          src={AlarmIcon}
+          alt="알람"
+          className="w-full h-full object-contain"
+        />
+      </div>
 
-      {/* 로고 중앙 정렬 */}
-      <img
-        src="/assets/MoamoaLogo.svg"
-        alt="MOA MOA"
-        className="h-5 absolute left-1/2 transform -translate-x-1/2"
-      />
+      {/* 중앙 로고 */}
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <img
+          src={MoamoaLogo}
+          alt="MOA MOA"
+          className="h-[18px] object-contain"
+        />
+      </div>
 
-      {/* 검색 아이콘 우측 */}
-      <div onClick={() => alert('검색')} className="cursor-pointer">
-        <img src="/assets/Search.svg" alt="검색" className="w-5 h-5 select-none" />
+      {/* 검색 아이콘 */}
+      <div className="w-[24px] h-[24px] flex items-center mr-[10px] justify-center">
+        <img
+          src={SearchIcon}
+          alt="검색"
+          className="w-full h-full object-contain"
+        />
       </div>
     </div>
   );
