@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Button from "../components/common/Button";
 import InputBox from "../components/common/InputBox";
-import Logo from "../assets/Logo_black.svg";
 import BackButton from "../components/common/BackButton";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -26,15 +25,15 @@ function FindIdPage() {
       <div className="absolute top-6 left-0 z-10">
               <BackButton />
             </div>
-        <img src={Logo} alt="Logo" className="w-40 h-20 mb-2 mt-10" />
-        <h1 className="text-xl font-semibold mb-25">아이디 찾기</h1>
+        <img src="/moaLogo.svg" alt="moa logo" className="w-40 h-20 mb-2 mt-10"/>
+        <h1 className="text-xl text-[#6282E1] font-semibold mb-25">아이디 찾기</h1>
 
         {status === "success" ? (
           <>
-            <p className="text-sm text-center mt-8 mb-8">
+            <p className="text-sm text-center mt-8 mb-15">
               회원님의 이메일로 아이디를 전송했습니다
             </p>
-            <Button variant="primary" onClick={() => navigate("/login")}>
+            <Button variant="primary" fontSize="xl" onClick={() => navigate("/login")}>
               로그인하러 가기
             </Button>
           </>
@@ -51,6 +50,11 @@ function FindIdPage() {
                 setInput(e.target.value);
                 setStatus("idle");
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit();
+                }
+              }}
               className={`mb-4 ${
                 status === "error"
                   ? "border border-red-500 bg-gray-100 text-black"
@@ -60,6 +64,7 @@ function FindIdPage() {
 
             <Button
               variant="primary"
+              fontSize="xl"
               disabled={!input}
               onClick={handleSubmit}>
               확인
@@ -69,9 +74,9 @@ function FindIdPage() {
       </div>
 
       {/* 하단 */}
-     <div className="flex justify-center items-center text-xs text-[#8F8F8F] mb-50">
+     <div className="flex justify-center items-center text-xs text-[#6282E1] mb-55">
       <Link to="/find-id">
-        <Button variant="text" size="small" width="fit" className="px-2 font-thin text-[#8F8F8F]">
+        <Button variant="text" size="sm" fontSize="sm" fontWeight="medium" width="fit" className="text-[#6282E1]">
         아이디 찾기
         </Button>
       </Link>
@@ -79,7 +84,7 @@ function FindIdPage() {
       <span>|</span>
 
       <Link to="/reset-password">
-        <Button variant="text" size="small" width="fit" className="px-2 font-thin text-[#8F8F8F]">
+        <Button variant="text" size="sm" fontSize="sm" fontWeight="medium" width="fit" className="text-[#6282E1]">
           비밀번호 변경
         </Button>
       </Link>
@@ -87,7 +92,7 @@ function FindIdPage() {
       <span>|</span>
 
       <Link to="/signup">
-        <Button variant="text" size="small" width="fit" className="px-2 font-thin text-[#8F8F8F]">
+        <Button variant="text" size="sm" fontSize="sm" fontWeight="medium" width="fit" className="text-[#6282E1]">
           회원가입
         </Button>
       </Link>

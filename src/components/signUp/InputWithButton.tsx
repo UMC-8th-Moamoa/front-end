@@ -36,12 +36,12 @@ const InputWithButton = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`flex-1 bg-[#eee] ${error ? 'border border-red-500' : ''}`}
+          className={`flex-1 bg-[#E7EDFF] ${error ? 'border border-red-500' : ''}`}
         />
         <Button
           onClick={onClickButton}
           variant="primary"
-          size="medium"
+          size="md"
           width="fit"
           disabled={disabled}
         >

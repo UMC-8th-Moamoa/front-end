@@ -7,7 +7,6 @@ import VisibilityToggle from "../components/common/VisibilityToggle";
 import EmailInputWithSelect from "../components/signUp/EmailInputWithSelect";
 import TermsAgreement from "../components/signUp/TermsAgreement";
 import Modal from "../components/common/Modal";
-import Logo from "../assets/Logo_black.svg";
 import { useNavigate } from "react-router-dom";
 
 function SignUpPage() {
@@ -60,7 +59,7 @@ const [terms, setTerms] = useState({
         <div className="absolute top-6 left-0 z-10">
         <BackButton />
       </div>
-        <img src={Logo} alt="Logo" className="w-40 h-20 mb-4" />
+        <img src="/moaLogo.svg" alt="moa logo" className="w-40 h-20 mb-4" />
 
         {/* 아이디 + 중복확인 */}
         <InputWithButton
@@ -91,7 +90,7 @@ const [terms, setTerms] = useState({
                 ? "숫자, 문자, 특수문자 포함 8자 이상"
                 : ""
             }
-            className="bg-gray-200 pr-10"
+            className="pr-10"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2">
             <VisibilityToggle onToggle={setVisible} />
@@ -106,27 +105,19 @@ const [terms, setTerms] = useState({
             onChange={(e) => setConfirmPw(e.target.value)}
             placeholder="비밀번호 확인"
             error={confirmPw && pw !== confirmPw ? '비밀번호가 일치하지 않습니다.' : ''}
-            className="bg-gray-200 pr-10"
+            className="pr-10"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2">
             <VisibilityToggle onToggle={setVisibleConfirm} />
         </div>
         </div>
 
-        {/* 이름 */}
-        <InputBox
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="이름"
-          className="mb-3 bg-gray-200"
-        />
-
         {/* 전화번호 */}
         <InputBox
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="전화번호(-없이 입력)"
-          className="mb-3 bg-gray-200"
+          className="mb-3"
         />
 
         {/* 이메일 + 인증 */}
@@ -150,7 +141,7 @@ const [terms, setTerms] = useState({
             // 인증 코드 재전송 로직
             setShowModal(true);
           }}
-          placeholder="인증 코드를 입력해 주세요"
+          placeholder="본인인증 번호 입력"
           buttonText="다시 보내기"
           disabled={!authCode}
           className="mb-4"
@@ -159,20 +150,20 @@ const [terms, setTerms] = useState({
 
       {showModal && (
       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-        <p className="text-gray-600">인증 코드를 다시 전송했습니다</p>
+        <p className="text-[#1F1F1F]">인증번호를 다시 전송했습니다</p>
         <Button
           variant="primary"
-          size="small"
+          size="md"
           width="fit"
           onClick={() => setShowModal(false)}
-          className="mt-6 bg-[#8f8f8f]"
+          className="mt-5 bg-[#8f8f8f] px-10"
         >
           확인
         </Button>
       </Modal>
     )}
 
-        <div className="text-xs text-gray-500 mt-1 mb-4 leading-snug">
+        <div className="text-xs text-[#B7B7B7] mt-1 mb-4">
         <p>• 앱의 모든 기능을 원활하게 사용하기 위해서 정확한 정보를 입력해야 합니다</p>
         <p>• 본인확인 및 보안을 위한 정보이며, 다른 용도로 사용되지 않습니다</p>
         </div>
@@ -182,7 +173,7 @@ const [terms, setTerms] = useState({
 
 
         {/* 다음 버튼 */}
-        <Button variant="primary" onClick={handleSubmit} className="w-full">
+        <Button variant="primary" fontSize="xl" onClick={handleSubmit} className="w-full">
           다음
         </Button>
       </div>

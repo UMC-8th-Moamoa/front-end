@@ -19,14 +19,14 @@ const SignupBirthdayPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen max-w-[393px] flex flex-col justify-center pt-20 px-4 bg-white">
+    <div className="relative min-h-screen max-w-[393px] flex flex-col justify-center px-4 bg-white">
       <div className="absolute top-6 left-0 z-10">
         <BackButton />
       </div>
      {/* 제목 */}
       <h1 className="mb-5">
-        <span className="text-3xl font-bold">생일</span>
-        <span className='text-3xl font-light'>을 입력해 주세요</span>
+        <span className="text-3xl text-[#6282E1] font-bold">생일</span>
+        <span className='text-3xl font-base'>을 입력해 주세요</span>
       </h1>
       <p className="text-lg text-gray-500 mb-10">
         이 정보는 추후에 수정이 불가능합니다<br />정확한 정보를 입력해 주세요
@@ -41,7 +41,7 @@ const SignupBirthdayPage = () => {
         
       />
 
-      <Button variant="primary" size="medium" width="full" className="mt-8" onClick={handleNext}>
+      <Button variant="primary" size="md" width="full" className="mt-8" onClick={handleNext}>
         확인
       </Button>
     </div>

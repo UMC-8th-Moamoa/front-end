@@ -28,13 +28,13 @@ const EmailInputWithSelect = ({
             placeholder="이메일"
             value={emailId}
             onChange={onChangeEmailId}
-            className="basis-1/2 bg-[#EAEAEA] border-none rounded-l-xl rounded-r-none text-sm text-black focus:outline-none"
+            className="basis-1/2 border-none rounded-l-xl rounded-r-none text-sm text-black focus:outline-none"
         />
         {/* 도메인 선택 */}
         <select
             value={emailDomain}
             onChange={onChangeEmailDomain}
-            className="basis-1/2 bg-white px-4 py-3 text-sm text-black border border-[#EAEAEA] rounded-r-xl rounded-l-none focus:outline-none"
+            className="basis-1/2 bg-white px-4 py-3 text-sm text-black border border-[#97B1FF] rounded-r-xl rounded-l-none focus:outline-none"
         >
             <option value="@gmail.com">@gmail.com</option>
             <option value="@naver.com">@naver.com</option>
@@ -45,9 +45,9 @@ const EmailInputWithSelect = ({
       {/* 인증 버튼 */}
       <Button
         variant="primary"
-        size="medium"
+        size="md"
         width="fit"
-        className="px-4 py-2 rounded-xl whitespace-nowrap"
+        className="px-4 py-2 whitespace-nowrap"
         onClick={onClickVerify}
         disabled={disabled}
       >
