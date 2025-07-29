@@ -6,7 +6,7 @@ import InputWithButton from "../components/signUp/InputWithButton";
 import VisibilityToggle from "../components/common/VisibilityToggle";
 import EmailInputWithSelect from "../components/signUp/EmailInputWithSelect";
 import TermsAgreement from "../components/signUp/TermsAgreement";
-import Modal from "../components/common/Modal";
+import { Modal } from "../components/common/Modal";
 import { useNavigate } from "react-router-dom";
 
 function SignUpPage() {

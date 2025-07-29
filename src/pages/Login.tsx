@@ -1,7 +1,7 @@
 import { useState } from "react";
 import InputBox from '../components/common/InputBox';
 import Button from '../components/common/Button';
-import Modal from '../components/common/Modal';
+import { Modal } from '../components/common/Modal';
 import KakaoIcon from '../assets/Kakao.svg';
 import Logo from '../assets/Logo_white.svg';
 import moa from '../assets/moa_character.svg';
@@ -79,7 +79,7 @@ function Login() {
           className="mb-3 placeholder:text-white bg-white/20"
           value={id}
           onChange={(e) => setId(e.target.value)}
-          
+          hasBorder={false}
         />
 
         {/* 비밀번호 입력 */}
@@ -91,6 +91,7 @@ function Login() {
           }`}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          hasBorder={false}
           onKeyDown={handleKeyDown}
         />
 

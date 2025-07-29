@@ -40,7 +40,7 @@ function App() {
       <Layout>
         <Routes>
           {/* 로그인 및 회원가입 */}
-          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/find-id" element={<FindIdPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/signup" element={<SignUpPage />} />

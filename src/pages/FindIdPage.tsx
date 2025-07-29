@@ -57,16 +57,19 @@ function FindIdPage() {
               }}
               className={`mb-4 ${
                 status === "error"
-                  ? "border border-red-500 bg-gray-100 text-black"
-                  : "bg-gray-200 text-black"
+                  ? "border border-red-500 text-black"
+                  : "text-black"
               }`}
+              hasBorder={false}
             />
 
             <Button
               variant="primary"
               fontSize="xl"
+              width="full"
               disabled={!input}
-              onClick={handleSubmit}>
+              onClick={handleSubmit}
+              >
               확인
             </Button>
           </>

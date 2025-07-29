@@ -62,7 +62,7 @@ const Button = ({
 
   const widthStyle =
     width === "full"
-      ? "w-full"
+      ? "w-[350px]"
       : width === "fit"
       ? "w-fit"
       : fixedWidths[size];
