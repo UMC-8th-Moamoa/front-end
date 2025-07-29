@@ -40,7 +40,7 @@ const InputWithButton = ({
         />
         <Button
           onClick={onClickButton}
-          variant="primary"
+          variant="signup"
           size="md"
           width="fit"
           disabled={disabled}
