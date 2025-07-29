@@ -1,3 +1,4 @@
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,3 +23,4 @@ export const Modal = ({ isOpen, onClose, children, className = "" }: ModalProps)
     </div>
   );
 };
+

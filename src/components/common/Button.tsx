@@ -1,7 +1,8 @@
 import React from "react";
+import clsx from "clsx";
 
 
-type Variant = "primary" | "secondary" | "kakao" | "login" | "text";
+type Variant = "primary" | "secondary" | "kakao" | "login" | "signup" | "text";
 type FontSize = "xs" | "sm" | "md" | "lg" | "xl";
 type PaddingSize = "xs" | "sm" | "md" | "lg" | "xl";
 type Width = "full" | "fit" | "fixed";
@@ -62,7 +63,7 @@ const Button = ({
 
   const widthStyle =
     width === "full"
-      ? "w-full"
+      ? "w-[350px]"
       : width === "fit"
       ? "w-fit"
       : fixedWidths[size];
@@ -88,6 +89,8 @@ const Button = ({
       : "bg-[#FEE500] text-black hover:bg-[#F1F4FF] active:bg-[#F1F4FF]",
     login:
       "bg-white text-[#6282E1] hover:bg-[#F1F4FF] active:bg-white",
+    signup:
+      "bg-white text-[#6282E1] border-1 border-[#6282E1] rounded-xl hover:bg-[#E6EDFF] active:bg-white",
     text: disabled
       ? "text-gray-300"
       : "hover:text-gray-200 hover:font-medium transition-all duration-200",
