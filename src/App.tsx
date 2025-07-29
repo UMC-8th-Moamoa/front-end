@@ -41,33 +41,6 @@ import PaymentMethodPage from "./pages/Purchase/PaymentMethodPage";
 function App() {
   return (
     <Router>
-
-      <Routes>
-        <Route path="/" element={<HomePage />} /> 
-        <Route path="/wishlist" element={<WishListPage />} /> 
-        <Route path="/wishlist-register" element={<WishListRegisterPage />} />
-        <Route path="/wishlist/register" element={<WishListRegisterPage />} />
-        <Route path="/wishlist/register/complete" element={<WishListRegisterCompletePage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/participation" element={<ParticipationPage />} />
-        <Route path="/vote-wish" element={<VoteWishPage />} />
-        <Route path="/moa-collected" element={<MoaCollectedPage />} />
-        <Route path="/pick-gift" element={<PickGiftPage />} />
-        <Route path="/input-moa-money" element={<InputMoaMoneyPage />} />
-        <Route path="/before-transfer" element={<BeforeTransferPage />} />
-        <Route path="/receive-complete" element={<ReceiveCompletePage />} />
-        <Route path="/remain-money-select" element={<RemainMoneySelectPage />} />
-        <Route path="/donation-select" element={<DonationSelectPage />} />
-        <Route path="/donation-complete-goodneighbors" element={<DonationToGoodneighborsPage />} />
-        <Route path="/convert-to-mong" element={<ConvertToMongPage />} />
-        <Route path="/convert-to-mong-complete" element={<ConvertToMongCompletePage />} />
-        <Route path="/return-to-friend" element={<ReturnToFriendPage/>} />
-        <Route path="/return-to-friend/return-to-friend-complete" element={<ReturnToFriendCompletePage />} />
-        <Route path="/receive-balance" element={<ReceiveBalancePage />} />
-        <Route path="/gift-certification" element={<GiftCertificationPage />} />
-        <Route path="/alarm" element={<AlarmPage />} />
-      </Routes>
-
       <Layout>
         <Routes>
           {/* 로그인 및 회원가입 */}
