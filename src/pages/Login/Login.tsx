@@ -1,7 +1,13 @@
 import { useState } from "react";
+<<<<<<< HEAD:src/pages/Login.tsx
 import InputBox from '../components/common/InputBox';
 import Button from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
+=======
+import InputBox from '../../components/common/InputBox';
+import Button from '../../components/common/Button';
+import Modal from '../../components/common/Modal';
+>>>>>>> feat/shopping:src/pages/Login/Login.tsx
 import KakaoIcon from '../assets/Kakao.svg';
 import Logo from '../assets/Logo_white.svg';
 import moa from '../assets/moa_character.svg';

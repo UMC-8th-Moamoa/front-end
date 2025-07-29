@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 
 // 로그인/회원가입 관련 페이지
-import Login from "./pages/Login";
+import Login from "./pages/Login/Login";
 import FindIdPage from "./pages/FindIdPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import SignUpPage from "./pages/SignUpPage";
@@ -33,6 +33,9 @@ import ReturnToFriendPage from "./pages/Home/MoaMoney/ReturnToFriendPage";
 import ReturnToFriendCompletePage from "./pages/Home/MoaMoney/ReturnToFriendCompletePage";
 import ReceiveBalancePage from "./pages/Home/MoaMoney/ReceiveBalancePage";
 import GiftCertificationPage from "./pages/Home/GiftCertificationPage";
+import ShoppingList from "./pages/Shopping/ShoppingList";
+import PurchasePage from "./pages/Purchase/PurchasePage";
+import PaymentMethodPage from "./pages/Purchase/PaymentMethodPage";
 
 function App() {
   return (
@@ -48,8 +51,8 @@ function App() {
           <Route path="/signup/birthday" element={<SignupBirthdayPage />} />
           <Route path="/signup/success" element={<SignupSuccessPage />} />
 
-          {/* 홈 및 기타 기능 페이지 */}
-          <Route path="/home" element={<HomePage />} />
+          {/* 홈 및 기능 관련 */}
+          <Route path="/" element={<HomePage />} />
           <Route path="/wishlist" element={<WishListPage />} />
           <Route path="/wishlist-register" element={<WishListRegisterPage />} />
           <Route path="/wishlist/register" element={<WishListRegisterPage />} />
@@ -72,6 +75,11 @@ function App() {
           <Route path="/return-to-friend/return-to-friend-complete" element={<ReturnToFriendCompletePage />} />
           <Route path="/receive-balance" element={<ReceiveBalancePage />} />
           <Route path="/gift-certification" element={<GiftCertificationPage />} />
+
+          {/* 쇼핑 및 결제 */}
+          <Route path="/shopping" element={<ShoppingList />} />
+          <Route path="/purchase" element={<PurchasePage />} />
+          <Route path="/purchase/payment" element={<PaymentMethodPage />} />
         </Routes>
       </Layout>
     </Router>
