@@ -3,8 +3,8 @@ import EnvelopeIcon from "/assets/Envelope.svg";
 
 interface FriendLetterItemProps {
   type: string;
-  date: string; // yyyy-mm-dd 형식
-  hasWrittenLetter: boolean; // 편지 작성 여부
+  date: string; 
+  hasWrittenLetter: boolean; 
 }
 
 const FriendLetterItem = ({ type, date, hasWrittenLetter }: FriendLetterItemProps) => {

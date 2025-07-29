@@ -57,7 +57,7 @@ const Calendar = () => {
         >
           <div
             className={`flex items-center justify-center ${
-              isToday ? 'bg-[#97B1FF] text-white' : 'text-[#0F2552]'
+              isToday ? 'bg-black text-white' : 'text-[#0F2552]'
             } ${isToday ? 'w-6 h-6 text-xs rounded-full' : ''}`}
           >
             {format(cloneDay, 'd')}

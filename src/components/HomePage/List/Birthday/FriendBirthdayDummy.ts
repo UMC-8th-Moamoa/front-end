@@ -1,20 +1,20 @@
 export const FriendBirthdayDummy = [
   {
-    name: "주니",
+    name: "지니",
     birthday: "2025-06-21",
     image: "/assets/profile.svg",
-    hasWrittenLetter: false, // 아직 작성 안함
+    hasWrittenLetter: false, 
   },
   {
-    name: "지니",
-    birthday: "2025-07-26",
+    name: "골드",
+    birthday: "2025-07-31",
     image: "/assets/profile.svg",
-    hasWrittenLetter: true, // 작성함
+    hasWrittenLetter: true, 
   },
   {
     name: "주디",
     birthday: "2025-01-15",
     image: "/assets/profile.svg",
-    hasWrittenLetter: true, // 작성함
+    hasWrittenLetter: true,
   },
 ];
