@@ -1,17 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import BackButton from "../common/BackButton";
 import CheckIcon from "../../assets/check.svg";
+import CheckGrayIcon from '../../assets/Check_gray.svg';
 
-interface Props {
+interface LetterHeaderProps {
   onSave: () => void;
-  
+  letterTextLength: number;
 }
 
-export default function LetterHeader({ onSave }: Props) {
+export default function LetterHeader({ onSave, letterTextLength }: LetterHeaderProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="flex items-center justify-between px-4 pt-[20px] pb-[12px] relative">
+<div className="relative w-[350px] h-[52px] mx-auto flex items-center justify-between px-4 pt-[20px]">
       {/* 뒤로가기 버튼 */}
       <BackButton />
 
@@ -23,14 +24,19 @@ export default function LetterHeader({ onSave }: Props) {
       {/* 체크 아이콘 */}
       <button
         onClick={() => {
-          onSave();
-          navigate("/moaletter/letter-saved");
+          if (letterTextLength > 0) {
+            onSave();
+            navigate("/moaletter/letter-saved");
+          }
         }}
-        className="bg-transparent border-none p-0 m-0"  
+        className="bg-transparent border-none p-0 m-0"
       >
-        <img src={CheckIcon} alt="check" className="w-[32px] h-[32px]" />
+        <img
+          src={letterTextLength > 0 ? CheckIcon : CheckGrayIcon}
+          alt="저장"
+          className="w-[32px] h-[32px]"
+        />
       </button>
-
     </div>
   );
 }

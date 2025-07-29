@@ -5,7 +5,7 @@ interface ItemCardProps {
 
 export default function ItemCard({ imageSrc, label }: ItemCardProps) {
   return (
-<div className="flex flex-col items-start w-[170px] p-[8px] pt-[8px] pb-[13px] gap-[11px] rounded-[20px] bg-white shadow-md box-border">
+    <div className="flex flex-col items-start w-[170px] p-[8px] pb-[13px] gap-[1px] rounded-[20px] bg-white shadow-[0_2px_4px_rgba(0,0,0,0.1)] shrink-0 box-border">
       <div className="w-[154px] h-[119px] rounded-[14px] bg-[#E1E1E1] overflow-hidden">
         {imageSrc ? (
           <img src={imageSrc} alt={label} className="w-full h-full object-cover" />

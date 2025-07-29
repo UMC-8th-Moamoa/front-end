@@ -30,31 +30,40 @@ export default function WriteLetterPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-[393px] w-full mx-auto bg-white font-pretendard overflow-hidden">
+<div className="flex flex-col h-screen w-full max-w-[393px] mx-auto bg-white font-pretendard overflow-x-hidden">
       {/* 상단 헤더 */}
-      <LetterHeader
-        onSave={() => {
-          localStorage.setItem("moa_letter", letterText);
-          navigate("/moaletter/letter-saved");
-        }}
-      />
+<div className="sticky top-0 z-30 bg-white">
+  <LetterHeader
+    onSave={() => {
+      localStorage.setItem("moa_letter", letterText);
+      navigate("/moaletter/letter-saved");
+    }}
+    letterTextLength={letterText.length}
+  />
+</div>
+
+
+
+
+
 
 {/* 탭 메뉴 */}
-<div className="flex flex-col items-center mt-[30px] relative w-full">
+<div className="flex flex-col items-center  relative w-full">
   <div className="flex justify-center gap-[90px] w-[350px] z-10">
     <button
       onClick={() => {
         setActiveTab("letter");
         setActiveTool("none");
       }}
-      className="w-[87px] pb-[10px] border-none bg-transparent"
+      className="w-[87px] pb-[0px] border-none bg-transparent"
     >
     <span
       className={`
         text-center font-pretendard text-[16px] font-semibold
         ${activeTab === "letter" ? "text-[#6282E1]" : "text-[#C7D5FF]"}
       `}
-    >
+    style={{ fontWeight: 600 }}
+>
         편지지
       </span>
     </button>
@@ -71,8 +80,9 @@ export default function WriteLetterPage() {
         text-center font-pretendard text-[16px] font-semibold
         ${activeTab === "envelope" ? "text-[#6282E1]" : "text-[#C7D5FF]"}
       `}
-    >
-        편지봉투
+    style={{ fontWeight: 600 }}
+>
+        우표
       </span>
     </button>
   </div>
@@ -91,7 +101,7 @@ export default function WriteLetterPage() {
 
 
       {/* 본문 내용 */}
-      <div className="flex-1 overflow-y-auto w-full">
+<div className="flex-1 w-full">
         {activeTab === "letter" ? (
           <LetterContent
             letterText={letterText}
@@ -106,7 +116,7 @@ export default function WriteLetterPage() {
 
       {/* 툴바: 입력창 아래에 고정 + 중앙 정렬 */}
       {activeTab === "letter" && (
-        <div className="z-30 px-4 pt-2 bg-white w-full overflow-x-hidden flex justify-center">
+<div className="z-30 bg-white w-full flex justify-center">
           <Toolbar
             activeTool={activeTool}
             onKeyboardClick={handleKeyboardClick}
@@ -120,7 +130,7 @@ export default function WriteLetterPage() {
       {activeTab === "letter" &&
         (activeTool === "font" || activeTool === "theme") && (
           <div className="z-20 bg-white px-4 pb-6 shadow-inner w-full overflow-x-hidden">
-            <div className="max-h-[250px]">
+            <div className="max-h-[336px]">
               {activeTool === "font" && <FontItemList />}
               {activeTool === "theme" && <LetterThemeList />}
             </div>

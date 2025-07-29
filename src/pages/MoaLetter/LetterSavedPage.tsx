@@ -14,7 +14,7 @@ export default function LetterSavedPage() {
       </div>
 
       {/* 본문 전체 내용 */}
-      <div className="flex flex-col w-full pt-[82px] px-[20px]">
+<div className="flex flex-col pt-[82px] w-[350px]">
         {/* 디폴트 이미지 */}
         <div className="w-[349px] h-[337px] rounded-[20px] bg-[#F2F2F2] flex justify-center items-center overflow-hidden mb-[29px]">
           <img
@@ -36,14 +36,17 @@ export default function LetterSavedPage() {
         </p>
 
         {/* 확인 버튼 */}
-        <Button
-          size="large"
-          width="fixed"
-          onClick={() => navigate("/home")}
-          className="w-[350px] h-[50px] bg-[#6282E1] text-[#FFF] text-[20px] font-bold rounded-[10px] border-none shadow-none focus:outline-none"
-        >
-          확인
-        </Button>
+<Button
+  size="large"
+  width="fixed"
+  onClick={() => navigate("/home")}
+  className="w-[350px] h-[50px] bg-[#6282E1] text-[#FFF] text-[20px] rounded-[10px] border-none shadow-none focus:outline-none"
+>
+  <span style={{ fontWeight: 700 }}>확인</span>
+</Button>
+
+
+
       </div>
     </div>
   );

@@ -2,72 +2,172 @@ import { useNavigate, useLocation } from "react-router-dom";
 import ItemCard from "./ItemCard";
 import Frame from "../../assets/Frame.svg";
 import DefaultImage from "../../assets/default.svg";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import Cropper from "react-easy-crop";
+import TestImage from '../../assets/Test.png';
+
+type Area = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 export default function EnvelopeContent() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null); // 현재 렌더링에 쓰일 최종 이미지
+  const [croppedImage, setCroppedImage] = useState<string | null>(null);   // 크롭 임시 저장 이미지
+  const [isCropping, setIsCropping] = useState(true);                      // 크롭 중 여부
 
-  // location.state에서 전달된 이미지 URL 받기
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (location.state && location.state.imageUrl) {
-      setSelectedImage(location.state.imageUrl);
-    }
-  }, [location.state]);
+  const createImage = (url: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = url;
+    img.onload = () => resolve(img);
+    img.onerror = (e) => reject(e);
+  });
 
-  return (
-    <div className="flex flex-col items-center pb-[100px]">
-      {/* 상단 원형 이미지 박스 */}
-      <div className="w-full mt-6 rounded-[24px] bg-gray-200 flex justify-center items-center aspect-square overflow-hidden">
-        <img
-          src={selectedImage || DefaultImage}
-          alt="선택된 이미지"
-          className="w-[350px] h-[347px] object-cover"
-        />
-      </div>
+  const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<string> => {
+  const image = await createImage(imageSrc);
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("No context");
 
-{/* 사진 불러오기 버튼 */}
-<div className="w-full max-w-[350px] bg-white rounded-[12px] mt-4">
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
+
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height
+  );
+
+  return canvas.toDataURL("image/jpeg");
+};
+ const onCropComplete = useCallback((_: Area, croppedArea: Area) => {
+  setCroppedAreaPixels(croppedArea);
+}, []);
+
+
+const handleCropDone = async () => {
+  if (!selectedImage || !croppedAreaPixels) return;
+  const cropped = await getCroppedImg(selectedImage, croppedAreaPixels);
+  setCroppedImage(cropped);  //  selectedImage 변경 
+  setIsCropping(false); // 크롭 모드 종료
+};
+
+
+useEffect(() => {
+  if (location.state && location.state.imageUrl) {
+    setSelectedImage(location.state.imageUrl);
+    setIsCropping(true); // 사진 선택한 경우만 크롭 모드로
+  } else {
+    setSelectedImage(null); // 기본 이미지만 보여줌
+    setIsCropping(false);   // Cropper 안 뜨게
+  }
+}, [location.state]);
+
+
+
+
+
+ return (
+  <div className="flex flex-col items-center w-full">
+{/* 크롭 이미지 영역 */}
+<div
+  className="mt-[22px] w-[350px] h-[347px] mt-6 rounded-[20px] bg-[#F2F2F2] flex justify-center items-center overflow-hidden relative"
+  style={{
+    borderRadius: "20px",
+    background: "#F2F2F2"
+  }}
+>  {selectedImage ? (
+    isCropping ? (
+      <>
+<Cropper
+  image={selectedImage}
+  crop={crop}
+  zoom={zoom}
+  aspect={1}
+  cropShape="rect"
+  showGrid={false}
+  onCropChange={setCrop}
+  onZoomChange={setZoom}
+  onCropComplete={onCropComplete}
+  cropSize={{ width: 200, height: 200 }}
+  classes={{
+    containerClassName: "z-0" 
+  }}
+/>
+
+      </>
+    ) : (
+      <img
+        src={selectedImage}
+        alt="선택된 이미지"
+        className="w-[350px] h-[347px] object-cover"
+      />
+    )
+  ) : (
+    <img
+      src={DefaultImage}
+      alt="기본 이미지"
+      className="w-[350px] h-[347px] object-contain opacity-60"
+    />
+  )}
+</div>
+
+
+    {/* 사진 불러오기 버튼 */}
+<div className="w-full max-w-[350px] bg-white rounded-[12px] mt-[14px]">
   <button
     onClick={() => navigate("/moaletter/select-photo")}
-    disabled={false}
-    className="flex items-center justify-center 
-               bg-white !bg-white  // ✅ 강제 흰색
-               text-[#B6B6B6] 
-               border border-[#B7B7B7] 
-               rounded-[12px] 
-               w-full h-[50px] px-4 
-               shadow-none"
-    style={{
-      backgroundColor: "#FFFFFF", 
-    }}
+    className="
+      flex items-center justify-center 
+      bg-white !bg-white
+      text-[#B6B6B6] 
+      border border-[#B7B7B7] 
+      rounded-[12px] 
+      w-full h-[50px] px-4 shadow-none
+    "
+    style={{ backgroundColor: "#FFFFFF" }}
   >
     <img
       src={Frame}
       alt="사진 불러오기"
-      className="w-[24px] h-[24px] mr-[15px] shrink-0 bg-transparent"
+      className="w-[24px] h-[24px] mr-[15px] shrink-0"
     />
-    <span className="font-pretendard text-[16px] font-semibold whitespace-nowrap bg-transparent">
+    <span className="font-pretendard text-[16px] font-semibold whitespace-nowrap">
       사진 불러오기
     </span>
   </button>
 </div>
 
 
-      {/* 아이템 박스 배열 */}
-      <div className="flex justify-center mt-5">
-        <div className="flex flex-wrap justify-center gap-x-[16px] gap-y-[20px] px-4 mt-2 overflow-x-hidden">
-          {[...Array(6)].map((_, i) => (
-            <ItemCard
-              key={i}
-              imageSrc={""} // 빈 string → 기본 회색 박스만
-              label={`아이템명`}
-            />
-          ))}
-        </div>
+    {/* 아이템 리스트 */}
+    <div
+      className="mt-[8px] w-full max-w-[390px] px-5 overflow-y-scroll"
+      style={{ height: "calc(100vh - 540px)" }}
+    >
+      <div className="flex flex-wrap justify-center gap-x-[10px] gap-y-[10px] mt-2 pb-[80px]">
+        {[...Array(20)].map((_, i) => (
+          <ItemCard key={i} imageSrc={""} label={`아이템명`} />
+        ))}
       </div>
     </div>
-  );
+  </div>
+);
+
+
+
 }

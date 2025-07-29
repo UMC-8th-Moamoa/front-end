@@ -21,7 +21,7 @@ export default function LetterContent({
   }, [activeTool]);
 
   return (
-    <div className="relative mt-[14px] w-full max-w-[360px] mx-auto">
+    <div className="relative mt-[22px] w-full max-w-[360px] mx-auto">
       {/* 입력창 + 카운트 텍스트 같이 감싸는 div */}
       <div className="relative w-full h-[369px] rounded-[20px] bg-[#F2F2F2]">
         <textarea
