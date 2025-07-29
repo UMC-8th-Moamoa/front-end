@@ -1,8 +1,10 @@
+<<<<<<< HEAD
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "tailwindcss";
 
 /* src/fonts/fonts.css 또는 src/index.css 상단에 */
 
@@ -40,3 +42,13 @@ textarea::placeholder {
   color: #999;
 }
 
+
+
+/* 스크롤바 숨기기 */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}

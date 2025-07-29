@@ -1,26 +1,41 @@
+import React from "react";
+
 interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   type?: "text" | "password" | "email" | "number" | "search";
   className?: string;
-  hasBorder?: boolean; 
+  hasBorder?: boolean;
+  error?: string; //오류 메시지 추가
 }
 
 const InputBox = ({
   type = "text",
   className = "",
   hasBorder = true,
+  error,
   ...props
 }: InputBoxProps) => {
+
+  const borderClass = hasBorder
+    ? error
+      ? "border border-[#E20938]"
+      : "border border-[#97B1FF]"
+    : error
+    ? "border border-[#E20938]"
+    : "appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none";
+
   return (
-    <input
-      type={type}
-      className={`w-[350px] h-[50px] px-4 py-2 rounded-[12px] text-sm placeholder-gray-400
-        ${hasBorder
-          ? "border border-red-500"
-          : "appearance-none outline-none border-none"} 
-        ${className}`}
-      {...props}
-    />
+    <div className="relative w-[350px]">
+      <input
+        type={type}
+        className={`w-full h-[50px] px-4 py-2 rounded-[12px] text-sm 
+          text-[#1F1F1F] placeholder:text-[#97B1FF] bg-[#E7EDFF]
+          ${borderClass} 
+          ${className}`}
+        {...props}
+      />
+    </div>
   );
 };
 
 export default InputBox;
+

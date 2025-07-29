@@ -4,7 +4,12 @@ const TopBar = () => {
   const navigate = useNavigate(); 
 
   return (
-    <div className="w-[393px] h-14 relative flex items-center justify-center px-4">
+    <div className="w-[393px] h-14 relative flex items-center justify-center px-4 ">
+      {/* 좌측 알람 아이콘 */}
+      <div className="absolute left-8 cursor-pointer">
+        <img src="/assets/Alarm.svg" alt="알림" className="w-[20px] h-[20px] mt-[2px] select-none" />
+      </div>
+
       {/* 중앙 로고 */}
       <img
         src="/assets/MoamoaLogo.svg"
@@ -15,9 +20,9 @@ const TopBar = () => {
       {/* 우측 돋보기 아이콘 */}
       <div
         onClick={() => navigate("/search")} 
-        className="absolute right-4 cursor-pointer"
+        className="absolute right-8 cursor-pointer"
       >
-        <img src="/assets/Search.svg" alt="검색" className="w-5 h-5 select-none" />
+        <img src="/assets/Search.svg" alt="검색" className="w-[21px] h-[21px] select-none" />
       </div>
     </div>
   );

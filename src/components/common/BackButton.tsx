@@ -1,4 +1,4 @@
-// src/components/common/BackButton.tsx
+
 import { useNavigate } from 'react-router-dom';
 import BackIcon from '../../assets/backbutton.svg';
 
@@ -7,7 +7,7 @@ function BackButton() {
 
   return (
     <button
-      onClick={() => navigate(-1)}
+      onClick={() => {navigate(-1)}}
        style={{
         background: 'none',
         border: 'none',
@@ -28,3 +28,4 @@ function BackButton() {
 }
 
 export default BackButton;
+

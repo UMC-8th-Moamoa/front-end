@@ -1,9 +1,13 @@
 import HomeIcon from '../../assets/Home.svg';
+import HomeIconActive from '../../assets/Home_color.svg';
 import MailIcon from '../../assets/Mail.svg';
 import MailIconActive from '../../assets/Mail_color.svg';
 import ShoppingBagIcon from '../../assets/Shopping_bag.svg';
+import ShoppingBagIconActive from '../../assets/Shopping_bag_color.svg';
 import UserIcon from '../../assets/User.svg';
+import UserIconActive from '../../assets/User_color.svg';
 import HeartIcon from '../../assets/Heart.svg';
+import HeartIconActive from '../../assets/Heart_color.svg';
 
 // 각 메뉴의 키 타입을 정의함
 export type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
@@ -14,14 +18,16 @@ interface BottomNavigationProps {
 }
 
 function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
-  // 하단바에 표시할 메뉴 아이콘 목록 정의 (letter는 선택된 아이콘 따로 있음)
+
+  // 하단바에 표시할 메뉴 아이콘 목록 정의 
   const menuList = [
-    { key: 'shopping', icon: ShoppingBagIcon },
-    { key: 'heart', icon: HeartIcon },
-    { key: 'home', icon: HomeIcon },
+    { key: 'shopping', icon: ShoppingBagIcon, activeIcon: ShoppingBagIconActive },
+    { key: 'heart', icon: HeartIcon, activeIcon: HeartIconActive },
+    { key: 'home', icon: HomeIcon, activeIcon: HomeIconActive },
     { key: 'letter', icon: MailIcon, activeIcon: MailIconActive },
-    { key: 'mypage', icon: UserIcon },
+    { key: 'mypage', icon: UserIcon, activeIcon: UserIconActive },
   ];
+
 
   return (
     <div
