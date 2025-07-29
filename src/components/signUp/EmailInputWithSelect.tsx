@@ -86,7 +86,7 @@ const EmailInputWithSelect = ({
 
       {/* 본인인증 버튼 */}
       <Button
-        variant="primary"
+        variant="signup"
         size="md"
         width="fit"
         className="px-4 py-2 ml-2 whitespace-nowrap h-[50px]"
