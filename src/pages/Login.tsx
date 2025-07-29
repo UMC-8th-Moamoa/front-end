@@ -5,6 +5,7 @@ import Modal from '../components/common/Modal';
 import KakaoIcon from '../assets/Kakao.svg';
 import Logo from '../assets/Logo_white.svg';
 import moa from '../assets/moa_character.svg';
+
 import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
@@ -103,6 +104,7 @@ function Login() {
           variant="kakao"
           size="lg"
           fontWeight="medium"
+          fontSize='lg'
           width="full"
           className="flex items-center justify-center gap-2"
         >

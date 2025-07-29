@@ -3,32 +3,26 @@ import React from "react";
 interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   type?: "text" | "password" | "email" | "number" | "search";
   className?: string;
-  error?: string; 
+  hasBorder?: boolean;
 }
 
-const InputBox = ({ type = "text", className = "", error, ...props }: InputBoxProps) => {
+const InputBox = ({
+  type = "text",
+  className = "",
+  hasBorder = true,
+  ...props
+}: InputBoxProps) => {
   return (
-    <div className="w-full max-w-[350px] mx-auto">
-      <input
-        type={type}
-        className={`
-          w-full px-4 py-3
-          rounded-lg
-          bg-[#EAEAEA]
-          text-black text-sm
-          focus:outline-none
-          ${error ? 'border border-red-500' : ''}
-          ${className}
-        `}
-        {...props}
-      />
-      {error && (
-        <p className="mt-1 text-sm text-red-500 pl-1">
-          • {error}
-        </p>
-      )}
-    </div>
+    <input
+      type={type}
+      className={`w-[350px] h-[50px] px-4 py-2 rounded-[12px] text-sm 
+        text-[#1F1F1F] placeholder:text-[#97B1FF] bg-[#E7EDFF]
+        ${hasBorder ? "border border-[#97B1FF]" : "appearance-none outline-none border-none"} 
+        ${className}`}
+      {...props}
+    />
   );
 };
 
 export default InputBox;
+
