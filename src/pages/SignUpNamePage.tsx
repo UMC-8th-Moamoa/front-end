@@ -36,7 +36,8 @@ const SignupNamePage = () => {
         placeholder="본명을 입력해 주세요"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="bg-[#E7EDFF] text-[#97B1FF] mb-3"
+        hasBorder={false}
+        className="bg-[#E7EDFF] text-[#1F1F1F] mb-3"
       />
 
       {/* 확인 버튼 */}

@@ -19,8 +19,8 @@ function SignUpPage() {
   const [visibleConfirm, setVisibleConfirm] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [emailDomain, setEmailDomain] = useState("");
+  const [emailId, setEmail] = useState("");
+  const [emailDomain, setEmailDomain] = useState("@gmail.com");
   const [authCode, setAuthCode] = useState("");
   const [showAuthInput, setShowAuthInput] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -42,8 +42,7 @@ function SignUpPage() {
       setErrors({ confirmPw: "비밀번호가 일치하지 않습니다." });
       return;
     }
-    // 그 외 로직
-    navigate("/next-step");
+    navigate("/signup/name");
   };
 
 
@@ -79,37 +78,50 @@ const [terms, setTerms] = useState({
             />
 
         {/* 비밀번호 */}
-        <div className="relative mb-3 w-full max-w-[350px] mx-auto">
-        <InputBox
-            type={visible ? 'text' : 'password'}
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            placeholder="비밀번호"
-            error={
-                pw && pw.length < 8
-                ? "숫자, 문자, 특수문자 포함 8자 이상"
-                : ""
-            }
-            className="pr-10"
-        />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <VisibilityToggle onToggle={setVisible} />
+        <div className="mb-3 w-full max-w-[350px] mx-auto">
+          <div className="relative flex items-center">
+            <InputBox
+                    type={visible ? 'text' : 'password'}
+                    value={pw}
+                    onChange={(e) => setPw(e.target.value)}
+                    placeholder="비밀번호"
+                    hasBorder={false}
+                    error={
+                        pw && pw.length < 8
+                        ? "숫자, 문자, 특수문자 포함 8자 이상"
+                        : ""
+                    }
+                    className="pr-10"
+                />
+            <div className="absolute right-3">
+              <VisibilityToggle onToggle={setVisible} />
+            </div>
+          </div>
+          {pw && pw.length < 8 && (
+            <p className="mt-1 text-sm text-[#E20938] pl-1">• 숫자, 문자, 특수문자 포함 8자 이상</p>
+          )}
         </div>
-        </div>
+        
 
         {/* 비밀번호 확인 */}
-        <div className="relative mb-3 w-full max-w-[350px] mx-auto">
-        <InputBox
-            type={visibleConfirm ? 'text' : 'password'}
-            value={confirmPw}
-            onChange={(e) => setConfirmPw(e.target.value)}
-            placeholder="비밀번호 확인"
-            error={confirmPw && pw !== confirmPw ? '비밀번호가 일치하지 않습니다.' : ''}
-            className="pr-10"
-        />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <VisibilityToggle onToggle={setVisibleConfirm} />
-        </div>
+        <div className="mb-3 w-full max-w-[350px] mx-auto">
+          <div className="relative flex items-center">
+            <InputBox
+              type={visibleConfirm ? 'text' : 'password'}
+              value={confirmPw}
+              onChange={(e) => setConfirmPw(e.target.value)}
+              placeholder="비밀번호 확인"
+              hasBorder={false}
+              error={confirmPw && pw !== confirmPw ? '비밀번호가 일치하지 않습니다.' : ''}
+              className="pr-10"
+            />
+            <div className="absolute right-3">
+              <VisibilityToggle onToggle={setVisibleConfirm} />
+            </div>
+          </div>
+          {confirmPw && pw !== confirmPw && (
+            <p className="mt-1 text-sm text-[#E20938] pl-1">• 비밀번호가 일치하지 않습니다.</p>
+          )}
         </div>
 
         {/* 전화번호 */}
@@ -118,12 +130,13 @@ const [terms, setTerms] = useState({
           onChange={(e) => setPhone(e.target.value)}
           placeholder="전화번호(-없이 입력)"
           className="mb-3"
+          hasBorder={false}
         />
 
         {/* 이메일 + 인증 */}
         <EmailInputWithSelect
-            email={email}
-            onChangeEmail={(e) => setEmail(e.target.value)}
+            emailId={emailId}
+            onChangeEmailId={(e) => setEmail(e.target.value)}
             emailDomain={emailDomain}
             onChangeEmailDomain={(e) => setEmailDomain(e.target.value)}
             onClickVerify={() => {

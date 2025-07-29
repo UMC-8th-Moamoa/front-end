@@ -36,7 +36,9 @@ const InputWithButton = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`flex-1 bg-[#E7EDFF] ${error ? 'border border-red-500' : ''}`}
+          hasBorder={false}
+          error={error}
+          className={`flex-1 ${error ? 'border border-[#E20938]' : ''}`}
         />
         <Button
           onClick={onClickButton}
@@ -44,12 +46,13 @@ const InputWithButton = ({
           size="md"
           width="fit"
           disabled={disabled}
+          className="h-[50px]"
         >
           {buttonText}
         </Button>
       </div>
       {error && (
-        <p className="mt-1 text-sm text-red-500 pl-1">• {error}</p>
+        <p className="mt-1 text-sm text-[#E20938] pl-1">• {error}</p>
       )}
     </div>
   );
