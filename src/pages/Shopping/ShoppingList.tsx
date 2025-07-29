@@ -1,5 +1,6 @@
 // ShoppingList.tsx
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ShoppingTopBar from '../../components/Shopping/ShoppingTopBar';
 import BottomNavigation from '../../components/common/BottomNavigation';
 import { TopMenu } from '../../components/Shopping/TopMenu';
@@ -10,7 +11,33 @@ import ItemCardDetail from '../../components/Shopping/ItemCardDetail';
 import { Modal } from '../../components/common/Modal';
 import toast, { Toaster } from 'react-hot-toast';
 
+type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
+
 export default function ShoppingList() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // 경로에 따라 active 메뉴 자동 설정
+  const pathToMenuMap: Record<string, MenuType> = {
+    '/shopping': 'shopping',
+    '/wishlist': 'heart',
+    '/home': 'home',
+    '/messages': 'letter',
+    '/mypage': 'mypage',
+  };
+  const activeMenu: MenuType = pathToMenuMap[location.pathname] || 'shopping';
+
+  const handleNavigate = (menu: MenuType) => {
+    const menuToPathMap: Record<MenuType, string> = {
+      shopping: '/shopping',
+      heart: '/wishlist',
+      home: '/home',
+      letter: '/messages',
+      mypage: '/mypage',
+    };
+    navigate(menuToPathMap[menu]);
+  };
+
   const userMC = 20; // 예시값
   const [selectedTab, setSelectedTab] = useState('폰트');
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
@@ -36,6 +63,7 @@ export default function ShoppingList() {
           <button
             onClick={() => {
               toast.dismiss(t.id);
+              navigate('/purchase');
             }}
             className="text-[#6282E1] border border-[#6282E1] w-full rounded-lg px-4 py-2 text-sm font-base hover:bg-[#F1F4FF] active:border-2"
           >
@@ -143,7 +171,7 @@ export default function ShoppingList() {
         </Modal>
 
         <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 bg-white w-full max-w-[393px]">
-          <BottomNavigation />
+          <BottomNavigation active={activeMenu} onNavigate={handleNavigate} />
         </footer>
       </div>
       <Toaster position="top-center" reverseOrder={false} />
