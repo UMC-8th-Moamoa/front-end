@@ -9,7 +9,7 @@ interface VoteWishListProps {
 
 const VoteWishList = ({ selectedId, setSelectedId }: VoteWishListProps) => {
   return (
-    <div className="w-[350px] h-[440px] overflow-y-auto overflow-x-hidden flex flex-col gap-2">
+    <div className="w-[350px] h-[580px] overflow-y-auto overflow-x-hidden flex flex-col gap-2">
       {recipientDummy.wishList.map((item, index) => (
         <VoteWishItem
           key={index}

@@ -1,18 +1,19 @@
-import { useState } from 'react';
-import { Modal } from '../../../common/Modal';
+import { useState } from "react";
+import { Modal } from "../../../common/Modal";
 import WhitePlus from "../../../../assets/WhitePlus.svg";
-
 
 interface PopularItemProps {
   imageUrl: string;
   title: string;
+  onConfirm: () => void;
 }
 
-const PopularItem = ({ imageUrl, title }: PopularItemProps) => {
+const PopularItem = ({ imageUrl, title, onConfirm }: PopularItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="min-w-[119px] mr-[16px]">
+    <div className="min-w-[119px] mr-[16px] relative">
+      {/* 썸네일 */}
       <div className="relative w-[119px] h-[119px] rounded-[16px] bg-gray-200 overflow-hidden">
         <img
           src={imageUrl}
@@ -31,9 +32,7 @@ const PopularItem = ({ imageUrl, title }: PopularItemProps) => {
       {/* 모달 */}
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <div className="w-[350px] h-[130px] bg-white rounded-[20px] flex flex-col items-center justify-center">
-          <p className="text-[18px] text-center mb-[16px]">
-            위시리스트에 추가하시겠습니까?
-          </p>
+          <p className="text-[18px] text-center mb-[16px]">위시리스트에 추가하시겠습니까?</p>
           <div className="flex space-x-[12px]">
             <button
               className="w-[132px] h-[39px] rounded-[12px] border border-[#6282E1] text-[16px] text-[#6282E1]"
@@ -41,7 +40,13 @@ const PopularItem = ({ imageUrl, title }: PopularItemProps) => {
             >
               취소
             </button>
-            <button className="w-[132px] h-[39px] rounded-[12px] bg-[#6282E1] text-[16px] text-white">
+            <button
+              className="w-[132px] h-[39px] rounded-[12px] bg-[#6282E1] text-[16px] text-white"
+              onClick={() => {
+                setIsOpen(false);
+                onConfirm(); // ✅ HomePage에 알림
+              }}
+            >
               확인
             </button>
           </div>

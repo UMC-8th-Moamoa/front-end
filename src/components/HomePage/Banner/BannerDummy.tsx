@@ -11,9 +11,8 @@ export const dummySubBanners: SubBannerProps[] = [
     variant: "default"
   },
   {
-    imageSrc: "/assets/Money.svg" ,
-    content: '채원님 모아에서\n 잔액이 돌아왔습니다',
-    variant: "highlight"
+    imageSrc: "/assets/GiftCertificationBanner.svg", // 너가 업로드한 배너 이미지
+    variant: "imageOnly", // ✅ 텍스트 제거를 위한 구분
   },
 ];
 

@@ -16,7 +16,7 @@ const RecipientBanner = () => {
   return (
     <div className="w-[350px] h-[152px] bg-white rounded-[20px] shadow-md flex items-center justify-center ml-[6px]">
       {/* 왼쪽 - 프로필 */}
-      <div className="flex flex-col mr-3 items-center justify-center w-[69px]">
+      <div className="flex flex-col items-center justify-center w-[69px] mr-5">
         {recipientDummy.profile ? (
           <img
             src={`/assets/${recipientDummy.profile}`}
@@ -35,7 +35,7 @@ const RecipientBanner = () => {
       </div>
 
       {/* 중앙 세로선 */}
-      <div className="w-px h-[102px] bg-[#D9D9D9] mx-8" />
+      <div className="w-px h-[102px] bg-[#D9D9D9] mx-5" />
 
       {/* 오른쪽 - 디데이 & 보탬 인원 */}
       <div className="flex flex-col items-center justify-center">

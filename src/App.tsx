@@ -7,7 +7,6 @@ import WishListRegisterCompletePage from "./pages/Wishlist/WishListCompletePage"
 import SearchPage from "./pages/Home/SearchPage";
 import ParticipationPage from "./pages/Home/ParticipationPage";
 import VoteWishPage from "./pages/Home/VoteWishPage";
-import RecommendWishPage from "./pages/Home/RecommendWishPage";
 import MoaCollectedPage from "./pages/Home/MoaCollectPage";
 import PickGiftPage from "./pages/Home/PickGiftPage";
 import InputMoaMoneyPage from "./pages/Home/MoaMoney/InputMoaMoneyPage";
@@ -36,7 +35,6 @@ function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/participation" element={<ParticipationPage />} />
         <Route path="/vote-wish" element={<VoteWishPage />} />
-        <Route path="/recommend-wish-list" element={<RecommendWishPage/>}/>
         <Route path="/moa-collected" element={<MoaCollectedPage />} />
         <Route path="/pick-gift" element={<PickGiftPage />} />
         <Route path="/input-moa-money" element={<InputMoaMoneyPage />} />

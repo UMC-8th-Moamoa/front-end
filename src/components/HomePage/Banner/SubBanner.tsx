@@ -1,8 +1,21 @@
 import type { SubBannerProps } from "../../../types/banner";
 import clsx from "clsx";
 
-const SubBanner = ({ imageSrc, content, buttonText, onClick, variant }: SubBannerProps) => {
+  const SubBanner = ({ imageSrc, content, buttonText, onClick, variant }: SubBannerProps) => {
   const isHighlight = variant === "highlight";
+  const isImageOnly = variant === "imageOnly"; // ✅ 새 타입 분기
+
+  if (isImageOnly) {
+    return (
+      <div className="w-[350px] h-[80px] rounded-[20px] overflow-hidden">
+        <img
+          src={imageSrc}
+          alt="배너"
+          className="w-full h-full object-cover rounded-[20px]"
+        />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -14,7 +27,6 @@ const SubBanner = ({ imageSrc, content, buttonText, onClick, variant }: SubBanne
       )}
     >
       <div className="flex items-center space-x-4">
-        {/* 아이콘 렌더링 */}
         {imageSrc === "user" ? (
           <div className="w-[57px] h-[57px] rounded-full bg-gray-300" />
         ) : (
