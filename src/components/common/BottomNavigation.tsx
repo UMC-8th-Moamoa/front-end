@@ -9,6 +9,7 @@ import UserIconActive from '../../assets/User_color.svg';
 import HeartIcon from '../../assets/Heart.svg';
 import HeartIconActive from '../../assets/Heart_color.svg';
 
+
 // 각 메뉴의 키 타입을 정의함
 export type MenuType = 'shopping' | 'heart' | 'home' | 'letter' | 'mypage';
 

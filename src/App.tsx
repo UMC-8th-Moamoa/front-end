@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
-import { Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import BottomNavigation, { type MenuType } from './components/common/BottomNavigation';
+import { useLocation } from 'react-router-dom';
 
 // 로그인/회원가입 관련 페이지
 import Login from "./pages/Login";
@@ -45,11 +45,63 @@ import AlbumGridPage from "./pages/MoaLetter/AlbumGridPage";
 import RollingPaperGridPage from "./pages/MoaLetter/RollingPaperPage";
 import ReceiptPage from "./pages/MoaLetter/ReceiptPage";
 
-function App() {
-  return (
-    <Router>
-      <Layout>
+// 마이페이지 관련 페이지
+import MyPage from './pages/MyPage/MyPage';
+import ProfileEditPage from './pages/MyPage/ProfileEditPage';
+import KeywordEditPage from './pages/MyPage/KeywordEditPage';
+import SettingsPage from './pages/MyPage/SettingsPage';
+import CustomerServicePage from './pages/MyPage/CustomerServicePage';
+import CustomerServiceWritePage from './pages/MyPage/CustomerServiceWritePage';
+import NoticePage from './pages/MyPage/NoticePage';
+import PurchaseHistoryPage from './pages/MyPage/PurchaseHistoryPage';
+import CustomerServiceDetailPage from './pages/MyPage/CustomerServiceDetailPage';
+import OtherUserFollowListPage from './pages/MyPage/OtherUserFollowListPage';
+import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage'; 
+import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
+
+
+function AppLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+const handleNavigate = (menu: MenuType) => {
+  switch (menu) {
+    case 'shopping':
+      navigate('/shopping');
+      break;
+    case 'heart':
+      navigate('/wishlist');
+      break;
+    case 'home':
+      navigate('/home');
+      break;
+    case 'letter':
+      navigate('/moaletter/write');
+      break;
+    case 'mypage':
+      navigate('/mypage');
+      break;
+    default:
+      break;
+  }
+};
+
+// 현재 경로에 따라 active 메뉴 키 결정
+const getActiveMenu = (): MenuType => {
+  if (location.pathname.startsWith('/wishlist')) return 'heart'; 
+  if (location.pathname.startsWith('/shopping')) return 'shopping';
+  if (location.pathname.startsWith('/moaletter')) return 'letter';
+  if (location.pathname.startsWith('/mypage')) return 'mypage';
+  return 'home';
+};
+
+
+return (
+    <div className="w-full flex flex-col items-center bg-[#FFF] h-screen">
+      <div className="w-[393px] pb-[70px]"> {/* 아래 네비 여백 확보 */}
         <Routes>
+          {/* 진입 시 home으로 리디렉션 */}
+          <Route path="/" element={<Navigate to="/home" />} />
+
           {/* 로그인 및 회원가입 */}
           <Route path="/login" element={<Login />} />
           <Route path="/find-id" element={<FindIdPage />} />
@@ -58,6 +110,22 @@ function App() {
           <Route path="/signup/name" element={<SignupNamePage />} />
           <Route path="/signup/birthday" element={<SignupBirthdayPage />} />
           <Route path="/signup/success" element={<SignupSuccessPage />} />
+
+          {/* 마이페이지 외부 */}
+          <Route path="/profile/edit" element={<ProfileEditPage />} />
+          <Route path="/keyword/edit" element={<KeywordEditPage />} />
+          <Route path="/user/:id" element={<OtherUserProfilePage />} />
+          <Route path="/user/:id/wishlist" element={<OtherUserWishlistPage />} />
+
+          {/* 마이페이지 내부 */}
+          <Route path="/mypage" element={<MyPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/customer-service" element={<CustomerServicePage />} />
+          <Route path="/customer-service/write" element={<CustomerServiceWritePage />} />
+          <Route path="/customer-service/detail" element={<CustomerServiceDetailPage />} />
+          <Route path="/notice" element={<NoticePage />} />
+          <Route path="/purchase-history" element={<PurchaseHistoryPage />} />
+          <Route path="/follow-list" element={<OtherUserFollowListPage />} />
 
           {/* 홈 및 기타 기능 페이지 */}
           <Route path="/home" element={<HomePage />} />
@@ -86,7 +154,6 @@ function App() {
 
          {/* 모아레터 페이지 */}
           <Route path="/moaletter/write" element={<WriteLetterPage />} />
-          <Route path="/" element={<Navigate to="/moaletter/write" />} />
           <Route path="/moaletter/letter-saved" element={<LetterSavedPage />} />
           <Route path="/moaletter/select-photo" element={<SelectPhotoPage />} />
           <Route path="/moaletter/preview" element={<LetterPreviewPage />} />
@@ -95,9 +162,23 @@ function App() {
           <Route path="/moaletter/rolling-paper" element={<RollingPaperGridPage />} />
           <Route path="/moaletter/receipt" element={<ReceiptPage />} />
         </Routes>
-      </Layout>
-    </Router>
+      </div>
+
+      {/*  항상 표시되는 하단 네비게이션 */}
+      <div className="mt-[1px] w-[393px] fixed bottom-0 z-50 bg-[#FFF]">
+<BottomNavigation
+  active={getActiveMenu()}
+  onNavigate={handleNavigate}
+/>
+      </div>
+    </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Router>
+      <AppLayout />
+    </Router>
+  );
+}
