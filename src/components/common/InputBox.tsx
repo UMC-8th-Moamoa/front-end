@@ -14,21 +14,25 @@ const InputBox = ({
   error,
   ...props
 }: InputBoxProps) => {
+
+  const borderClass = hasBorder
+    ? error
+      ? "border border-[#E20938]"
+      : "border border-[#97B1FF]"
+    : error
+    ? "border border-[#E20938]"
+    : "appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none";
+
   return (
     <div className="relative w-[350px]">
       <input
         type={type}
         className={`w-full h-[50px] px-4 py-2 rounded-[12px] text-sm 
           text-[#1F1F1F] placeholder:text-[#97B1FF] bg-[#E7EDFF]
-          ${hasBorder ? "border border-[#97B1FF]" : "appearance-none outline-none border-none"} 
+          ${borderClass} 
           ${className}`}
         {...props}
       />
-      {error && (
-        <p className="absolute top-full mt-1 text-xs text-[#E20938]">
-          {error}
-        </p>
-      )}
     </div>
   );
 };
