@@ -1,4 +1,7 @@
+// src/pages/Shopping/ShoppingList.tsx
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+
 import ShoppingTopBar from '../../components/Shopping/ShoppingTopBar';
 import BottomNavigation, { type MenuType } from '../../components/common/BottomNavigation';
 import { TopMenu } from '../../components/Shopping/TopMenu';
@@ -8,28 +11,49 @@ import { TabContent } from '../../components/Shopping/TabContent';
 import ItemCardDetail from '../../components/Shopping/ItemCardDetail';
 import { Modal } from '../../components/common/Modal';
 import toast, { Toaster } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 
 export default function ShoppingList() {
-  const userMC = 20; // 예시값
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState('폰트');
+  const location = useLocation();
+
+  // 경로 → 하단 네비 활성 탭 매핑
+  const pathToMenuMap: Record<string, MenuType> = {
+    '/shopping': 'shopping',
+    '/wishlist': 'heart',
+    '/home': 'home',
+    '/messages': 'letter',
+    '/mypage': 'mypage',
+  };
+  const activeMenu: MenuType = pathToMenuMap[location.pathname] || 'shopping';
+
+  const handleNavigate = (menu: MenuType) => {
+    const menuToPathMap: Record<MenuType, string> = {
+      shopping: '/shopping',
+      heart: '/wishlist',
+      home: '/home',
+      letter: '/messages',
+      mypage: '/mypage',
+    };
+    navigate(menuToPathMap[menu]);
+  };
+
+  const userMC = 20; // TODO: /api/points 연동해서 실제 MC로 대체
+
+  const [selectedTab, setSelectedTab] = useState<'폰트' | '편지지' | '우표' | '보관함'>('폰트');
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const bannerImages: Record<string, string> = {
+  const bannerImages: Record<'폰트' | '편지지' | '우표', string> = {
     폰트: '/banners/font-banner.png',
     편지지: '/banners/paper-banner.png',
     우표: '/banners/stamp-banner.png',
   };
 
   const handleBuy = (item: any) => {
-    if (userMC < item.price) {
+    if (userMC < (item.price ?? 0)) {
       toast.custom((t) => (
         <div
-          className={`${
-            t.visible ? 'animate-enter' : 'animate-leave'
-          } bg-white rounded-xl shadow-md px-6 py-4 w-[330px] text-center`}
+          className={`${t.visible ? 'animate-enter' : 'animate-leave'} bg-white rounded-xl shadow-md px-6 py-4 w-[330px] text-center`}
         >
           <p className="text-base font-base text-black mb-2">몽코인이 부족합니다</p>
           <button
@@ -58,47 +82,27 @@ export default function ShoppingList() {
   };
 
   const getHeaderProps = () => {
-    switch (selectedTab) {
-      case '보관함':
-        return {
-          title: '아이템 보관함',
-          type: 'filter',
-          options: ['전체 보기', '폰트', '편지지', '편지봉투'],
-        };
-      default:
-        return {
-          title: '신규 출시',
-          type: 'sort',
-          options: ['최신 출시', '최초 출시', '높은 가격순', '낮은 가격순'],
-        };
+    if (selectedTab === '보관함') {
+      return {
+        title: '아이템 보관함',
+        type: 'filter' as const,
+        options: ['전체 보기', '폰트', '편지지', '편지봉투'],
+      };
     }
+    return {
+      title: '신규 출시',
+      type: 'sort' as const,
+      options: ['최신 출시', '최초 출시', '높은 가격순', '낮은 가격순'],
+    };
   };
 
   const [selectedOption, setSelectedOption] = useState(getHeaderProps().options[0]);
 
   useEffect(() => {
+    // 탭이 바뀌면 헤더 옵션도 기본값으로 초기화
     setSelectedOption(getHeaderProps().options[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
-
-  const handleNavigate = (menu: MenuType) => {
-    switch (menu) {
-      case 'shopping':
-        navigate('/shopping');
-        break;
-      case 'heart':
-        navigate('/wishlist');
-        break;
-      case 'home':
-        navigate('/home');
-        break;
-      case 'letter':
-        navigate('/moaletter/preview');
-        break;
-      case 'mypage':
-        navigate('/mypage');
-        break;
-    }
-  };
 
   return (
     <div className="min-h-screen max-w-[393px] mx-auto flex flex-col justify-between bg-white">
@@ -113,9 +117,7 @@ export default function ShoppingList() {
           onSelect={setSelectedOption}
         />
 
-        {selectedTab !== '보관함' && (
-          <AdBanner imageUrl={bannerImages[selectedTab]} />
-        )}
+        {selectedTab !== '보관함' && <AdBanner imageUrl={bannerImages[selectedTab as '폰트' | '편지지' | '우표']} />}
 
         <TabContent
           selectedTab={selectedTab}
@@ -129,10 +131,7 @@ export default function ShoppingList() {
             className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
             onClick={() => setSelectedItem(null)}
           >
-            <div
-              className="relative z-60"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="relative z-60" onClick={(e) => e.stopPropagation()}>
               <ItemCardDetail item={selectedItem} onBuy={handleBuy} />
             </div>
           </div>
@@ -165,7 +164,7 @@ export default function ShoppingList() {
 
         {/* 하단 네비게이션 */}
         <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 bg-white w-full max-w-[393px]">
-          <BottomNavigation active="shopping" onNavigate={handleNavigate} />
+          <BottomNavigation active={activeMenu} onNavigate={handleNavigate} />
         </footer>
       </div>
       <Toaster position="top-center" reverseOrder={false} />
