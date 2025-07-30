@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
 
 // 로그인/회원가입 관련 페이지
 import Login from "./pages/Login/Login";
@@ -38,10 +37,10 @@ import ShoppingList from "./pages/Shopping/ShoppingList";
 import PurchasePage from "./pages/Purchase/PurchasePage";
 import PaymentMethodPage from "./pages/Purchase/PaymentMethodPage";
 
+
 function App() {
   return (
     <Router>
-      <Layout>
         <Routes>
           {/* 로그인 및 회원가입 */}
           <Route path="/login" element={<Login />} />
@@ -82,7 +81,6 @@ function App() {
           <Route path="/purchase" element={<PurchasePage />} />
           <Route path="/purchase/payment" element={<PaymentMethodPage />} />
         </Routes>
-      </Layout>
     </Router>
   );
 }

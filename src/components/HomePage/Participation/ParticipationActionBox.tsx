@@ -25,9 +25,9 @@ const ParticipationActionBox = ({
             width="fixed"
             size="medium"
             onClick={() => navigate("/input-moa-money")}
-            className="text-white w-[288px] h-[50px] !bg-[#6282E1]"
+            className="text-white w-[288px] h-[50px] !font-normal !bg-[#6282E1]"
           >
-            마음 보태러 가기
+            모아 참여하기
           </Button>
         );
       case "pending":
@@ -37,7 +37,7 @@ const ParticipationActionBox = ({
             size="medium"
             variant="gray"
             disabled
-            className="text-white w-[288px] h-[50px] !bg-[#6282E1]"
+            className="text-white w-[288px] h-[50px] !font-normal !bg-[#C7D5FF]"
           >
             송금 내역을 확인 중입니다
           </Button>
@@ -48,7 +48,7 @@ const ParticipationActionBox = ({
             width="fixed"
             size="medium"
             onClick={onClick}
-            className="text-white w-[288px] h-[50px] !bg-[#6282E1]"
+            className="text-white w-[288px] h-[50px] !font-normal !bg-[#6282E1]"
           >
             편지 작성하러 가기
           </Button>

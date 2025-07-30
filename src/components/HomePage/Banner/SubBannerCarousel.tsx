@@ -31,7 +31,7 @@ const SubBannerCarousel = () => {
           <div
             key={index}
             className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex ? 'bg-gray-700' : 'bg-gray-300'
+              index === currentIndex ? 'bg-[#97B1FF]' : 'bg-gray-300'
             }`}
           />
         ))}

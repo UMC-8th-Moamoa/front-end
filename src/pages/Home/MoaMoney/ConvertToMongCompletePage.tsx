@@ -7,7 +7,11 @@ const ConvertToMongCompletePage = () => {
   const navigate = useNavigate();
 
   const handleConfirm = () => {
-    navigate("/");
+    navigate("/"); // 편지 보러가기
+  };
+
+  const handleGoHome = () => {
+    navigate("/"); // 홈으로 가기
   };
 
   return (
@@ -20,8 +24,8 @@ const ConvertToMongCompletePage = () => {
       {/* 본문 */}
       <main className="w-full flex-grow flex flex-col items-start justify-center px-6">
         <div className="w-full max-w-[393px] flex flex-col items-start">
-          <h1 className="text-[32px] text-black font-normal mb-2 ml-1 leading-snug">
-            <span className="font-bold">26MC</span>로<br />
+          <h1 className="text-[32px] mt-10 text-black font-normal mb-2 ml-1 leading-snug">
+            <span className="font-bold text-[#6282E1]">26MC</span>로<br />
             전환되었습니다
           </h1>
           <p className="text-[20px] text-gray-400 mb-10 mt-4 ml-1">
@@ -31,11 +35,19 @@ const ConvertToMongCompletePage = () => {
           <Button
             size="medium"
             width="large"
-            className="bg-black text-white text-[20px] font-medium mt-16 w-[350px] h-[50px]"
+            className="bg-[#6282E1] text-white text-[20px] font-medium mt-30 w-[350px] h-[50px]"
             onClick={handleConfirm}
           >
-            확인
+            편지 보러가기
           </Button>
+
+          {/* 👉 추가된 '홈으로 가기 >' 버튼 */}
+          <button
+            className="text-[#B7B7B7] text-[14px] mt-8 font-medium self-center"
+            onClick={handleGoHome}
+          >
+            홈으로 가기 &gt;
+          </button>
         </div>
       </main>
 

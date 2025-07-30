@@ -70,7 +70,7 @@ const HomePage = () => {
             className="w-[350px] h-[140px] px-6 py-6"
           >
             <div className="w-full h-full flex flex-col justify-between items-center">
-              <p className="text-[20px] font-medium text-black text-center">
+              <p className="text-[18px] font-normal mt-1 text-black text-center">
                 아직 송금이 완료되지 않았습니다
               </p>
               <button
@@ -82,7 +82,7 @@ const HomePage = () => {
                     },
                   });
                 }}
-                className="w-[120px] h-[40px] bg-gray-400 text-white text-[18px] rounded-[12px] mt-3"
+                className="w-[120px] h-[40px] bg-[#6282E1] text-white text-[18px] rounded-[12px] mt-3"
               >
                 확인
               </button>
