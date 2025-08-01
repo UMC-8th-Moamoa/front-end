@@ -11,6 +11,7 @@ import BottomNavigation from "../../components/common/BottomNavigation";
 import { dummyBirthdayBanner, dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
 import Calendar from "../../components/HomePage/Calendar/Calendar";
 import { Modal } from "../../components/common/Modal";
+import { popularDummy } from "../../components/HomePage/List/Popular/PopularDummy";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ const HomePage = () => {
           <MainBanner {...dummyMainBanner} onClick={() => navigate("/moa-collected")} />
           <SubBannerCarousel />
           <FriendLetterList />
-          <PopularList onWishConfirm={handleWishConfirm} />
+          <PopularList items={popularDummy} onWishConfirm={handleWishConfirm} />
           <UpcomingFriendList />
           <BirthdayBanner {...dummyBirthdayBanner} />
           <Calendar />
@@ -62,7 +63,7 @@ const HomePage = () => {
           <BottomNavigation />
         </footer>
 
-        {/* ❗송금 미완료 알림 모달 */}
+        {/* 송금 미완료 알림 모달 */}
         {isTransferModalOpen && (
           <Modal
             isOpen={isTransferModalOpen}
