@@ -15,7 +15,7 @@ const LinkInputModal = ({ isOpen, onClose, onConfirm }: LinkInputModalProps) => 
       <InputBox 
         placeholder="링크를 넣어주세요"
         hasBorder={false}
-        className="!w-[276px]" 
+        className="!w-[276px] ml-9" 
       />
       <div className="flex w-full gap-2">
         <button

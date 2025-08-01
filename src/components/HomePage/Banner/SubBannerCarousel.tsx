@@ -1,3 +1,4 @@
+// src/components/HomePage/Banner/SubBannerCarousel.tsx
 import { useEffect, useState } from 'react';
 import SubBanner from './SubBanner';
 import { dummySubBanners } from './BannerDummy';
@@ -9,7 +10,6 @@ const SubBannerCarousel = () => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % dummySubBanners.length);
     }, 4000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -21,7 +21,6 @@ const SubBannerCarousel = () => {
         imageSrc={currentItem.imageSrc}
         content={currentItem.content}
         buttonText={currentItem.buttonText}
-        onClick={currentItem.onClick}
         variant={currentItem.variant}
       />
 

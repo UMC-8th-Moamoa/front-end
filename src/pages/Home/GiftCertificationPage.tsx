@@ -14,7 +14,7 @@ const GiftCertificationPage = () => {
       {/* 상단 헤더 */}
       <div className="w-full max-w-[393px] px-4 pt-4 flex items-center">
         <BackButton />
-        <h1 className="flex-1 text-center text-[24px] font-bold mr-10">
+        <h1 className="flex-1 text-center text-[18px] font-bold mr-8">
           선물 인증하기
         </h1>
       </div>
@@ -28,14 +28,14 @@ const GiftCertificationPage = () => {
       <div className="w-[345px] h-px bg-[#D3D3D3] mt-4 mb-4" />
 
       {/* 이미지 업로드 영역 */}
-      <div className="w-[350px] h-[201px] bg-[#D9D9D9] rounded-[20px] flex items-center justify-center mb-4">
+      <div className="w-[350px] h-[201px] bg-[#F2F2F2] border border-[#C7D5FF] rounded-[20px] flex items-center justify-center mb-4">
         <img src={WhitePhoto} alt="사진 업로드 아이콘" className="w-10 h-10" />
       </div>
 
       {/* 소감 입력 */}
       <InputBox
         placeholder="소감을 입력해주세요"
-        className="w-[350px] h-[108px] text-[16px] bg-[#EAEAEA] rounded-xl placeholder:text-gray-400"
+        className="w-[350px] h-[108px] text-[16px] text-[#B7B7B7] bg-[#F2F2F2] rounded-xl placeholder:text-gray-400"
         hasBorder={false}
       />
 
@@ -47,8 +47,8 @@ const GiftCertificationPage = () => {
       </p>
 
       {/* 등록하기 버튼 */}
-      <div className="absolute bottom-[65px] w-full flex justify-center">
-        <button className="w-[350px] h-[50px] bg-black text-white text-[16px] font-semibold rounded-xl"
+      <div className="absolute bottom-[80px] w-full flex justify-center">
+        <button className="w-[350px] h-[50px] bg-[#6282E1] text-white text-[16px] font-semibold rounded-xl"
                 onClick={() => navigate("/")}>
           등록하기
         </button>
