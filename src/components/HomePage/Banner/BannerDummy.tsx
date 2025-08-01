@@ -11,8 +11,8 @@ export const dummySubBanners: SubBannerProps[] = [
     variant: "default"
   },
   {
-    imageSrc: "/assets/GiftCertificationBanner.svg", // 너가 업로드한 배너 이미지
-    variant: "imageOnly", // ✅ 텍스트 제거를 위한 구분
+    imageSrc: "/assets/GiftCertificationBanner.svg",
+    variant: "imageOnly" // 텍스트 없는 이미지 배너
   },
 ];
 

@@ -48,7 +48,7 @@ const PickGiftPage = () => {
   };
 
   return (
-    <div className="w-full h-screen overflow-hidden flex flex-col items-center bg-[#8F8F8F] relative">
+    <div className="w-full h-screen bg-gradient-to-b from-[#6282E1] to-[#FEC3FF] overflow-hidden flex flex-col items-center bg-[#8F8F8F] relative">
       {/* 상단 제목 */}
       <div className="w-full mt-5 max-w-[393px] px-4 pt-[12px]">
         <h2 className="text-center text-[16px] font-medium text-white">나의 모아모아</h2>
@@ -115,10 +115,10 @@ const PickGiftPage = () => {
 
       {/* 정산하기 버튼 */}
       <div className="absolute bottom-[58px] left-1/2 -translate-x-1/2 z-50 w-[350px] h-[44px]">
-        <Button className="bg-gray-300" onClick={handleSettlementClick}>
+        <Button className="bg-[#6282E1]" onClick={handleSettlementClick}>
           <div className="flex justify-between items-center w-full">
-            <span className="text-[16px] font-bold text-black ml-33">정산하기</span>
-            <span className={`text-[12px] font-medium ${isWarning ? "text-[#CB1919]" : "text-black"}`}>
+            <span className="text-[16px] font-medium text-white ml-33">정산하기</span>
+            <span className="text-[12px] font-medium text-white">
               {totalPrice.toLocaleString()}원
             </span>
           </div>
@@ -138,21 +138,21 @@ const PickGiftPage = () => {
         className="w-[350px] h-[191px] py-6 px-4"
       >
         <div className="text-center w-full">
-          <h3 className="text-[20px] font-bold mb-1">예산이 초과되었어요!</h3>
-          <p className="text-[15px] text-gray-600 mb-4 py-2 leading-relaxed">
+          <h3 className="text-[18px] font-bold mb-1">예산이 초과되었어요!</h3>
+          <p className="text-[14px] text-[#6C6C6C] mb-4 py-2 leading-relaxed">
             선물 금액이 모인 금액을 초과했어요. <br />
             내 돈을 보태거나 선물을 다시 골라주세요.
           </p>
           <div className="flex justify-between w-full px-3">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="w-[92px] h-[40px] rounded-[8px] border border-gray-400 text-gray-600 text-[18px]"
+              className="w-[92px] h-[40px] rounded-[8px] border border-[#6282E1] text-[#6282E1] text-[18px]"
             >
               취소
             </button>
             <button
               onClick={handleConfirmMyMoney}
-              className="w-[187px] h-[40px] rounded-[8px] bg-gray-400 text-white text-[18px]"
+              className="w-[187px] h-[40px] rounded-[8px] bg-[#6282E1] text-white text-[18px]"
             >
               내 돈 보태기
             </button>

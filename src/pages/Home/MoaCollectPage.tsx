@@ -15,7 +15,7 @@ const MoaCollectedPage = () => {
   };
 
   return (
-    <div className="relative w-[393px] min-h-screen bg-[#8F8F8F] mx-auto pb-[100px] overflow-hidden">
+    <div className="relative bg-gradient-to-b from-[#6282E1] to-[#FEC3FF] w-[393px] min-h-screen bg-[#8F8F8F] mx-auto pb-[100px] overflow-hidden">
       {/* 금액 */}
       <div className="pt-[50px] text-center">
         <p className="text-white text-[40px] font-medium">
@@ -33,9 +33,9 @@ const MoaCollectedPage = () => {
 
       {/* 달걀모양 이미지 */}
       <img
-        src="/assets/Eclipse.svg"
+        src="/assets/Moa2.png"
         alt="Eclipse"
-        className="absolute bottom-[-30px] left-1/3 -translate-x-[20%] w-[444px] h-[517px] object-contain"
+        className="absolute left-1/3 -translate-x-[20%] w-[481px] h-[481px] object-contain"
       />
 
       {/* 선물 고르기 버튼 */}

@@ -26,27 +26,20 @@ const RemainMoneySelectPage = () => {
 
           {/* 선택 버튼들 */}
           <div className="w-full flex flex-col gap-3">
-            <button className="w-full h-[50px] bg-gray-200 rounded-xl text-[20px] font-semibold mt-8"
+            <button className="w-full h-[50px] bg-white border border-[#6282E1] text-[#6282E1] rounded-xl text-[20px] font-semibold mt-8"
                     onClick={() => navigate("/donation-select")}>
               기부하기
             </button>
 
             {/* 몽코인 버튼 + 추천 뱃지 */}
             <div className="relative w-full">
-              <button className="w-full h-[50px] bg-gray-200 rounded-xl text-[20px] font-semibold"
+              <button className="w-full h-[50px] bg-white border border-[#6282E1] text-[#6282E1] rounded-xl text-[20px] font-semibold"
                     onClick={() => navigate("/convert-to-mong")}>
                 몽코인으로 전환
               </button>
-              <span
-                className="absolute top-1/2 right-[12px] transform -translate-y-1/2 
-                text-[12px] text-gray-600 border border-[#8F8F8F] 
-                rounded-[8px] px-[12px] py-[2px] bg-white"
-              >
-                추천!
-              </span>
             </div>
 
-            <button className="w-full h-[50px] bg-gray-200 rounded-xl text-[20px] font-semibold"
+            <button className="w-full h-[50px] bg-white border border-[#6282E1] text-[#6282E1] rounded-xl text-[20px] font-semibold"
                     onClick={() => navigate("/return-to-friend")}>
               친구에게 돌려주기
             </button>

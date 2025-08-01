@@ -10,6 +10,10 @@ const DonationToGoodneighborsPage = () => {
     navigate("/");
   };
 
+  const handleGoHome = () => {
+    navigate("/"); // 홈으로 가기
+  };
+
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-center bg-white pb-[84px]">
       {/* 상단 뒤로가기 */}
@@ -21,7 +25,7 @@ const DonationToGoodneighborsPage = () => {
       <main className="w-full flex-grow flex flex-col items-start justify-center px-6">
         <div className="w-full max-w-[393px] flex flex-col items-start">
           <h1 className="text-[32px] text-black font-normal mb-2 ml-1 leading-snug">
-            <span className="font-bold">굿네이버스</span>에<br />
+            <span className="font-bold text-[#6282E1]">굿네이버스</span>에<br />
             기부했어요
           </h1>
           <p className="text-[20px] text-gray-400 mb-10 mt-4 ml-1">
@@ -31,11 +35,17 @@ const DonationToGoodneighborsPage = () => {
           <Button
             size="medium"
             width="large"
-            className="bg-black text-white text-[20px] font-medium mt-16 w-[350px] h-[50px]"
+            className="bg-[#6282E1] text-white text-[20px] font-medium mt-16 w-[350px] h-[50px]"
             onClick={handleConfirm}
           >
             확인
           </Button>
+          <button
+            className="text-[#B7B7B7] text-[14px] mt-8 font-medium self-center"
+            onClick={handleGoHome}
+          >
+            홈으로 가기 &gt;
+          </button>
         </div>
       </main>
 
