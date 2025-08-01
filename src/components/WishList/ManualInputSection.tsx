@@ -35,7 +35,7 @@ const ManualInputSection = () => {
         hasBorder={false}
         className={`
           ${price ? "text-[24px] font-bold" : "text-sm"} 
-          caret-black pr-4 bg-[#F2F2F2] w-full h-full rounded-[12px] 
+          caret-black pr-4 bg-[#F2F2F2] w-[350px] h-[44px] rounded-[12px] 
           placeholder:text-[#B7B7B7]
         `}
       />

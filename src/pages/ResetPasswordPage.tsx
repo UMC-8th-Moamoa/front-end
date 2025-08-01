@@ -55,7 +55,7 @@ function ResetPasswordPage() {
         <div className="absolute top-6 left-0 z-10">
           <BackButton />
         </div>
-        <img src="/moaLogo.svg" alt="moa logo" className="w-40 h-20 mb-2 mt-10" />
+        <img src="/assets/MoamoaLogo.svg" alt="moa logo" className="w-40 h-20 mb-2 mt-10" />
         <h1 className="text-xl text-[#6282E1] font-semibold mb-20">비밀번호 변경</h1>
 
         {/* STEP 1 */}
@@ -68,6 +68,7 @@ function ResetPasswordPage() {
               type="text"
               placeholder="이름을 입력해 주세요"
               value={name}
+              hasBorder={false}
               onChange={(e) => {
                 setName(e.target.value);
                 setError("");
@@ -78,6 +79,7 @@ function ResetPasswordPage() {
               type="text"
               placeholder="전화번호를 입력해 주세요"
               value={phone}
+              hasBorder={false}
               onChange={(e) => {
                 setPhone(e.target.value);
                 setError("");
@@ -148,6 +150,7 @@ function ResetPasswordPage() {
               <InputBox
                 type={visibleNewPw ? 'text' : 'password'}
                 placeholder="새로운 비밀번호를 입력해 주세요"
+                hasBorder={false}
                 value={newPw}
                 onChange={(e) => {
                   setNewPw(e.target.value);
@@ -164,6 +167,7 @@ function ResetPasswordPage() {
               <InputBox
                 type={visibleConfirmPw ? 'text' : 'password'}
                 placeholder="비밀번호를 다시 입력해 주세요"
+                hasBorder={false}
                 value={confirmPw}
                 onChange={(e) => {
                   setConfirmPw(e.target.value);

@@ -25,7 +25,7 @@ function FindIdPage() {
       <div className="absolute top-6 left-0 z-10">
               <BackButton />
             </div>
-        <img src="/moaLogo.svg" alt="moa logo" className="w-40 h-20 mb-2 mt-10"/>
+        <img src="/assets/MoamoaLogo.svg" alt="moa logo" className="w-40 h-20 mb-2 mt-10"/>
         <h1 className="text-xl text-[#6282E1] font-semibold mb-25">아이디 찾기</h1>
 
         {status === "success" ? (

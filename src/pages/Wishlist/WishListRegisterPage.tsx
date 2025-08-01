@@ -42,7 +42,7 @@ const WishListRegisterPage = () => {
               />
               <span>{isPrivate ? "비공개" : "공개"}</span>
             </label>
-            <Button variant="primary" size="medium" width="full" onClick={handleSubmit} className="text-[20px] !bg-[#6282E1] font-semibold">
+            <Button variant="primary" size="medium" width="full" onClick={handleSubmit} className="h-[50px] text-[20px] !bg-[#6282E1] font-semibold">
               등록하기
             </Button>
           </div>

@@ -23,7 +23,7 @@ const ReturnToFriendPage = () => {
         <div className="w-full max-w-[393px] flex flex-col items-start">
           <h1 className="text-[32px] text-black font-normal mb-2 ml-1 leading-snug">
             남은 잔금을<br />
-            <span className="font-bold">친구들에게 </span>돌려주세요!
+            <span className="font-bold text-[#6282E1]">친구들</span>에게 돌려주세요!
           </h1>
           <p className="text-[20px] text-gray-400 mb-10 mt-4 ml-1">
             친구들이 보낸 금액에 따라 잔금이 차등<br />분배됩니다
@@ -32,7 +32,7 @@ const ReturnToFriendPage = () => {
           <Button
             size="medium"
             width="large"
-            className="bg-black text-white text-[20px] font-medium mt-16 w-[350px] h-[50px]"
+            className="bg-[#6282E1] text-white text-[20px] font-medium mt-16 w-[350px] h-[50px]"
             onClick={handleConfirm}
           >
             돌려주기

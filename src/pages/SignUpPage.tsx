@@ -58,7 +58,7 @@ const [terms, setTerms] = useState({
         <div className="absolute top-6 left-0 z-10">
         <BackButton />
       </div>
-        <img src="/moaLogo.svg" alt="moa logo" className="w-40 h-20 mb-4" />
+        <img src="/assets/MoamoaLogo.svg" alt="moa logo" className="w-40 h-20 mb-4" />
 
         {/* 아이디 + 중복확인 */}
         <InputWithButton
@@ -162,7 +162,7 @@ const [terms, setTerms] = useState({
       )}
 
       {showModal && (
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} className="w-[360px]">
         <p className="text-[#1F1F1F]">인증번호를 다시 전송했습니다</p>
         <Button
           variant="primary"

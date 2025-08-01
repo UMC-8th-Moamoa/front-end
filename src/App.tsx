@@ -3,7 +3,7 @@ import BottomNavigation, { type MenuType } from './components/common/BottomNavig
 import { useLocation } from 'react-router-dom';
 
 // 로그인/회원가입 관련 페이지
-import Login from "./pages/Login";
+import Login from "./pages/Login/Login";
 import FindIdPage from "./pages/FindIdPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import SignUpPage from "./pages/SignUpPage";
@@ -19,7 +19,6 @@ import WishListRegisterCompletePage from "./pages/Wishlist/WishListCompletePage"
 import SearchPage from "./pages/Home/SearchPage";
 import ParticipationPage from "./pages/Home/ParticipationPage";
 import VoteWishPage from "./pages/Home/VoteWishPage";
-import RecommendWishPage from "./pages/Home/RecommendWishPage";
 import MoaCollectedPage from "./pages/Home/MoaCollectPage";
 import PickGiftPage from "./pages/Home/PickGiftPage";
 import InputMoaMoneyPage from "./pages/Home/MoaMoney/InputMoaMoneyPage";
@@ -34,6 +33,12 @@ import ReturnToFriendPage from "./pages/Home/MoaMoney/ReturnToFriendPage";
 import ReturnToFriendCompletePage from "./pages/Home/MoaMoney/ReturnToFriendCompletePage";
 import ReceiveBalancePage from "./pages/Home/MoaMoney/ReceiveBalancePage";
 import GiftCertificationPage from "./pages/Home/GiftCertificationPage";
+import AlarmPage from "./pages/Home/AlarmPage";
+// 쇼핑/결제페이지
+import ShoppingList from "./pages/Shopping/ShoppingList";
+import PurchasePage from "./pages/Purchase/PurchasePage";
+import PaymentMethodPage from "./pages/Purchase/PaymentMethodPage";
+
 
 // 모아레터 관련 페이지
 import WriteLetterPage from "./pages/MoaLetter/WriteLetterPage";
@@ -62,49 +67,45 @@ import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage';
 import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
 
 
-function AppLayout() {
+function AppRoutes() {
   const navigate = useNavigate();
   const location = useLocation();
-const handleNavigate = (menu: MenuType) => {
-  switch (menu) {
-    case 'shopping':
-      navigate('/shopping');
-      break;
-    case 'heart':
-      navigate('/wishlist');
-      break;
-    case 'home':
-      navigate('/home');
-      break;
-    case 'letter':
-      navigate('/moaletter/write');
-      break;
-    case 'mypage':
-      navigate('/mypage');
-      break;
-    default:
-      break;
-  }
-};
 
-// 현재 경로에 따라 active 메뉴 키 결정
-const getActiveMenu = (): MenuType => {
-  if (location.pathname.startsWith('/wishlist')) return 'heart'; 
-  if (location.pathname.startsWith('/shopping')) return 'shopping';
-  if (location.pathname.startsWith('/moaletter')) return 'letter';
-  if (location.pathname.startsWith('/mypage')) return 'mypage';
-  return 'home';
-};
+  const handleNavigate = (menu: MenuType) => {
+    switch (menu) {
+      case 'shopping':
+        navigate('/shopping');
+        break;
+      case 'heart':
+        navigate('/wishlist');
+        break;
+      case 'home':
+        navigate('/home');
+        break;
+      case 'letter':
+        navigate('/moaletter/write');
+        break;
+      case 'mypage':
+        navigate('/mypage');
+        break;
+    }
+  };
 
+  const getActiveMenu = (): MenuType => {
+    if (location.pathname.startsWith('/wishlist')) return 'heart';
+    if (location.pathname.startsWith('/shopping')) return 'shopping';
+    if (location.pathname.startsWith('/moaletter')) return 'letter';
+    if (location.pathname.startsWith('/mypage')) return 'mypage';
+    return 'home';
+  };
 
-return (
+  return (
     <div className="w-full flex flex-col items-center bg-[#FFF] h-screen">
-      <div className="w-[393px] pb-[70px]"> {/* 아래 네비 여백 확보 */}
+      <div className="w-[393px] pb-[70px]">
         <Routes>
-          {/* 진입 시 home으로 리디렉션 */}
           <Route path="/" element={<Navigate to="/home" />} />
-
-          {/* 로그인 및 회원가입 */}
+          
+          {/* 로그인/회원가입 */}
           <Route path="/login" element={<Login />} />
           <Route path="/find-id" element={<FindIdPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -129,7 +130,7 @@ return (
           <Route path="/purchase-history" element={<PurchaseHistoryPage />} />
           <Route path="/follow-list" element={<OtherUserFollowListPage />} />
 
-          {/* 홈 및 기타 기능 페이지 */}
+          {/* 홈/기능 */}
           <Route path="/home" element={<HomePage />} />
           <Route path="/wishlist" element={<WishListPage />} />
           <Route path="/wishlist-register" element={<WishListRegisterPage />} />
@@ -138,7 +139,6 @@ return (
           <Route path="/search" element={<SearchPage />} />
           <Route path="/participation" element={<ParticipationPage />} />
           <Route path="/vote-wish" element={<VoteWishPage />} />
-          <Route path="/recommend-wish-list" element={<RecommendWishPage />} />
           <Route path="/moa-collected" element={<MoaCollectedPage />} />
           <Route path="/pick-gift" element={<PickGiftPage />} />
           <Route path="/input-moa-money" element={<InputMoaMoneyPage />} />
@@ -153,35 +153,38 @@ return (
           <Route path="/return-to-friend/return-to-friend-complete" element={<ReturnToFriendCompletePage />} />
           <Route path="/receive-balance" element={<ReceiveBalancePage />} />
           <Route path="/gift-certification" element={<GiftCertificationPage />} />
+          <Route path="/alarm" element={<AlarmPage />} />
 
-         {/* 모아레터 페이지 */}
-        <Route path="/moaletter/write" element={<WriteLetterPage />} />
-        <Route path="/moaletter/letter-saved" element={<LetterSavedPage />} />
-        <Route path="/moaletter/select-photo" element={<SelectPhotoPage />} />
-        <Route path="/moaletter/preview" element={<LetterPreviewPage />} />
-        <Route path="/moaletter/envelope" element={<EnvelopeContent />} />
-        <Route path="/moaletter/album/:albumName" element={<AlbumGridPage />} />
-        <Route path="/moaletter/rolling-paper" element={<RollingPaperGridPage />} />
-        <Route path="/moaletter/receipt" element={<ReceiptPage />} />
-        <Route path="/moaletter/letter-detail" element={<LetterDetailPage />} />
+          {/* 모아레터 */}
+          <Route path="/moaletter/write" element={<WriteLetterPage />} />
+          <Route path="/moaletter/letter-saved" element={<LetterSavedPage />} />
+          <Route path="/moaletter/select-photo" element={<SelectPhotoPage />} />
+          <Route path="/moaletter/preview" element={<LetterPreviewPage />} />
+          <Route path="/moaletter/envelope" element={<EnvelopeContent />} />
+          <Route path="/moaletter/album/:albumName" element={<AlbumGridPage />} />
+          <Route path="/moaletter/rolling-paper" element={<RollingPaperGridPage />} />
+          <Route path="/moaletter/receipt" element={<ReceiptPage />} />
+          <Route path="/moaletter/letter-detail" element={<LetterDetailPage />} />
+
+          {/* 쇼핑/결제 */}
+          <Route path="/shopping" element={<ShoppingList />} />
+          <Route path="/purchase" element={<PurchasePage />} />
+          <Route path="/purchase/payment" element={<PaymentMethodPage />} />
         </Routes>
       </div>
 
-      {/*  항상 표시되는 하단 네비게이션 */}
       <div className="mt-[1px] w-[393px] fixed bottom-0 z-50 bg-[#FFF]">
-<BottomNavigation
-  active={getActiveMenu()}
-  onNavigate={handleNavigate}
-/>
+        <BottomNavigation active={getActiveMenu()} onNavigate={handleNavigate} />
       </div>
     </div>
   );
 }
 
+
 export default function App() {
   return (
     <Router>
-      <AppLayout />
+      <AppRoutes />
     </Router>
   );
 }

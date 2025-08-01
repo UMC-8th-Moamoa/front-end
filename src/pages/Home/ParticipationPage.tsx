@@ -6,7 +6,7 @@ import ParticipantList from "../../components/HomePage/Participation/Participant
 import ParticipationActionBox from "../../components/HomePage/Participation/ParticipationActionBox";
 import RecipientBanner from "../../components/HomePage/Participation/RecipientBanner";
 import ShareModal from "../../components/HomePage/Participation/ShareModal";
-import ClipboardToast from "../../components/HomePage/Participation/ClipBoardToast";
+import ClipboardToast from "../../components/HomePage/Participation/ClipboardToast";
 
 const ParticipationPage = () => {
   const [copied, setCopied] = useState(false);

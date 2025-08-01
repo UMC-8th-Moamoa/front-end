@@ -1,8 +1,28 @@
-import type { SubBannerProps } from "../../../types/banner";
+// src/components/HomePage/Banner/SubBanner.tsx
+import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
+import type { SubBannerProps } from "../../../types/banner";
 
-const SubBanner = ({ imageSrc, content, buttonText, onClick, variant }: SubBannerProps) => {
+const SubBanner = ({ imageSrc, content, buttonText, variant }: SubBannerProps) => {
+  const navigate = useNavigate();
+
   const isHighlight = variant === "highlight";
+  const isImageOnly = variant === "imageOnly";
+
+  if (isImageOnly) {
+    return (
+      <div
+        className="w-[350px] h-[80px] rounded-[20px] overflow-hidden cursor-pointer"
+        onClick={() => navigate("/gift-certification")}
+      >
+        <img
+          src={imageSrc}
+          alt="배너"
+          className="w-full h-full object-cover rounded-[20px]"
+        />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -14,11 +34,13 @@ const SubBanner = ({ imageSrc, content, buttonText, onClick, variant }: SubBanne
       )}
     >
       <div className="flex items-center space-x-4">
-        {/* 아이콘 렌더링 */}
         {imageSrc === "user" ? (
           <div className="w-[57px] h-[57px] rounded-full bg-gray-300" />
         ) : (
-          <div className="w-[57px] h-[57px] flex items-center justify-center">
+          <div
+            className="w-[57px] h-[57px] flex items-center justify-center cursor-pointer"
+            onClick={() => navigate("/gift-certification")}
+          >
             <img src={imageSrc} alt="아이콘" />
           </div>
         )}
@@ -35,10 +57,7 @@ const SubBanner = ({ imageSrc, content, buttonText, onClick, variant }: SubBanne
 
       {buttonText && (
         <span
-          onClick={onClick}
-          className={clsx(
-            "absolute bottom-3 top-[53px] text-gray-400 right-4 text-[12px] cursor-pointer hover:opacity-75 transition-colors"
-          )}
+          className="absolute bottom-3 top-[53px] text-gray-400 right-4 text-[12px] cursor-pointer hover:opacity-75 transition-colors"
         >
           {buttonText} &gt;
         </span>

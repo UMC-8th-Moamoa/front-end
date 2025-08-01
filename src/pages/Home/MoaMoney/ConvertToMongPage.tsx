@@ -21,17 +21,20 @@ const ConvertToMongPage = () => {
       <main className="w-full flex-grow flex flex-col items-start justify-center px-6">
         <div className="w-full max-w-[393px] flex flex-col items-start">
           <h1 className="text-[32px] text-black font-normal mb-2 ml-1 leading-snug">
-            <span className="font-bold">몽코인</span>으로 남은<br />
+            <span className="font-bold text-[#6282E1]">몽코인</span>으로 남은<br />
             마음을 바꾸세요!
           </h1>
           <p className="text-[20px] text-gray-400 mb-10 mt-4 ml-1">
             전환되는 몽코인은 100원 단위까지 전환되<br />며 나머지 금액은 반올림 되어 적용됩니다
           </p>
+          <p className="text-[14px] text-black mt-10 w-full text-right">
+            전환되는 몽코인: <span className="text-[20px]">26MC</span>
+          </p>
 
           <Button
             size="medium"
             width="large"
-            className="bg-black text-white text-[20px] font-medium mt-16 w-[350px] h-[50px]"
+            className="bg-[#6282E1] text-white text-[20px] font-medium mt-2 w-[350px] h-[50px]"
             onClick={handleConfirm}
           >
             전환하기

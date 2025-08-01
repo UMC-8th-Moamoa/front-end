@@ -34,7 +34,7 @@ const ReceiveCompletePage = () => {
         <Button
           size="medium"
           width="large"
-          className="bg-black text-white text-[16px] font-medium w-[350px] h-[50px]"
+          className="bg-[#6282E1] text-white text-[20px] font-medium w-[350px] h-[50px]"
           onClick={handleConfirm}
         >
           확인

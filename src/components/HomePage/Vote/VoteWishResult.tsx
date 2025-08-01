@@ -4,7 +4,7 @@ const VoteWishResult = () => {
   const maxVotes = Math.max(...recipientDummy.wishList.map((item) => item.voteCount));
 
   return (
-    <div className="w-[350px] h-[440px] overflow-y-auto scrollbar-hide flex flex-col gap-2">
+    <div className="w-[350px] h-[580px] overflow-y-auto scrollbar-hide flex flex-col gap-2">
       {recipientDummy.wishList.map((item, index) => {
         const percentage = item.voteCount / maxVotes;
 
@@ -19,10 +19,10 @@ const VoteWishResult = () => {
               {/* 바 + 숫자 */}
               <div className="flex-1 flex items-center gap-2">
                 <div
-                  className="h-[15px] bg-[#D9D9D9] rounded-[2px]"
+                  className="h-[15px] bg-[#C7D5FF] rounded-[2px]"
                   style={{ width: `${193 * percentage}px` }}
                 />
-                <span className="text-[14px] text-[#B6B6B6] font-semibold">
+                <span className="text-[14px] text-[#C7D5FF] font-semibold">
                   {item.voteCount}명
                 </span>
               </div>

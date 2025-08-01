@@ -14,7 +14,7 @@ const SignUpSuccessPage = () => {
       <p className="text-xl font- text-gray-500 mb-30 mx-3">
         마음을 모아, 기쁨을 나눠봐요!
       </p>
-      <Button variant="primary" size="md" width="full" onClick={() => window.location.href = '/home'}>
+      <Button variant="primary" size="md" width="full" onClick={() => window.location.href = '/login'}>
         시작하기
       </Button>
     </div>
