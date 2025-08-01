@@ -5,6 +5,7 @@ import Button from '../../components/common/Button';
 import KakaoIcon from '../../assets/payment_kakao.svg';
 import BackButton from '../../components/common/BackButton';
 import BankTransferSection from '../../components/Purchase/BankTransferSection';
+import { Toaster, toast } from 'react-hot-toast';
 
 const PaymentMethodPage = () => {
   const [selectedMethod, setSelectedMethod] = useState<'kakao' | 'bank'>('kakao');
@@ -70,16 +71,13 @@ const PaymentMethodPage = () => {
               price={price}
               deadline={depositDeadline}
               onConfirm={() => {
-                if (!depositName.trim()) {
-                  alert('입금자명을 입력해주세요.');
-                  return;
-                }
                 console.log('입금 확인 요청', depositName);
               }}
             />
           </>
         )}
       </div>
+      <Toaster position="top-center" reverseOrder={false} />
     </div>
   );
 };

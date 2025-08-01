@@ -2,6 +2,9 @@
 import ChangeOptionList from "./ChargeOptionList";
 import QuantityCounter from "./QuantityCounter";
 import Button from "../common/Button";
+import { useNavigate } from "react-router-dom";
+
+
 
 type Option = {
   id: number;
@@ -27,6 +30,7 @@ export default function PaidChargeSection({
   onChangeQuantity,
   totalPrice,
 }: Props) {
+  const navigate = useNavigate();
   return (
     <>
       <div className="px-5 py-4">
@@ -54,7 +58,13 @@ export default function PaidChargeSection({
           <p className="text-xl font-semibold">₩ {totalPrice.toLocaleString()}</p>
           <QuantityCounter value={quantity} onChange={onChangeQuantity} />
         </div>
-        <Button variant="primary" className="w-full mb-4">
+        <Button
+          variant="primary"
+          className="w-full mb-4"
+          onClick={() => {
+            navigate('/purchase/payment');
+          }}
+        >
           결제하기
         </Button>
       </div>

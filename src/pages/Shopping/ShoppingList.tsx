@@ -9,9 +9,11 @@ import { TabContent } from '../../components/Shopping/TabContent';
 import ItemCardDetail from '../../components/Shopping/ItemCardDetail';
 import { Modal } from '../../components/common/Modal';
 import toast, { Toaster } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 export default function ShoppingList() {
   const userMC = 20; // 예시값
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState('폰트');
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,6 +38,7 @@ export default function ShoppingList() {
           <button
             onClick={() => {
               toast.dismiss(t.id);
+              navigate('/purchase');
             }}
             className="text-[#6282E1] border border-[#6282E1] w-full rounded-lg px-4 py-2 text-sm font-base hover:bg-[#F1F4FF] active:border-2"
           >
@@ -99,6 +102,7 @@ export default function ShoppingList() {
 
         <TabContent
           selectedTab={selectedTab}
+          selectedOption={selectedOption} 
           onItemClick={(item) => setSelectedItem(item)}
         />
 

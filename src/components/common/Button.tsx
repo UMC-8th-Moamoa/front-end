@@ -86,7 +86,7 @@ const Button = ({
       "bg-white text-[#6282E1] border border-[#6282E1] hover:bg-[#F1F4FF] active:border-2",
     kakao: disabled
       ? "bg-[#FEE500] text-gray-400"
-      : "bg-[#FEE500] text-black hover:bg-[#F1F4FF] active:bg-[#F1F4FF]",
+      : "bg-[#FEE500] text-black hover:bg-[#E6CC00] active:bg-[#F1F4FF]",
     login:
       "bg-white text-[#6282E1] hover:bg-[#F1F4FF] active:bg-white",
     signup:

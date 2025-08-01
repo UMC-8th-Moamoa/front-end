@@ -16,12 +16,12 @@ const InputBox = ({
 }: InputBoxProps) => {
 
   const borderClass = hasBorder
-    ? error
-      ? "border border-[#E20938]"
-      : "border border-[#97B1FF]"
-    : error
-    ? "border border-[#E20938]"
-    : "appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none";
+  ? error
+    ? "border border-[#E20938] focus:outline-none focus:ring-0"
+    : "border border-[#97B1FF] focus:outline-none focus:ring-0 focus:border-[#5a7df8]"
+  : error
+  ? "border border-[#E20938] focus:outline-none focus:ring-0"
+  : "appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none";
 
   return (
     <div className="relative w-[350px]">

@@ -8,11 +8,13 @@ interface Item {
   description?: string;
   price?: number;
   isOwned?: boolean;
+  releaseDate?: string; 
 }
 
 type TabContentProps = {
   selectedTab: keyof typeof dummyData;
-  onItemClick: (item: Item) => void; // 🔹 추가된 props
+  selectedOption: string;
+  onItemClick: (item: Item) => void;
 };
 
 const dummyData: Record<string, Item[]> = {
@@ -24,6 +26,7 @@ const dummyData: Record<string, Item[]> = {
       description: '예쁜 손글씨 느낌의 폰트입니다.',
       price: 100,
       isOwned: false,
+      releaseDate: '2025-07-20',
     },
     {
       id: '2',
@@ -32,6 +35,7 @@ const dummyData: Record<string, Item[]> = {
       description: '귀여운 손글씨 느낌의 폰트입니다.',
       price: 0,
       isOwned: false,
+      releaseDate: '2025-07-10',
     },
   ],
   편지지: [
@@ -42,15 +46,52 @@ const dummyData: Record<string, Item[]> = {
       description: '예쁜 느낌의 편지지입니다.',
       price: 100,
       isOwned: true,
+      releaseDate: '2025-07-05',
     },
-    { id: '4', name: '편지지2', priceLabel: '100MC' },
-    { id: '5', name: '편지지3', priceLabel: '무료' },
-    { id: '6', name: '편지지4', priceLabel: '150MC' },
+    {
+      id: '4',
+      name: '편지지2',
+      priceLabel: '100MC',
+      price: 100,
+      releaseDate: '2025-07-15',
+    },
+    {
+      id: '5',
+      name: '편지지3',
+      priceLabel: '무료',
+      price: 0,
+      releaseDate: '2025-06-30',
+    },
+    {
+      id: '6',
+      name: '편지지4',
+      priceLabel: '150MC',
+      price: 150,
+      releaseDate: '2025-07-01',
+    },
   ],
   우표: [
-    { id: '7', name: '우표1', priceLabel: '무료' },
-    { id: '8', name: '우표2', priceLabel: '100MC' },
-    { id: '9', name: '우표3', priceLabel: '200MC' },
+    {
+      id: '7',
+      name: '우표1',
+      priceLabel: '무료',
+      price: 0,
+      releaseDate: '2025-06-15',
+    },
+    {
+      id: '8',
+      name: '우표2',
+      priceLabel: '100MC',
+      price: 100,
+      releaseDate: '2025-07-25',
+    },
+    {
+      id: '9',
+      name: '우표3',
+      priceLabel: '200MC',
+      price: 200,
+      releaseDate: '2025-07-18',
+    },
   ],
   보관함: [
     { id: '10', name: '보관아이템1', priceLabel: '보유중' },
@@ -58,25 +99,39 @@ const dummyData: Record<string, Item[]> = {
     { id: '12', name: '보관아이템3', priceLabel: '보유중' },
     { id: '13', name: '보관아이템4', priceLabel: '보유중' },
     { id: '14', name: '보관아이템5', priceLabel: '보유중' },
-    { id: '15', name: '보관아이템6', priceLabel: '보유중' },
-    { id: '16', name: '보관아이템7', priceLabel: '보유중' },
   ],
 };
 
-export const TabContent = ({ selectedTab, onItemClick }: TabContentProps) => {
+export const TabContent = ({ selectedTab, selectedOption, onItemClick }: TabContentProps) => {
   const items = dummyData[selectedTab] || [];
+
+  // 정렬 기능
+  const sortedItems = [...items].sort((a, b) => {
+    switch (selectedOption) {
+      case '높은 가격순':
+        return (b.price ?? 0) - (a.price ?? 0);
+      case '낮은 가격순':
+        return (a.price ?? 0) - (b.price ?? 0);
+      case '최신 출시':
+        return new Date(b.releaseDate ?? '').getTime() - new Date(a.releaseDate ?? '').getTime();
+      case '최초 출시':
+        return new Date(a.releaseDate ?? '').getTime() - new Date(b.releaseDate ?? '').getTime();
+      default:
+        return 0;
+    }
+  });
 
   return (
     <div className="relative px-2 pt-4 pb-28">
       <div className="grid grid-cols-2 gap-x-1 gap-y-4">
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <ItemCard
             key={item.id}
             id={item.id}
             name={item.name}
             priceLabel={item.priceLabel}
             imageUrl={item.imageUrl}
-            onClick={() => onItemClick(item)} // 🔹 외부에서 클릭 처리
+            onClick={() => onItemClick(item)}
           />
         ))}
       </div>

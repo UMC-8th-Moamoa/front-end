@@ -50,7 +50,7 @@ const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy }) => {
       </div>
 
       {/* 버튼 영역 */}
-      <div className="mt-auto w-full px-2">
+      <div className="flex mt-auto w-full">
         <Button
           onClick={() => onBuy(item)}
           disabled={item.isOwned || item.price === undefined}

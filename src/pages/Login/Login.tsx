@@ -27,20 +27,20 @@ function Login() {
     }
 
     // 아이디 불일치 (하드코딩)
-    if (id !== "moa123") {
+    if (id !== "moa123" && id !== "moa111") {
       setShowModal(true);
       return;
     }
 
     // 비밀번호 불일치 (하드코딩 예시)
-    if (password !== "11111111") {
+    if (password !== "11111111" && password !== "moa1234!") {
       setPasswordError("• 비밀번호가 일치하지 않습니다");
       return;
     }
 
     // 로그인 성공 로직
     alert("로그인 성공!");
-    navigate("/signup/name");
+    navigate("/");
   };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
