@@ -30,7 +30,7 @@ export default function WriteLetterPage() {
   };
 
   return (
-<div className="flex flex-col h-screen w-full max-w-[393px] mx-auto bg-white font-pretendard overflow-x-hidden">
+<div className="flex flex-col h-screen w-full max-w-[393px] mx-auto bg-white font-pretendard overflow-hidden">
       {/* 상단 헤더 */}
 <div className="sticky top-0 z-30 bg-white">
   <LetterHeader
@@ -126,16 +126,19 @@ export default function WriteLetterPage() {
         </div>
       )}
 
-      {/* 아이템 리스트: 툴바 아래에 붙고 자체 스크롤 */}
-      {activeTab === "letter" &&
-        (activeTool === "font" || activeTool === "theme") && (
-          <div className="z-20 bg-white px-4 pb-6 shadow-inner w-full overflow-x-hidden">
-            <div className="max-h-[336px]">
-              {activeTool === "font" && <FontItemList />}
-              {activeTool === "theme" && <LetterThemeList />}
-            </div>
-          </div>
-        )}
+ {/* 바텀시트 패널 */}
+{activeTab === "letter" &&
+  (activeTool === "font" || activeTool === "theme") && (
+    <div className="z-20 bg-white px-4 pb-6 shadow-inner w-full overflow-x-hidden">
+      <div className="max-h-[336px]">
+        {activeTool === "font" && <FontItemList />}
+        {activeTool === "theme" && <LetterThemeList />}
+      </div>
+    </div>
+)}
+
+
+
     </div>
   );
 }

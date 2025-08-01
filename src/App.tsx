@@ -7,6 +7,7 @@ import EnvelopeContent from "./components/moaletter/EnvelopeContent";
 import AlbumGridPage from "./pages/MoaLetter/AlbumGridPage"; 
 import RollingPaperGridPage from "./pages/MoaLetter/RollingPaperPage";
 import ReceiptPage from "./pages/MoaLetter/ReceiptPage";
+import LetterDetailPage from "./pages/MoaLetter/LetterDetailPage";
 
 import { Navigate } from "react-router-dom";
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/moaletter/album/:albumName" element={<AlbumGridPage />} />
         <Route path="/moaletter/rolling-paper" element={<RollingPaperGridPage />} />
         <Route path="/moaletter/receipt" element={<ReceiptPage />} />
+        <Route path="/moaletter/letter-detail" element={<LetterDetailPage />} />
 
       </Routes>
     </BrowserRouter>

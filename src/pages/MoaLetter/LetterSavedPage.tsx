@@ -7,7 +7,7 @@ export default function LetterSavedPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="w-[393px] h-[794px] mx-auto bg-white font-pretendard overflow-hidden flex flex-col items-center relative">
+    <div className="w-[393px] h-screen mx-auto bg-white font-pretendard overflow-hidden flex flex-col items-center relative">
       {/* 상단 뒤로가기 버튼 */}
       <div className="absolute left-[0px] top-[18px] z-10">
         <BackButton />
