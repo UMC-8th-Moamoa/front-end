@@ -18,7 +18,7 @@ export default function ReceiptPage() {
       </div>
 
       {/* 내용 영역 */}
-      <div className="w-[350px] h-[677px] flex-shrink-0 rounded-[10px] bg-[#F2F2F2] mx-auto">
+      <div className="w-[350px] h-[677px] mt-[28px] flex-shrink-0 rounded-[10px] bg-[#F2F2F2] mx-auto">
         {/* 실제 영수증 내용 추후 삽입 예정 */}
       </div>
     </div>

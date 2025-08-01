@@ -4,36 +4,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "tailwindcss";
 
-/* src/fonts/fonts.css 또는 src/index.css 상단에 */
-
-@font-face {
-  font-family: 'Pretendard';
-  src: url('/fonts/Pretendard-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  src: url('/fonts/Pretendard-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  src: url('/fonts/Pretendard-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-}
 
 :root {
   color-scheme: light;
   color: #000000;
   background-color: #ffffff;
-  font-family: 'Pretendard';
   line-height: 1.5;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -41,22 +17,19 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 이하 동일 */
 
-html, body {
+html, body, #root {
   height: 100%;
-    position: relative;
-
-}
-
-body {
   margin: 0;
   padding: 0;
   font-family: 'Pretendard Variable', sans-serif;
-  background-color: #ffffff;
-    overflow-x: hidden;
-
+  background-color: #fff;
+  overflow-x: hidden;
+  position: relative;
 }
+
+
+
 
 textarea::placeholder {
   color: #999;

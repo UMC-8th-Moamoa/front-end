@@ -5,6 +5,8 @@ import DefaultImage from "../../assets/default.svg";
 import { useEffect, useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
 import TestImage from '../../assets/Test.png';
+import styles from "./EnvelopeContent.module.css";
+
 
 type Area = {
   x: number;
@@ -22,8 +24,21 @@ export default function EnvelopeContent() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null); // 현재 렌더링에 쓰일 최종 이미지
   const [croppedImage, setCroppedImage] = useState<string | null>(null);   // 크롭 임시 저장 이미지
   const [isCropping, setIsCropping] = useState(true);                      // 크롭 중 여부
+  const [isLoading, setIsLoading] = useState(true);
+  const [items, setItems] = useState<{ name: string; image: string }[]>([]);
 
-
+useEffect(() => {
+  // 테스트용 더미 데이터 1초 뒤에 세팅
+  setTimeout(() => {
+    setItems([
+      { name: "봄우표", image: "" },
+      { name: "여름우표", image: "" },
+      { name: "가을우표", image: "" },
+      { name: "겨울우표", image: "" },
+    ]);
+    setIsLoading(false);
+  }, 1000);
+}, []);
   const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const img = new Image();
@@ -60,21 +75,17 @@ export default function EnvelopeContent() {
 }, []);
 
 
-const handleCropDone = async () => {
-  if (!selectedImage || !croppedAreaPixels) return;
-  const cropped = await getCroppedImg(selectedImage, croppedAreaPixels);
-  setCroppedImage(cropped);  //  selectedImage 변경 
-  setIsCropping(false); // 크롭 모드 종료
-};
-
+const [hasTriedToSelectImage, setHasTriedToSelectImage] = useState(false);
 
 useEffect(() => {
   if (location.state && location.state.imageUrl) {
     setSelectedImage(location.state.imageUrl);
-    setIsCropping(true); // 사진 선택한 경우만 크롭 모드로
+    setIsCropping(true);
+    setHasTriedToSelectImage(true);
   } else {
-    setSelectedImage(null); // 기본 이미지만 보여줌
-    setIsCropping(false);   // Cropper 안 뜨게
+    setSelectedImage(null);
+    setIsCropping(false);
+    if (location.state) setHasTriedToSelectImage(true); // 사진 선택 시도는 했음
   }
 }, [location.state]);
 
@@ -82,35 +93,25 @@ useEffect(() => {
 
 
 
+
+
  return (
   <div className="flex flex-col items-center w-full">
-{/* 크롭 이미지 영역 */}
-<div
-  className="mt-[22px] w-[350px] h-[347px] mt-6 rounded-[20px] bg-[#F2F2F2] flex justify-center items-center overflow-hidden relative"
-  style={{
-    borderRadius: "20px",
-    background: "#F2F2F2"
-  }}
->  {selectedImage ? (
+<div className="relative w-[350px] h-[347px] mt-[22px] rounded-[20px] bg-[#F2F2F2] flex justify-center items-center overflow-hidden">
+  {selectedImage ? (
     isCropping ? (
-      <>
-<Cropper
-  image={selectedImage}
-  crop={crop}
-  zoom={zoom}
-  aspect={1}
-  cropShape="rect"
-  showGrid={false}
-  onCropChange={setCrop}
-  onZoomChange={setZoom}
-  onCropComplete={onCropComplete}
-  cropSize={{ width: 200, height: 200 }}
-  classes={{
-    containerClassName: "z-0" 
-  }}
-/>
-
-      </>
+      <Cropper
+        image={selectedImage}
+        crop={crop}
+        zoom={zoom}
+        aspect={1}
+        cropShape="rect"
+        showGrid={false}
+        onCropChange={setCrop}
+        onZoomChange={setZoom}
+        onCropComplete={onCropComplete}
+        cropSize={{ width: 200, height: 200 }}
+      />
     ) : (
       <img
         src={selectedImage}
@@ -118,14 +119,18 @@ useEffect(() => {
         className="w-[350px] h-[347px] object-cover"
       />
     )
-  ) : (
+  ) : hasTriedToSelectImage ? (
+    // 사진 선택은 시도했지만 선택 안 된 경우만 테스트 이미지
     <img
-      src={DefaultImage}
+      src={TestImage}
       alt="기본 이미지"
       className="w-[350px] h-[347px] object-contain opacity-60"
     />
-  )}
+  ) : null}
 </div>
+
+
+
 
 
     {/* 사진 불러오기 버튼 */}
@@ -147,7 +152,7 @@ useEffect(() => {
       alt="사진 불러오기"
       className="w-[24px] h-[24px] mr-[15px] shrink-0"
     />
-    <span className="font-pretendard text-[16px] font-semibold whitespace-nowrap">
+    <span className="font-pretendard text-[16px] font-semibold whitespace-nowrap"style={{ fontWeight: 600 }}>
       사진 불러오기
     </span>
   </button>
@@ -155,16 +160,21 @@ useEffect(() => {
 
 
     {/* 아이템 리스트 */}
-    <div
-      className="mt-[8px] w-full max-w-[390px] px-5 overflow-y-scroll"
-      style={{ height: "calc(100vh - 540px)" }}
-    >
-      <div className="flex flex-wrap justify-center gap-x-[10px] gap-y-[10px] mt-2 pb-[80px]">
-        {[...Array(20)].map((_, i) => (
-          <ItemCard key={i} imageSrc={""} label={`아이템명`} />
+<div
+  className="mt-[8px] w-full max-w-[390px] px-5 overflow-y-scroll"
+  style={{ height: "calc(100vh - 540px)" }}
+>
+  <div className="flex flex-wrap justify-center gap-x-[10px] gap-y-[10px] mt-[2] pb-[80px]">
+    {isLoading
+      ? [...Array(6)].map((_, i) => (
+          <ItemCard key={i} isLoading={true} label="" />
+        ))
+      : items.map((item, i) => (
+          <ItemCard key={i} imageSrc={item.image} label={item.name} />
         ))}
-      </div>
-    </div>
+  </div>
+</div>
+
   </div>
 );
 

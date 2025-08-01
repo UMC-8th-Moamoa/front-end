@@ -55,7 +55,10 @@ const GiftCertificationPage = () => {
       </div>
 
       {/* 하단 네비게이션 */}
-      <BottomNavigation />
+<BottomNavigation
+  active="home"
+  onNavigate={(menu) => navigate(`/${menu}`)}
+/>
     </div>
   );
 };

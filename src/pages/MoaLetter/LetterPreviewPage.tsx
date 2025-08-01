@@ -1,5 +1,5 @@
 // 모아레터 - 연도별 편지 보기 페이지 (디자인 세부 반영: 카드 흰색, 헤더 정렬, 날짜 텍스트 스타일, 점선 포함)
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import BottomNavigation from "../../components/common/BottomNavigation";
 import MoaLetterLogo from "../../assets/Moaletter.svg";
 import HorizontalIcon from "../../assets/horizontal.svg";
@@ -20,6 +20,23 @@ export default function MoaLetterPreviewPage() {
   const touchStartX = useRef<number | null>(null);
   const navigate = useNavigate();
 
+   //  mount 시 localStorage에서 불러오기
+  useEffect(() => {
+    const savedMode = localStorage.getItem("moa_view_mode");
+    if (savedMode === "vertical") setIsVertical(true);
+    else if (savedMode === "horizontal") setIsVertical(false);
+  }, []);
+
+  //  보기 방식 전환 + 저장
+  const toggleViewMode = () => {
+    setIsVertical((prev) => {
+      const next = !prev;
+      localStorage.setItem("moa_view_mode", next ? "vertical" : "horizontal");
+      return next;
+    });
+  };
+
+
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -37,9 +54,6 @@ export default function MoaLetterPreviewPage() {
     touchStartX.current = null;
   };
 
-  const toggleViewMode = () => {
-    setIsVertical((prev) => !prev);
-  };
 
   return (
     <div className="w-full max-w-[393px] min-h-screen mx-auto font-pretendard bg-[linear-gradient(169deg,#6282E1_1.53%,#FEC3FF_105.97%)]">
@@ -73,7 +87,7 @@ export default function MoaLetterPreviewPage() {
             <div
               key={idx}
               className="flex flex-col items-center gap-[2px]"
-              onClick={() => navigate("/moaletter/Rolling-paper")}
+              onClick={() => navigate("/moaletter/rolling-paper")}
             >
                   {/* 날짜 텍스트 */}
                   <p
@@ -117,8 +131,10 @@ export default function MoaLetterPreviewPage() {
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
-              {/* 카드 */}
+        {/* 가로모드 */}
               <div
+                onClick={() => navigate("/moaletter/rolling-paper")}
+
                 className="bg-white rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] relative z-10 mb-[45px]"
                 style={{
                   width: 275,
@@ -128,8 +144,11 @@ export default function MoaLetterPreviewPage() {
               >
                 {mockLetters[currentIndex].hasHeart && (
                   <button
-                    onClick={() => navigate("/moaletter/receipt")}
-  className="absolute top-[12px] right-[12px] z-20 bg-transparent border-none outline-none p-0 m-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/moaletter/receipt");
+                }}  
+                className="absolute top-[12px] right-[12px] z-20 bg-transparent border-none outline-none p-0 m-0"
                   >
                     <img
                       src={HeartIcon}

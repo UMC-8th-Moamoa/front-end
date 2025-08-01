@@ -1,6 +1,7 @@
 import React from "react";
 import Triangle from "../../assets/Triangle.svg";
 import BackButton from "../../components/common/BackButton";
+import { useNavigate } from "react-router-dom";
 
 interface LetterCard {
   id: number;
@@ -11,6 +12,8 @@ const mockLetters: LetterCard[] = Array.from({ length: 1 }, (_, i) => ({
 }));
 
 export default function RollingPaperGridPage() {
+  const navigate = useNavigate();
+
   const getGridCols = (length: number) => {
     if (length <= 1) return "grid-cols-1";
     if (length <= 4) return "grid-cols-2";
@@ -65,17 +68,30 @@ export default function RollingPaperGridPage() {
       </div>
 
       {/* 카드 표시 */}
-      {mockLetters.length === 1 ? (
-        <div className="flex justify-center items-center h-full">
-          <div className="flex-shrink-0" style={cardStyle}></div>
-        </div>
-      ) : (
+{mockLetters.length === 1 ? (
+  <div className="flex justify-center items-center h-full">
+    <div
+      className="flex-shrink-0 cursor-pointer flex justify-center items-center"
+      style={cardStyle}
+      onClick={() => navigate("/moaletter/letter-detail")}
+    >
+      <p className="text-black text-[16px] font-medium"></p>
+    </div>
+  </div>
+) : (
+
         <div
           className={`grid ${getGridCols(mockLetters.length)} gap-[10px] justify-center`}
         >
           {mockLetters.map((letter) => (
-            <div key={letter.id} className="flex-shrink-0" style={cardStyle}></div>
-          ))}
+  <div
+    key={letter.id}
+    className="flex-shrink-0 cursor-pointer"
+    style={cardStyle}
+  onClick={() => navigate(`/moaletter/letter/${letter.id}`)}
+  />
+))}
+
         </div>
       )}
     </div>

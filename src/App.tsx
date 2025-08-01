@@ -44,6 +44,8 @@ import EnvelopeContent from "./components/moaletter/EnvelopeContent";
 import AlbumGridPage from "./pages/MoaLetter/AlbumGridPage"; 
 import RollingPaperGridPage from "./pages/MoaLetter/RollingPaperPage";
 import ReceiptPage from "./pages/MoaLetter/ReceiptPage";
+import LetterDetailPage from './pages/MoaLetter/LetterDetailPage';
+
 
 // 마이페이지 관련 페이지
 import MyPage from './pages/MyPage/MyPage';
@@ -153,14 +155,15 @@ return (
           <Route path="/gift-certification" element={<GiftCertificationPage />} />
 
          {/* 모아레터 페이지 */}
-          <Route path="/moaletter/write" element={<WriteLetterPage />} />
-          <Route path="/moaletter/letter-saved" element={<LetterSavedPage />} />
-          <Route path="/moaletter/select-photo" element={<SelectPhotoPage />} />
-          <Route path="/moaletter/preview" element={<LetterPreviewPage />} />
-          <Route path="/moaletter/envelope" element={<EnvelopeContent />} />
-          <Route path="/moaletter/album/:albumName" element={<AlbumGridPage />} />
-          <Route path="/moaletter/rolling-paper" element={<RollingPaperGridPage />} />
-          <Route path="/moaletter/receipt" element={<ReceiptPage />} />
+        <Route path="/moaletter/write" element={<WriteLetterPage />} />
+        <Route path="/moaletter/letter-saved" element={<LetterSavedPage />} />
+        <Route path="/moaletter/select-photo" element={<SelectPhotoPage />} />
+        <Route path="/moaletter/preview" element={<LetterPreviewPage />} />
+        <Route path="/moaletter/envelope" element={<EnvelopeContent />} />
+        <Route path="/moaletter/album/:albumName" element={<AlbumGridPage />} />
+        <Route path="/moaletter/rolling-paper" element={<RollingPaperGridPage />} />
+        <Route path="/moaletter/receipt" element={<ReceiptPage />} />
+        <Route path="/moaletter/letter-detail" element={<LetterDetailPage />} />
         </Routes>
       </div>
 
