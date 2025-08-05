@@ -83,7 +83,7 @@ function AppRoutes() {
         navigate('/home');
         break;
       case 'letter':
-        navigate('/moaletter/write');
+        navigate('/moaletter/preview');
         break;
       case 'mypage':
         navigate('/mypage');
