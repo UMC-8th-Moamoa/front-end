@@ -1,41 +1,9 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css");
+@import "tailwindcss";
 
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
-:root {
-  color-scheme: light;
-  color: #000000;
-  background-color: #ffffff;
-  line-height: 1.5;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+body {
   font-family: 'Pretendard Variable', sans-serif;
-  background-color: #fff;
-  overflow-x: hidden;
-  position: relative;
 }
-
-
-
-
-textarea::placeholder {
-  color: #999;
-}
-
-
 
 /* 스크롤바 숨기기 */
 .scrollbar-hide::-webkit-scrollbar {
@@ -44,22 +12,4 @@ textarea::placeholder {
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE, Edge */
   scrollbar-width: none; /* Firefox */
-  min-width: 350px;
-  min-height: 100vh;
-  background-color: #FFF;
-  color: black;
-  overflow-x: hidden; /* 혹시 body에서 튀는 걸 방지 */
-}
-
-#root {
-  max-width: 393px;
-  margin: 0 auto;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-
-
-button {
-  all: unset;
-  cursor: pointer;
 }
