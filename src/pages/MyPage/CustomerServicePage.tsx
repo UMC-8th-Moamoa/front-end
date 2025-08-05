@@ -230,7 +230,7 @@ return (
       )}
 
             <button
-        onClick={() => navigate('/mypage/customer-service/write')}
+onClick={() => navigate('/customer-service/write')}
         className="fixed bottom-[24px] right-[20px] w-[56px] h-[56px] rounded-full bg-[#6282E1] shadow-[2px_4px_4px_rgba(0,0,0,0.25)] flex items-center justify-center z-50"
       >
         <img src={PlusIcon} alt="문의 작성" className="w-[24px] h-[24px]" />

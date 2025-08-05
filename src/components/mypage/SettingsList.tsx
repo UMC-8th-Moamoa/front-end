@@ -3,12 +3,13 @@ import GrayButtonIcon from "../../assets/gray_button.svg";
 
 function SettingsList() {
   const navigate = useNavigate();
-  const settings = [
-    { label: "설정", route: "/mypage/settings" },
-    { label: "구매 내역", route: "/mypage/purchase-history" },
-    { label: "공지사항", route: "/mypage/notice" },
-    { label: "고객센터", route: "/mypage/customer-service" },
-  ];
+const settings = [
+  { label: "설정", route: "/settings" },
+  { label: "구매 내역", route: "/purchase-history" },
+  { label: "공지사항", route: "/notice" },
+  { label: "고객센터", route: "/customer-service" },
+];
+
 
   return (
     <div

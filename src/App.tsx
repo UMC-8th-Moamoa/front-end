@@ -83,7 +83,7 @@ function AppRoutes() {
         navigate('/home');
         break;
       case 'letter':
-        navigate('/moaletter/write');
+        navigate('/moaletter/preview');
         break;
       case 'mypage':
         navigate('/mypage');
@@ -98,19 +98,34 @@ function AppRoutes() {
     if (location.pathname.startsWith('/mypage')) return 'mypage';
     return 'home';
   };
-  // 로그인/회원가입 등에서 바텀 네비 숨기기
-  const hideNavigationPaths = [
-    '/login',
-    '/signup',
-    '/signup/name',
-    '/signup/birthday',
-    '/signup/success',
-    '/reset-password',
-    '/find-id',
-  ];
-  const shouldHideNavigation = hideNavigationPaths.some(path =>
-    location.pathname.startsWith(path)
-  );
+
+  // 바텀 네비 숨길 페이지
+const excludedPaths = [
+  "/moaletter/write",
+  "/moaletter/select-photo",
+  "/moaletter/album",
+  "/moaletter/letter-detail",
+  "/moaletter/letter-saved",
+  "/moaletter/receipt",
+  "/moaletter/rolling-paper",
+
+  "/settings",
+  "/purchase-history",
+  "/notice",
+  "/customer-service",
+  "/customer-service/detail",
+  "/customer-service/write",
+  "/keyword/edit",
+  "/profile/edit",
+  "/user", 
+  "/follow-list",
+];
+
+ 
+const shouldShowBottomNav = !excludedPaths.some((path) =>
+  location.pathname.startsWith(path)
+);
+
   return (
     <div className="w-full flex flex-col items-center bg-[#FFF] h-screen">
       <div className="w-[393px] pb-[70px]">
@@ -183,10 +198,19 @@ function AppRoutes() {
           <Route path="/purchase" element={<PurchasePage />} />
           <Route path="/purchase/payment" element={<PaymentMethodPage />} />
         </Routes>
+        
       </div>
 
-    
-    </div>
+
+{shouldShowBottomNav && (
+  <div className="fixed bottom-0 w-full max-w-[393px] z-50">
+    <BottomNavigation
+      active={getActiveMenu()}
+      onNavigate={handleNavigate}
+    />
+  </div>
+        )}
+  </div>
   );
 }
 
