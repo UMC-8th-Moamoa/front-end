@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import AlarmIcon from "../../assets/Alarm.svg";
 import SearchIcon from "../../assets/Search.svg";
