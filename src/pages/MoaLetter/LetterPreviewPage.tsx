@@ -1,6 +1,7 @@
 // 모아레터 - 연도별 편지 보기 페이지 (디자인 세부 반영: 카드 흰색, 헤더 정렬, 날짜 텍스트 스타일, 점선 포함)
 import React, { useRef, useState, useEffect } from "react";
 import BottomNavigation from "../../components/common/BottomNavigation";
+import type { MenuType } from "../../components/common/BottomNavigation";
 import MoaLetterLogo from "../../assets/Moaletter.svg";
 import HorizontalIcon from "../../assets/horizontal.svg";
 import VerticalIcon from "../../assets/vertical.svg";
@@ -19,6 +20,25 @@ export default function MoaLetterPreviewPage() {
   const [isVertical, setIsVertical] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const navigate = useNavigate();
+const handleNavigate = (menu: MenuType) => {
+  switch (menu) {
+    case "shopping":
+      navigate("/shopping");
+      break;
+    case "heart":
+      navigate("/wishlist");
+      break;
+    case "home":
+      navigate("/home");
+      break;
+    case "letter":
+      navigate("/moaletter/write");
+      break;
+    case "mypage":
+      navigate("/mypage");
+      break;
+  }
+};
 
    //  mount 시 localStorage에서 불러오기
   useEffect(() => {
@@ -255,7 +275,7 @@ export default function MoaLetterPreviewPage() {
         </div>
 
         {/* 하단 네비게이션 */}
-        <BottomNavigation active="letter" onNavigate={() => {}} />
+<BottomNavigation active="letter" onNavigate={handleNavigate} />
       </div>
     </div>
   );

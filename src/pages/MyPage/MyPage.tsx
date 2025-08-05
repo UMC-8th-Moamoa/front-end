@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // navigate 추가
+import type { MenuType } from '../../components/common/BottomNavigation'; 
+
 import KeywordSection from '../../components/mypage/KeywordSection';
 import ParticipationSummary from '../../components/mypage/ParticipationSummary';
 import SettingsList from '../../components/mypage/SettingsList';
@@ -8,8 +11,31 @@ import ProfilePhotoModal from '../../components/mypage/ProfilePhotoModal';
 import ProfileCard from '../../components/mypage/ProfileCard';
 
 function MyPage() {
-  const [activeMenu, setActiveMenu] = useState<'shopping' | 'heart' | 'home' | 'letter' | 'mypage'>('mypage');
-  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열림 여부
+  const navigate = useNavigate(); // useNavigate 훅
+  const [activeMenu, setActiveMenu] = useState<MenuType>('mypage');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 라우팅 로직
+  const handleNavigate = (menu: MenuType) => {
+    setActiveMenu(menu); // 상태도 업데이트 (UI용)
+    switch (menu) {
+      case 'shopping':
+        navigate('/shopping');
+        break;
+      case 'heart':
+        navigate('/wishlist');
+        break;
+      case 'home':
+        navigate('/home');
+        break;
+      case 'letter':
+        navigate('/moaletter/write');
+        break;
+      case 'mypage':
+        navigate('/mypage');
+        break;
+    }
+  };
 
   return (
     <>
@@ -30,7 +56,7 @@ function MyPage() {
         {!isModalOpen && (
           <div className="fixed bottom-0 w-full flex justify-center bg-white">
             <div className="w-[393px]">
-              <BottomNavigation active={activeMenu} onNavigate={setActiveMenu} />
+              <BottomNavigation active={activeMenu} onNavigate={handleNavigate} />
             </div>
           </div>
         )}
@@ -47,4 +73,3 @@ function MyPage() {
 }
 
 export default MyPage;
-

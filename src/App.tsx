@@ -98,7 +98,19 @@ function AppRoutes() {
     if (location.pathname.startsWith('/mypage')) return 'mypage';
     return 'home';
   };
-
+  // 로그인/회원가입 등에서 바텀 네비 숨기기
+  const hideNavigationPaths = [
+    '/login',
+    '/signup',
+    '/signup/name',
+    '/signup/birthday',
+    '/signup/success',
+    '/reset-password',
+    '/find-id',
+  ];
+  const shouldHideNavigation = hideNavigationPaths.some(path =>
+    location.pathname.startsWith(path)
+  );
   return (
     <div className="w-full flex flex-col items-center bg-[#FFF] h-screen">
       <div className="w-[393px] pb-[70px]">
@@ -173,9 +185,7 @@ function AppRoutes() {
         </Routes>
       </div>
 
-      <div className="mt-[1px] w-[393px] fixed bottom-0 z-50 bg-[#FFF]">
-        <BottomNavigation active={getActiveMenu()} onNavigate={handleNavigate} />
-      </div>
+    
     </div>
   );
 }
