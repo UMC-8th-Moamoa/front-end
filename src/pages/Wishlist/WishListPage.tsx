@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import BottomNavigation from "../../components/common/BottomNavigation";
 import TopBar from "../../components/common/TopBar";
 import WishListSection from "../../components/WishList/WishListSection";
 
@@ -25,8 +24,6 @@ const WishListPage = () => {
         >
           <img src="/assets/GrayPlus.svg" alt="추가하기" className="w-[24px] h-[24px]" />
         </button>
-
-        <BottomNavigation />
       </div>
     </main>
   );
