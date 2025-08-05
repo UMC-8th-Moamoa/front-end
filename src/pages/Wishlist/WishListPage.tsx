@@ -1,9 +1,30 @@
 import { useNavigate } from "react-router-dom";
 import TopBar from "../../components/common/TopBar";
 import WishListSection from "../../components/WishList/WishListSection";
+import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
 
 const WishListPage = () => {
   const navigate = useNavigate();
+
+  const handleNavigate = (menu: MenuType) => {
+    switch (menu) {
+      case "shopping":
+        navigate("/shopping");
+        break;
+      case "heart":
+        navigate("/wishlist");
+        break;
+      case "home":
+        navigate("/home");
+        break;
+      case "letter":
+        navigate("/moaletter/preview");
+        break;
+      case "mypage":
+        navigate("/mypage");
+        break;
+    }
+  };
 
   return (
     <main className="min-h-screen bg-white flex justify-center">
@@ -14,20 +35,25 @@ const WishListPage = () => {
         </div>
 
         {/* ✅ 고정된 TopBar 높이만큼 여백 주기 */}
-        <div className="pt-[45px]"> {/* TopBar 높이가 56px이라는 가정 */}
+        <div className="pt-[45px]">
           <WishListSection />
         </div>
 
+        {/* ✅ 플로팅 버튼 */}
         <button
           onClick={() => navigate("/wishlist/register")}
           className="w-[70px] h-[70px] rounded-full bg-[#6282E1] shadow-[2px_4px_4px_rgba(0,0,0,0.25)] flex items-center justify-center fixed bottom-[84px] right-5 z-50"
         >
           <img src="/assets/GrayPlus.svg" alt="추가하기" className="w-[24px] h-[24px]" />
         </button>
+
+        {/* ✅ BottomNavigation */}
+        <div className="mt-[1px] w-full max-w-[393px] fixed bottom-0 z-50 bg-[#FFF]">
+          <BottomNavigation active="heart" onNavigate={handleNavigate} />
+        </div>
       </div>
     </main>
   );
 };
-
 
 export default WishListPage;

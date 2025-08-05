@@ -7,7 +7,7 @@ import SubBannerCarousel from "../../components/HomePage/Banner/SubBannerCarouse
 import FriendLetterList from "../../components/HomePage/List/Birthday/FriendLetterList";
 import UpcomingFriendList from "../../components/HomePage/List/Birthday/UpcomingFriendList";
 import PopularList from "../../components/HomePage/List/Popular/PopularList";
-import BottomNavigation from "../../components/common/BottomNavigation";
+import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
 import { dummyBirthdayBanner, dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
 import Calendar from "../../components/HomePage/Calendar/Calendar";
 import { Modal } from "../../components/common/Modal";
@@ -30,6 +30,26 @@ const HomePage = () => {
   const handleWishConfirm = () => {
     setShowWishBanner(true);
     setTimeout(() => setShowWishBanner(false), 3000);
+  };
+
+  const handleNavigate = (menu: MenuType) => {
+    switch (menu) {
+      case "shopping":
+        navigate("/shopping");
+        break;
+      case "heart":
+        navigate("/wishlist");
+        break;
+      case "home":
+        navigate("/home");
+        break;
+      case "letter":
+        navigate("/moaletter/preview");
+        break;
+      case "mypage":
+        navigate("/mypage");
+        break;
+    }
   };
 
   return (
@@ -60,7 +80,7 @@ const HomePage = () => {
 
         {/* BottomNavigation 고정 */}
         <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 bg-white w-full max-w-[393px]">
-          <BottomNavigation />
+          <BottomNavigation active="home" onNavigate={handleNavigate} />
         </footer>
 
         {/* 송금 미완료 알림 모달 */}

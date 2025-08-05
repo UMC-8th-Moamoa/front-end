@@ -1,7 +1,6 @@
-// ShoppingList.tsx
 import { useState, useEffect } from 'react';
 import ShoppingTopBar from '../../components/Shopping/ShoppingTopBar';
-import BottomNavigation from '../../components/common/BottomNavigation';
+import BottomNavigation, { type MenuType } from '../../components/common/BottomNavigation';
 import { TopMenu } from '../../components/Shopping/TopMenu';
 import { ShopHeader } from '../../components/Shopping/ShopHeader';
 import { AdBanner } from '../../components/Shopping/AdBanner';
@@ -19,10 +18,10 @@ export default function ShoppingList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const bannerImages: Record<string, string> = {
-  폰트: '/banners/font-banner.png',
-  편지지: '/banners/paper-banner.png',
-  우표: '/banners/stamp-banner.png',
-};
+    폰트: '/banners/font-banner.png',
+    편지지: '/banners/paper-banner.png',
+    우표: '/banners/stamp-banner.png',
+  };
 
   const handleBuy = (item: any) => {
     if (userMC < item.price) {
@@ -32,9 +31,7 @@ export default function ShoppingList() {
             t.visible ? 'animate-enter' : 'animate-leave'
           } bg-white rounded-xl shadow-md px-6 py-4 w-[330px] text-center`}
         >
-          <p className="text-base font-base text-black mb-2">
-            몽코인이 부족합니다
-          </p>
+          <p className="text-base font-base text-black mb-2">몽코인이 부족합니다</p>
           <button
             onClick={() => {
               toast.dismiss(t.id);
@@ -83,6 +80,26 @@ export default function ShoppingList() {
     setSelectedOption(getHeaderProps().options[0]);
   }, [selectedTab]);
 
+  const handleNavigate = (menu: MenuType) => {
+    switch (menu) {
+      case 'shopping':
+        navigate('/shopping');
+        break;
+      case 'heart':
+        navigate('/wishlist');
+        break;
+      case 'home':
+        navigate('/home');
+        break;
+      case 'letter':
+        navigate('/moaletter/preview');
+        break;
+      case 'mypage':
+        navigate('/mypage');
+        break;
+    }
+  };
+
   return (
     <div className="min-h-screen max-w-[393px] mx-auto flex flex-col justify-between bg-white">
       <div className="w-full flex flex-col justify-center relative">
@@ -102,7 +119,7 @@ export default function ShoppingList() {
 
         <TabContent
           selectedTab={selectedTab}
-          selectedOption={selectedOption} 
+          selectedOption={selectedOption}
           onItemClick={(item) => setSelectedItem(item)}
         />
 
@@ -114,7 +131,7 @@ export default function ShoppingList() {
           >
             <div
               className="relative z-60"
-              onClick={(e) => e.stopPropagation()} // 카드 내부 클릭 시 닫힘 방지
+              onClick={(e) => e.stopPropagation()}
             >
               <ItemCardDetail item={selectedItem} onBuy={handleBuy} />
             </div>
@@ -146,8 +163,9 @@ export default function ShoppingList() {
           </div>
         </Modal>
 
+        {/* 하단 네비게이션 */}
         <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 bg-white w-full max-w-[393px]">
-          <BottomNavigation />
+          <BottomNavigation active="shopping" onNavigate={handleNavigate} />
         </footer>
       </div>
       <Toaster position="top-center" reverseOrder={false} />

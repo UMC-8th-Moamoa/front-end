@@ -1,7 +1,5 @@
-// 모아레터 - 연도별 편지 보기 페이지 (디자인 세부 반영: 카드 흰색, 헤더 정렬, 날짜 텍스트 스타일, 점선 포함)
 import React, { useRef, useState, useEffect } from "react";
-import BottomNavigation from "../../components/common/BottomNavigation";
-import type { MenuType } from "../../components/common/BottomNavigation";
+import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
 import MoaLetterLogo from "../../assets/Moaletter.svg";
 import HorizontalIcon from "../../assets/horizontal.svg";
 import VerticalIcon from "../../assets/vertical.svg";
@@ -20,34 +18,35 @@ export default function MoaLetterPreviewPage() {
   const [isVertical, setIsVertical] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const navigate = useNavigate();
-const handleNavigate = (menu: MenuType) => {
-  switch (menu) {
-    case "shopping":
-      navigate("/shopping");
-      break;
-    case "heart":
-      navigate("/wishlist");
-      break;
-    case "home":
-      navigate("/home");
-      break;
-    case "letter":
-      navigate("/moaletter/write");
-      break;
-    case "mypage":
-      navigate("/mypage");
-      break;
-  }
-};
 
-   //  mount 시 localStorage에서 불러오기
+  const handleNavigate = (menu: MenuType) => {
+    switch (menu) {
+      case "shopping":
+        navigate("/shopping");
+        break;
+      case "heart":
+        navigate("/wishlist");
+        break;
+      case "home":
+        navigate("/home");
+        break;
+      case "letter":
+        navigate("/moaletter/preview");
+        break;
+      case "mypage":
+        navigate("/mypage");
+        break;
+    }
+  };
+
+  // mount 시 localStorage에서 불러오기
   useEffect(() => {
     const savedMode = localStorage.getItem("moa_view_mode");
     if (savedMode === "vertical") setIsVertical(true);
     else if (savedMode === "horizontal") setIsVertical(false);
   }, []);
 
-  //  보기 방식 전환 + 저장
+  // 보기 방식 전환 + 저장
   const toggleViewMode = () => {
     setIsVertical((prev) => {
       const next = !prev;
@@ -55,7 +54,6 @@ const handleNavigate = (menu: MenuType) => {
       return next;
     });
   };
-
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -73,7 +71,6 @@ const handleNavigate = (menu: MenuType) => {
     }
     touchStartX.current = null;
   };
-
 
   return (
     <div className="w-full max-w-[393px] min-h-screen mx-auto font-pretendard bg-[linear-gradient(169deg,#6282E1_1.53%,#FEC3FF_105.97%)]">
@@ -100,81 +97,58 @@ const handleNavigate = (menu: MenuType) => {
 
         {/* 본문 내용 */}
         <div className="flex-1 overflow-y-auto px-4">
-        {/* 세로모드 */}
+          {/* 세로모드 */}
           {isVertical ? (
             <div className="flex flex-col gap-6 pb-4 items-center">
               {mockLetters.map((letter, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col items-center gap-[2px]"
-              onClick={() => navigate("/moaletter/rolling-paper")}
-            >
+                <div
+                  key={idx}
+                  className="flex flex-col items-center gap-[2px]"
+                  onClick={() => navigate("/moaletter/rolling-paper")}
+                >
                   {/* 날짜 텍스트 */}
-                  <p
-                    className="text-white text-center text-[18px] font-medium leading-none mb-[8px]"
-                    style={{
-                      color: "#FFF",
-                      textAlign: "center",
-                      fontFamily: "Pretendard",
-                      fontSize: "18px",
-                      fontWeight: 500,
-                      lineHeight: "normal",
-                      fontStyle: "normal",
-                    }}
-                  >
+                  <p className="text-white text-center text-[18px] font-medium leading-none mb-[8px]">
                     {letter.year}
                   </p>
 
                   {/* 카드 */}
-                  <div
-                    className="relative bg-white rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] w-[350px] h-[161px] mb-[45px]"
-                    style={{ backgroundColor: "#FFF" }}
-                  >
-    {letter.hasHeart && (
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          navigate("/moaletter/receipt");
-        }}
-  className="absolute top-[12px] right-[12px] z-20 bg-transparent border-none outline-none p-0 m-0"
-      >
-        <img src={HeartIcon} alt="하트" className="w-[24px] h-[24px]" />
-      </button>
-    )}
-  </div>
-</div>
+                  <div className="relative bg-white rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] w-[350px] h-[161px] mb-[45px]">
+                    {letter.hasHeart && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/moaletter/receipt");
+                        }}
+                        className="absolute top-[12px] right-[12px] z-20 bg-transparent border-none outline-none p-0 m-0"
+                      >
+                        <img src={HeartIcon} alt="하트" className="w-[24px] h-[24px]" />
+                      </button>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
+            // 가로모드
             <div
               className="relative flex flex-col items-center justify-center h-full"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
-        {/* 가로모드 */}
               <div
                 onClick={() => navigate("/moaletter/rolling-paper")}
-
                 className="bg-white rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] relative z-10 mb-[45px]"
-                style={{
-                  width: 275,
-                  height: 508,
-                  backgroundColor: "#FFF",
-                }}
+                style={{ width: 275, height: 508 }}
               >
                 {mockLetters[currentIndex].hasHeart && (
                   <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate("/moaletter/receipt");
-                }}  
-                className="absolute top-[12px] right-[12px] z-20 bg-transparent border-none outline-none p-0 m-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/moaletter/receipt");
+                    }}
+                    className="absolute top-[12px] right-[12px] z-20 bg-transparent border-none outline-none p-0 m-0"
                   >
-                    <img
-                      src={HeartIcon}
-                      alt="하트"
-                      className="w-[24px] h-[24px]"
-                    />
+                    <img src={HeartIcon} alt="하트" className="w-[24px] h-[24px]" />
                   </button>
                 )}
               </div>
@@ -191,37 +165,33 @@ const handleNavigate = (menu: MenuType) => {
                       transform: "translateY(-50%)",
                       background:
                         "repeating-linear-gradient(to right, #FFF, #FFF 4px, transparent 4px, transparent 8px)",
-                      zIndex: 0,
                     }}
                   />
                 )}
-                {currentIndex > 0 &&
-                  currentIndex < mockLetters.length - 1 && (
-                    <>
-                      <div
-                        className="absolute left-0 h-[2px]"
-                        style={{
-                          width: "50%",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          background:
-                            "repeating-linear-gradient(to right, #FFF, #FFF 4px, transparent 4px, transparent 8px)",
-                          zIndex: 0,
-                        }}
-                      />
-                      <div
-                        className="absolute right-0 h-[2px]"
-                        style={{
-                          width: "50%",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          background:
-                            "repeating-linear-gradient(to right, #FFF, #FFF 4px, transparent 4px, transparent 8px)",
-                          zIndex: 0,
-                        }}
-                      />
-                    </>
-                  )}
+                {currentIndex > 0 && currentIndex < mockLetters.length - 1 && (
+                  <>
+                    <div
+                      className="absolute left-0 h-[2px]"
+                      style={{
+                        width: "50%",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background:
+                          "repeating-linear-gradient(to right, #FFF, #FFF 4px, transparent 4px, transparent 8px)",
+                      }}
+                    />
+                    <div
+                      className="absolute right-0 h-[2px]"
+                      style={{
+                        width: "50%",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background:
+                          "repeating-linear-gradient(to right, #FFF, #FFF 4px, transparent 4px, transparent 8px)",
+                      }}
+                    />
+                  </>
+                )}
                 {currentIndex === mockLetters.length - 1 && (
                   <div
                     className="absolute right-1/2 h-[2px]"
@@ -231,29 +201,14 @@ const handleNavigate = (menu: MenuType) => {
                       transform: "translateY(-50%)",
                       background:
                         "repeating-linear-gradient(to right, #FFF, #FFF 4px, transparent 4px, transparent 8px)",
-                      zIndex: 0,
                     }}
                   />
                 )}
-                <div
-                  className="w-[22px] h-[22px] rounded-full z-10"
-                  style={{ backgroundColor: "#FFF" }}
-                />
+                <div className="w-[22px] h-[22px] rounded-full" style={{ backgroundColor: "#FFF" }} />
               </div>
 
               {/* 날짜 텍스트 */}
-              <p
-                className="text-white text-center text-[18px] font-medium leading-none w-[97px] h-[22px]"
-                style={{
-                  color: "#FFF",
-                  textAlign: "center",
-                  fontFamily: "Pretendard",
-                  fontSize: "18px",
-                  fontWeight: 500,
-                  lineHeight: "normal",
-                  fontStyle: "normal",
-                }}
-              >
+              <p className="text-white text-center text-[18px] font-medium leading-none w-[97px] h-[22px]">
                 {mockLetters[currentIndex].year}
               </p>
 
@@ -262,11 +217,7 @@ const handleNavigate = (menu: MenuType) => {
                 {mockLetters.map((_, i) => (
                   <div
                     key={i}
-                    className={`w-2 h-2 rounded-full ${
-                      i === currentIndex
-                        ? "bg-white"
-                        : "bg-white opacity-30"
-                    }`}
+                    className={`w-2 h-2 rounded-full ${i === currentIndex ? "bg-white" : "bg-white opacity-30"}`}
                   />
                 ))}
               </div>
@@ -275,7 +226,9 @@ const handleNavigate = (menu: MenuType) => {
         </div>
 
         {/* 하단 네비게이션 */}
-<BottomNavigation active="letter" onNavigate={handleNavigate} />
+        <div className="fixed bottom-0 w-full max-w-[393px] left-1/2 -translate-x-1/2 z-50">
+          <BottomNavigation active="letter" onNavigate={handleNavigate} />
+        </div>
       </div>
     </div>
   );
