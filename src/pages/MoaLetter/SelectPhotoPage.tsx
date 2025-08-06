@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
-import CameraIcon from "../../assets/camera.svg";
+import CameraIcon from "../../assets/Camera.svg";
 
 interface AlbumItemProps {
   title: string;
