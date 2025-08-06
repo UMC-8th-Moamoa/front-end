@@ -11,7 +11,6 @@ import BottomNavigation, { type MenuType } from "../../components/common/BottomN
 import { dummyBirthdayBanner, dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
 import Calendar from "../../components/HomePage/Calendar/Calendar";
 import { Modal } from "../../components/common/Modal";
-import { popularDummy } from "../../components/HomePage/List/Popular/PopularDummy";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -27,10 +26,16 @@ const HomePage = () => {
     }
   }, [location.state]);
 
-  const handleWishConfirm = () => {
-    setShowWishBanner(true);
-    setTimeout(() => setShowWishBanner(false), 3000);
+  const handleWishConfirm = (): Promise<void> => {
+    return new Promise((resolve) => {
+      setShowWishBanner(true);
+      setTimeout(() => {
+        setShowWishBanner(false);
+        resolve();
+      }, 3000);
+    });
   };
+  
 
   const handleNavigate = (menu: MenuType) => {
     switch (menu) {
@@ -72,7 +77,7 @@ const HomePage = () => {
           <MainBanner {...dummyMainBanner} onClick={() => navigate("/moa-collected")} />
           <SubBannerCarousel />
           <FriendLetterList />
-          <PopularList items={popularDummy} onWishConfirm={handleWishConfirm} />
+          <PopularList onConfirm={handleWishConfirm} />
           <UpcomingFriendList />
           <BirthdayBanner {...dummyBirthdayBanner} />
           <Calendar />
