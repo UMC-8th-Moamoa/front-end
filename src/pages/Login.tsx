@@ -50,6 +50,10 @@ function Login() {
     }
   };
 
+  const handleKakaoLogin = () => {
+  window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/auth/kakao`;
+};
+
   return (
     <div
       className="min-h-screen max-w-[393px] mx-auto flex flex-col justify-between"
@@ -108,6 +112,7 @@ function Login() {
           fontSize='lg'
           width="full"
           className="flex items-center justify-center gap-2"
+          onClick={handleKakaoLogin}
         >
           <img src={KakaoIcon} alt="Kakao Icon" className="w-5 h-5" />
           카카오로 시작하기

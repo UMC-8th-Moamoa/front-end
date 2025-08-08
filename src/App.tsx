@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
+import { SignupProvider } from "./contexts/SignupContext";
+import OAuthCallback from './pages/OAuthCallback';
 
 // 로그인/회원가입 관련 페이지
 import Login from "./pages/Login";
@@ -39,14 +41,26 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          {/* 로그인 및 회원가입 */}
+          {/* 로그인 */}
           <Route path="/login" element={<Login />} />
           <Route path="/find-id" element={<FindIdPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/signup/name" element={<SignupNamePage />} />
-          <Route path="/signup/birthday" element={<SignupBirthdayPage />} />
-          <Route path="/signup/success" element={<SignupSuccessPage />} />
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
+
+          {/* 회원가입 페이지 */}
+          <Route
+            path="/signup/*"
+            element={
+              <SignupProvider>
+                <Routes>
+                  <Route path="" element={<SignUpPage />} />
+                  <Route path="name" element={<SignupNamePage />} />
+                  <Route path="birthday" element={<SignupBirthdayPage />} />
+                  <Route path="success" element={<SignupSuccessPage />} />
+                </Routes>
+              </SignupProvider>
+            }
+          />
 
           {/* 홈 및 기타 기능 페이지 */}
           <Route path="/home" element={<HomePage />} />
