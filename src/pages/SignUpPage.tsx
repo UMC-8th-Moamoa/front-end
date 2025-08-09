@@ -9,12 +9,27 @@ import EmailInputWithSelect from "../components/signUp/EmailInputWithSelect";
 import TermsAgreement from "../components/signUp/TermsAgreement";
 import { Modal } from "../components/common/Modal";
 import { useNavigate } from "react-router-dom";
-import {
-  registerUser,
-  checkNicknameDuplicate,
-  sendEmailCode,
-  verifyEmailCode,
-} from "../api/auth";
+import { checkNicknameDuplicate, sendEmailCode, verifyEmailCode } from "../api/auth";
+
+// 숫자만 남기기
+const onlyDigits = (v: string) => v.replace(/\D/g, "");
+
+// 010-0000-0000 형태로 포맷 (국내 휴대폰 가정)
+function formatPhone(input: string) {
+  const d = onlyDigits(input).slice(0, 11); // 최대 11자리
+  if (d.length < 4) return d;
+  if (d.length < 8) return `${d.slice(0, 3)}-${d.slice(3)}`;
+  return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7, 11)}`;
+}
+
+// 서버 요구 포맷 검증 (010-0000-0000)
+function isValidPhoneDash(v: string) {
+  return /^010-\d{4}-\d{4}$/.test(v);
+}
+
+// ✅ 아이디 허용 문자 & 길이
+const sanitizeUserId = (v: string) => v.replace(/[^\w]/g, "").slice(0, 50); // \w = [A-Za-z0-9_]
+const isValidUserId = (v: string) => /^[A-Za-z0-9_]{4,50}$/.test(v);
 
 function SignUpPage() {
   const [nickname, setNickname] = useState("");
@@ -32,6 +47,7 @@ function SignUpPage() {
 
   const [authCode, setAuthCode] = useState("");
   const [showAuthInput, setShowAuthInput] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -42,94 +58,113 @@ function SignUpPage() {
 
   const navigate = useNavigate();
 
+  // 닉네임 입력 핸들러: 허용문자만 남기고 자동 정리
+  const onChangeNickname: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const cleaned = sanitizeUserId(e.target.value);
+    setNickname(cleaned);
+    setIsChecked(false);
+    setIsDuplicate(false);
+    setErrors((prev) => ({ ...prev, id: "" }));
+  };
+
   // 닉네임 중복확인
   const handleCheckDuplicate = async () => {
+    const id = nickname; // 이미 sanitize 된 상태
+    if (!isValidUserId(id)) {
+      return alert("아이디는 4~50자의 영문/숫자/언더스코어만 가능합니다.");
+    }
     try {
-      const res = await checkNicknameDuplicate(nickname);
+      const res = await checkNicknameDuplicate(id);
       const isAvailable = res.success?.available;
-
       setIsDuplicate(!isAvailable);
       setIsChecked(true);
-
-      if (isAvailable) {
-        alert("사용 가능한 닉네임입니다.");
-      } else {
-        alert("이미 사용 중인 닉네임입니다.");
-      }
+      alert(isAvailable ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.");
     } catch (e) {
-      alert("닉네임 중복 확인 중 오류가 발생했습니다.");
       console.error(e);
+      alert("닉네임 중복 확인 중 오류가 발생했습니다.");
     }
   };
 
   // 이메일 인증코드 전송
   const handleSendAuthCode = async () => {
-  const fullEmail = `${emailId}${emailDomain}`;
-  try {
-    const res = await sendEmailCode(fullEmail, 'signup');
-    if (res.resultType === 'SUCCESS') {
-      alert(res.success.message);
-      setShowAuthInput(true);
-    } else {
-      alert(res.error?.message || '인증코드 전송 실패');
+    const fullEmail = `${emailId}${emailDomain}`;
+    if (!emailId.trim()) {
+      alert("이메일 아이디를 입력해 주세요.");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    alert('서버 오류로 인증코드 전송에 실패했습니다.');
-  }
-};
+    try {
+      setSendingEmail(true);
+      const res = await sendEmailCode(fullEmail, "signup");
+      if (res.resultType === "SUCCESS") {
+        alert(res.success?.message || "인증코드를 전송했습니다.");
+        setShowAuthInput(true);
+        setIsEmailVerified(false);
+      } else {
+        alert(res.error?.reason || "인증코드 전송 실패");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("서버 오류로 인증코드 전송에 실패했습니다.");
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   // 인증코드 확인
   const handleVerifyCode = async () => {
     const fullEmail = `${emailId}${emailDomain}`;
-    if (!authCode) {
+    if (!authCode.trim()) {
       alert("인증코드를 입력해 주세요.");
       return;
     }
     try {
       setVerifyingCode(true);
-      const res = await verifyEmailCode(fullEmail, authCode, 'signup');
+      const res = await verifyEmailCode(fullEmail, authCode.trim(), "signup");
       if (res.resultType === "SUCCESS") {
-        alert(res.success?.message ?? "이메일 인증이 완료되었습니다.");
+        setIsEmailVerified(true);
         setShowModal(true);
       } else {
-        const msg = res.error?.reason ?? (res as any).error?.message ?? "인증 실패. 코드를 확인해 주세요.";
-        alert(msg);
+        alert(res.error?.reason || "인증 실패. 코드를 확인해 주세요.");
+        setIsEmailVerified(false);
       }
     } catch (err) {
       console.error(err);
       alert("서버 오류로 인증에 실패했습니다.");
+      setIsEmailVerified(false);
     } finally {
       setVerifyingCode(false);
     }
   };
 
-  // 다음(회원가입 진행)
-  const handleSubmit = async () => {
-    if (pw !== confirmPw) {
-      setErrors({ confirmPw: "비밀번호가 일치하지 않습니다." });
-      return;
+  // 다음 스텝으로 이동 (회원가입 API는 다음 페이지에서)
+  const handleNext = () => {
+    const id = nickname; // sanitize 되어 있음
+
+    if (!isValidUserId(id)) return alert("아이디는 4~50자의 영문/숫자/언더스코어만 가능합니다.");
+    if (!isChecked) return alert("아이디 중복확인을 해주세요.");
+    if (isDuplicate) return alert("이미 사용 중인 아이디입니다.");
+
+    if (!pw || pw.length < 8) return alert("비밀번호는 8자 이상으로 입력해 주세요.");
+    if (pw !== confirmPw) return alert("비밀번호가 일치하지 않습니다.");
+
+    if (!emailId.trim()) return alert("이메일을 입력해 주세요.");
+    if (!isEmailVerified) return alert("이메일 본인인증을 완료해 주세요.");
+
+    const phoneFormatted = formatPhone(phone);
+    if (!isValidPhoneDash(phoneFormatted)) {
+      return alert("휴대폰 번호를 010-0000-0000 형식으로 입력해 주세요.");
     }
+
     const fullEmail = `${emailId}${emailDomain}`;
-    try {
-      const res = await registerUser({
+
+    navigate("/signup/name", {
+      state: {
         email: fullEmail,
         password: pw,
-        name: "", // 다음 페이지에서 입력
-        phone,
-        birthday: "", // 다음 페이지에서 입력
-      });
-
-      if (res.resultType === "SUCCESS") {
-        navigate("/signup/name");
-      } else {
-        const msg = res.error?.reason ?? (res as any).error?.message ?? "회원가입 실패";
-        alert(msg);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("서버 오류로 회원가입에 실패했습니다.");
-    }
+        phone: phoneFormatted,
+        nickname: id, // 공백/특수문자 제거된 값
+      },
+    });
   };
 
   return (
@@ -144,15 +179,15 @@ function SignUpPage() {
         {/* 아이디 + 중복확인 */}
         <InputWithButton
           value={nickname}
-          onChange={(e) => {
-            setNickname(e.target.value);
-            setIsChecked(false);
-            setErrors((prev) => ({ ...prev, id: "" }));
-          }}
+          onChange={onChangeNickname}
           onClickButton={handleCheckDuplicate}
-          placeholder="아이디"
+          placeholder="아이디 (영문/숫자/_ 4~50자)"
           buttonText="중복확인"
-          error={errors.id}
+          error={
+            nickname && !isValidUserId(nickname)
+              ? "영문/숫자/언더스코어만 가능, 4~50자"
+              : errors.id
+          }
         />
 
         {/* 비밀번호 */}
@@ -191,11 +226,11 @@ function SignUpPage() {
           </div>
         </div>
 
-        {/* 전화번호 */}
+        {/* 전화번호 (자동 포맷) */}
         <InputBox
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="전화번호(-없이 입력)"
+          onChange={(e) => setPhone(formatPhone(e.target.value))}
+          placeholder="전화번호"
           className="mb-3"
           hasBorder={false}
         />
@@ -203,9 +238,15 @@ function SignUpPage() {
         {/* 이메일 입력 + 인증 */}
         <EmailInputWithSelect
           emailId={emailId}
-          onChangeEmailId={(e) => setEmail(e.target.value)}
+          onChangeEmailId={(e) => {
+            setEmail(e.target.value);
+            setIsEmailVerified(false);
+          }}
           emailDomain={emailDomain}
-          onChangeEmailDomain={(e) => setEmailDomain(e.target.value)}
+          onChangeEmailDomain={(e) => {
+            setEmailDomain(e.target.value);
+            setIsEmailVerified(false);
+          }}
           onClickVerify={handleSendAuthCode}
         />
 
@@ -245,7 +286,13 @@ function SignUpPage() {
 
         <TermsAgreement value={terms} onChange={setTerms} />
 
-        <Button variant="primary" fontSize="xl" onClick={handleSubmit} className="w-full">
+        <Button
+          variant="primary"
+          fontSize="xl"
+          onClick={handleNext}
+          className="w-full"
+          disabled={sendingEmail || verifyingCode}
+        >
           다음
         </Button>
       </div>

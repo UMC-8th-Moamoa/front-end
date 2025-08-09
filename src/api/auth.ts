@@ -68,7 +68,18 @@ export async function registerUser(payload: {
   name: string;
   phone: string;
   birthday: string;
-}): Promise<ApiEnvelope<RegisterSuccess>> {
-  const res = await axios.post('/auth/register', payload);
-  return res.data;
+  nickname: string;
+}) {
+  try {
+    const res = await axios.post('/auth/register', payload);
+    return res.data;
+  } catch (err: any) {
+    console.error('[REGISTER ERROR]', {
+      url: err.config?.url,
+      payload: err.config?.data,
+      status: err.response?.status,
+      data: err.response?.data, 
+    });
+    throw err;
+  }
 }
