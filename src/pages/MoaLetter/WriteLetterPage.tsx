@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import LetterHeader from "../../components/moaletter/LetterHeader";
 import Toolbar from "../../components/moaletter/Toolbar";
 import FontItemList from "../../components/moaletter/FontItemList";
@@ -15,6 +15,11 @@ export default function WriteLetterPage() {
   const [letterText, setLetterText] = useState("");
   const [activeTool, setActiveTool] = useState<ToolType>("none");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const location = useLocation();
+ 
+  useEffect(() => {
+  if (location.state?.openTab === "envelope") setActiveTab("envelope");
+}, [location.state]);
 
   const handleKeyboardClick = () => {
     setActiveTool((prev) => (prev === "keyboard" ? "none" : "keyboard"));

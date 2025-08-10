@@ -24,9 +24,10 @@ export default function AlbumGridPage() {
   onClick={() => {
     if (selectedIndex !== null) {
       const dummyImageUrl = `/sample${selectedIndex + 1}.jpg`;
-      navigate("/moaletter/envelope", {
-        state: { imageUrl: dummyImageUrl },
-      });
+navigate("/moaletter/write", {
+  state: { imageUrl: dummyImageUrl, openTab: "envelope" },
+});
+
     }
   }}
   className={`text-center text-[18px] font-bold font-pretendard mr-[28px] bg-transparent border-none shadow-none outline-none p-0 ${

@@ -1,7 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import ItemCard from "./ItemCard";
 import Frame from "../../assets/Frame.svg";
-import DefaultImage from "../../assets/default.svg";
 import { useEffect, useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
 import TestImage from '../../assets/Test.png';
@@ -82,11 +81,12 @@ useEffect(() => {
     setSelectedImage(location.state.imageUrl);
     setIsCropping(true);
     setHasTriedToSelectImage(true);
-  } else {
-    setSelectedImage(null);
-    setIsCropping(false);
-    if (location.state) setHasTriedToSelectImage(true); // 사진 선택 시도는 했음
-  }
+} else {
+  // 테스트 이미지로 바로 크롭 테스트
+  setSelectedImage(TestImage);
+  setIsCropping(true);
+  setHasTriedToSelectImage(true);
+}
 }, [location.state]);
 
 
