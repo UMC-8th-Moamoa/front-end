@@ -2,16 +2,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// https://vite.dev/config/
+// vite.config.ts
 export default defineConfig({
   plugins: [tailwindcss(), react()],
   assetsInclude: ['**/*.svg'],
   server: {
     proxy: {
       '/api': {
-        target: 'http://54.180.138.131:3000', // 백엔드 주소
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        // rewrite 불필요. /api → /api 그대로면 제거 가능
       },
     },
   },

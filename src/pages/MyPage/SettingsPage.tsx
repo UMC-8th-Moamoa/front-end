@@ -89,7 +89,7 @@ export default function SettingsPage() {
 
 
       {/* 본문 */}
-      <div className="bg-white text-black max-w-[350px] mx-auto min-h-screen px-5 pb-[100px]">
+      <div className="bg-white text-black max-w-[350px] mx-auto min-h-screen px-5 mt-[10px] pb-[100px]">
         <div className="max-w-[393px] flex items-center mb-[16px]">
           <BackButton />
           <h1 className="text-[18px] font-bold flex-1 text-center -ml-6">설정</h1>

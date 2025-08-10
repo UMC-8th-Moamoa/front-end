@@ -29,9 +29,9 @@ const filteredHistory = history.filter(item => {
 
 
   return (
-    <div className="w-full max-w-[350px] mt-[9px] mx-auto bg-white min-h-screen font-pretendard">
+    <div className="w-full max-w-[350px] mt-[10px] mx-auto bg-white min-h-screen font-pretendard">
       {/* 상단 헤더 */}
-      <div className="flex items-center px-4 pt-5 pb-3">
+      <div className="flex items-center px-4 pb-3">
         <BackButton />
         <h1 className="flex-1 text-center text-[18px] font-bold leading-[22px] text-[#1F1F1F]">구매 내역</h1>
         <div className="w-5" />

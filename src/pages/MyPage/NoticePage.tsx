@@ -33,9 +33,9 @@ const NoticePage = () => {
   };
 
   return (
-    <div className="max-w-[350px] mx-auto px-4 pt-4 bg-white text-black min-h-screen">
+    <div className="max-w-[350px] mx-auto px-4 mt-[15px] bg-white text-black min-h-screen">
       {/* 상단바 */}
-      <div className="relative flex items-center justify-center mb-5 h-[60px]">
+      <div className="relative flex items-center justify-center mb-5 h-[30px]">
         {/* BackIcon - 이미지로 사용 */}
         <img
           src={BackIcon}
@@ -44,7 +44,7 @@ const NoticePage = () => {
           onClick={() => window.history.back()}
         />
 
-        <h1 className="text-[18px] font-bold text-[#1F1F1F] leading-[22px] font-pretendard">
+        <h1 className="text-[18px] font-bold text-[#1F1F1F]  font-pretendard">
           공지사항
         </h1>
       </div>
