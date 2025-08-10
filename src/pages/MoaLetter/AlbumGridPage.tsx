@@ -13,7 +13,7 @@ export default function AlbumGridPage() {
   return (
     <div className="flex flex-col items-center px-0 pt-[0px] pb-[100px] bg-white">
       {/* 상단 헤더 */}
-      <div className="w-[393px] h-[52px] flex items-center justify-between px-4 bg-white">
+      <div className="w-[393px] h-[52px] flex items-center justify-between px-2 bg-white">
         <BackButton />
         <h1 className="text-[18px] font-bold leading-[22px] text-[#1F1F1F] font-pretendard">
           사진 선택
@@ -42,7 +42,7 @@ export default function AlbumGridPage() {
       </div>
 
       {/* 사진 그리드 */}
-      <div className="grid grid-cols-3 gap-[2px] w-full max-w-[393px] mt-[4px] px-2">
+      <div className="grid grid-cols-3 gap-[4px] w-full max-w-[393px] mt-[4px]">
         {sampleImages.map((_, i) => {
           const isSelected = i === selectedIndex;
           return (

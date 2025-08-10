@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
 import CameraIcon from "../../assets/Camera.svg";
@@ -49,7 +48,7 @@ export default function SelectPhotoPage() {
   ];
 
   return (
-    <div className="flex flex-col  items-center px-4 pb-10 pt-[20px]">
+    <div className="flex flex-col  items-center px-4 pb-10 pt-[10px]">
       <div className=" flex items-center justify-between w-[393px] mb-[21px]">
         <BackButton />
         <h1 className="text-[18px] font-bold text-black font-pretendard">

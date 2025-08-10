@@ -161,10 +161,10 @@ useEffect(() => {
 
     {/* 아이템 리스트 */}
 <div
-  className="mt-[8px] w-full max-w-[390px] px-5 overflow-y-scroll"
+  className="mt-[8px] w-full max-w-[390px] px-4 mt-[20px] overflow-y-scroll"
   style={{ height: "calc(100vh - 540px)" }}
 >
-  <div className="flex flex-wrap justify-center gap-x-[10px] gap-y-[10px] mt-[2] pb-[80px]">
+   <div className="grid grid-cols-2 gap-[10px] w-full max-w-[350px]">
     {isLoading
       ? [...Array(6)].map((_, i) => (
           <ItemCard key={i} isLoading={true} label="" />

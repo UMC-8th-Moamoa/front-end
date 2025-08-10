@@ -55,8 +55,6 @@ export default function Toolbar({
     flex justify-center items-center
     rounded-full
     w-[74px] h-[40px]
-    px-[30px] py-[6px]
-    gap-[px]
     transition-all duration-200
     border-none outline-none
     appearance-none
@@ -66,17 +64,19 @@ export default function Toolbar({
     boxShadow: isActive ? "0px 4px 4px rgba(0, 0, 0, 0.10)" : "none",
   }}
 >
-  <img
-    src={isActive ? iconColor : icon}
-    alt={`${type} 버튼`}
-    className="w-5 h-5"
-  />
+<img
+  src={isActive ? iconColor : icon}
+  alt={`${type} 버튼`}
+  className={
+    type === "font"
+      ? "w-[15px] h-[20px]" // 글씨체 아이콘
+      : type === "theme"
+      ? "w-[17px] h-[22px]" // 편지지 아이콘
+      : "w-[34px] h-[34px]" // 키보드 아이콘
+  }
+/>
+
 </button>
-
-
-
-
-
       );
     })}
   </div>
