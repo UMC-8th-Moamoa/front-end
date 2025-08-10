@@ -8,22 +8,30 @@ export default function CustomerServiceDetailPage() {
   const { title, content, date, username } = state || {};
 
   return (
-    <div className="mt-[12px] flex flex-col max-w-[393px] mx-auto text-black bg-white min-h-screen px-5 pt-4">
-      {/* 상단바: 백버튼 + 유저정보 + 날짜 (한 줄 정렬) */}
-      <div className="flex justify-between items-center mb-[15px]">
+<div className="flex flex-col max-w-[393px] mx-auto text-black bg-white min-h-screen px-5 pt-[60px]">
+      {/* 상단바 - 고정 */}
+      <div
+        className="fixed top-0 left-1/2 transform -translate-x-1/2 w-[393px] h-[60px] flex justify-between items-center px-5 z-50 border-b border-[#EAEAEA] bg-white"
+      >
         <div className="flex items-center gap-[8px]">
           <BackButton />
           <div className="w-[34px] h-[34px] bg-[#97B1FF] rounded-full" />
-          <span className="text-[16px] font-semibold text-[#1F1F1F] font-pretendard">{username}</span>
+          <span className="text-[16px] font-semibold text-[#1F1F1F] font-pretendard">
+            {username ?? ''}
+          </span>
         </div>
-        <span className="text-[14px] font-normal text-[#B7B7B7] font-pretendard">{date}</span>
+        <span className="text-[14px] font-normal text-[#B7B7B7] font-pretendard">
+          {date ?? ''}
+        </span>
       </div>
 
+      
+
       {/* 구분선 */}
-      <div className="mb-[40px] w-[350px] h-[1px] bg-[#E1E1E1] mb-[20px] mx-auto" />
+      <div className=" w-[350px] h-[1px] bg-[#E1E1E1]  mx-auto" />
 
   {/* 제목 */}
-      <div className="w-[350px] mx-auto text-[18px] font-medium text-[#1F1F1F] font-pretendard mb-[8px]">
+      <div className="w-[350px] mx-auto text-[18px] font-medium text-[#1F1F1F] font-pretendard mt-[40px] mb-[8px]">
         결제에 문제가 생겼습니다
       </div>
 

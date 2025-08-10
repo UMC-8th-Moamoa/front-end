@@ -91,7 +91,7 @@ const navigate = useNavigate();
           className="mt-[100px] ml-[10px] flex w-[260px] h-[50px] justify-center items-center bg-[#6282E1] rounded-[10px] text-[#FFFFFF] text-[18px] font-bold font-pretendard"
          onClick={() => {
   alert('문의가 등록되었습니다');
-  navigate('/mypage/customer-service');
+  navigate('/customer-service');
 }}
 
         >

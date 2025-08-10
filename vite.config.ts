@@ -4,7 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-<<<<<<< HEAD
   plugins: [tailwindcss(), react()],
   assetsInclude: ['**/*.svg'],
   server: {
@@ -17,9 +16,3 @@ export default defineConfig({
     },
   },
 });
-=======
-  plugins: [react(), svgr()],
-  assetsInclude: ['**/*.svg'], 
-  base: './',
-});
->>>>>>> 8065684465d00bb329f5517eaf4c55441daa84ad

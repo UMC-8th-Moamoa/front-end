@@ -55,7 +55,6 @@ import LetterDetailPage from './pages/MoaLetter/LetterDetailPage';
 // 마이페이지 관련 페이지
 import MyPage from './pages/MyPage/MyPage';
 import ProfileEditPage from './pages/MyPage/ProfileEditPage';
-import KeywordEditPage from './pages/MyPage/KeywordEditPage';
 import SettingsPage from './pages/MyPage/SettingsPage';
 import CustomerServicePage from './pages/MyPage/CustomerServicePage';
 import CustomerServiceWritePage from './pages/MyPage/CustomerServiceWritePage';
@@ -115,7 +114,6 @@ const excludedPaths = [
   "/customer-service",
   "/customer-service/detail",
   "/customer-service/write",
-  "/keyword/edit",
   "/profile/edit",
   "/user", 
   "/follow-list",
@@ -127,8 +125,9 @@ const shouldShowBottomNav = !excludedPaths.some((path) =>
 );
 
   return (
-    <div className="w-full flex flex-col items-center bg-[#FFF] h-screen">
-      <div className="w-[393px] pb-[70px]">
+<div className="w-full flex flex-col items-center bg-white min-h-svh">
+  <div className="w-full max-w-mobile mx-auto
+                  pb-[calc(4rem+env(safe-area-inset-bottom))]">
         <Routes>
           <Route path="/" element={<Navigate to="/home" />} />
           
@@ -143,7 +142,6 @@ const shouldShowBottomNav = !excludedPaths.some((path) =>
 
           {/* 마이페이지 외부 */}
           <Route path="/profile/edit" element={<ProfileEditPage />} />
-          <Route path="/keyword/edit" element={<KeywordEditPage />} />
           <Route path="/user/:id" element={<OtherUserProfilePage />} />
           <Route path="/user/:id/wishlist" element={<OtherUserWishlistPage />} />
 
@@ -152,10 +150,10 @@ const shouldShowBottomNav = !excludedPaths.some((path) =>
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/customer-service" element={<CustomerServicePage />} />
           <Route path="/customer-service/write" element={<CustomerServiceWritePage />} />
-          <Route path="/customer-service/detail" element={<CustomerServiceDetailPage />} />
+          <Route path="/mypage/customer-service/detail" element={<CustomerServiceDetailPage />} />
           <Route path="/notice" element={<NoticePage />} />
           <Route path="/purchase-history" element={<PurchaseHistoryPage />} />
-          <Route path="/follow-list" element={<OtherUserFollowListPage />} />
+          <Route path="/mypage/follow-list" element={<OtherUserFollowListPage />} />
 
           {/* 홈/기능 */}
           <Route path="/home" element={<HomePage />} />

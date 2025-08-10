@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { MenuType } from '../../components/common/BottomNavigation'; 
 
-import KeywordSection from '../../components/mypage/KeywordSection';
 import ParticipationSummary from '../../components/mypage/ParticipationSummary';
 import SettingsList from '../../components/mypage/SettingsList';
 import BottomNavigation from '../../components/common/BottomNavigation';
@@ -46,7 +45,6 @@ function MyPage() {
       <div className="w-full flex flex-col items-center bg-white pt-[60px] pb-[80px]">
         <div className="w-[393px] mx-auto">
           <ProfileCard />
-          <KeywordSection />
           <ParticipationSummary />
           <SettingsList />
         </div>

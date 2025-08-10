@@ -59,19 +59,19 @@ const NoticePage = () => {
 >
   {/* 날짜 + 화살표 한 줄 */}
 <div className="w-full flex justify-between items-center">
-  <p className="text-[12px] text-[#B7B7B7] font-medium font-pretendard">
+  <p className="text-[12px] text-[#B7B7B7] font-medium  font-pretendard">
     {notice.date}
   </p>
   <img
     src={openId === notice.id ? UpIcon : DownIcon}
     alt="toggle"
-    className="w-[30px] h-[30px] self-center translate-y-[1px]" 
+    className="w-[30px] h-[30px] self-center translate-y-[10px]" 
   />
 </div>
 
 
   {/* 제목 아래 줄 */}
-  <p className="mt-[0px] text-[18px] font-bold text-[#1F1F1F] leading-[2px] font-pretendard"style={{ fontWeight: 700 }}
+  <p className="mt-[0px] text-[18px] font-bold text-[#1F1F1F] leading-[20px] font-pretendard"style={{ fontWeight: 700 }}
 >
     {notice.title}
   </p>
@@ -79,14 +79,14 @@ const NoticePage = () => {
 
             {/* 펼쳐진 본문 내용 */}
             {openId === notice.id && (
-              <p className="mt-0 text-[16px] leading-[20px] text-[#1F1F1F] font-pretendard font-normal">
+              <p className="mt-2 text-[16px] leading-[20px] text-[#1F1F1F] font-pretendard font-normal">
                 {notice.content}
               </p>
             )}
 
             {/* 구분선 */}
             {index < notices.length - 1 && (
-              <hr className="mt-[1px] border-t border-[#E1E1E1]" />
+              <hr className="my-[12px] border-t border-[#E1E1E1]" />
             )}
           </div>
         ))}

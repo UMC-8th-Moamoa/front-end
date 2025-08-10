@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation  } from 'react-router-dom';
 import { useState } from 'react';
 import ProfileIcon from '../../assets/profile.svg';
 import SearchIcon from '../../assets/Search.svg';
@@ -16,11 +16,15 @@ interface User {
 
 export default function OtherUserFollowListPage() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<'follower' | 'following'>('follower');
   const [showUnfollowModal, setShowUnfollowModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 const [searchTerm, setSearchTerm] = useState('');
 const [searchKeyword, setSearchKeyword] = useState(''); // 아이콘 클릭 시 적용될 실제 검색어
+
+  const location = useLocation();
+  const initialTab = location.state?.tab === 'following' ? 'following' : 'follower';
+  const [tab, setTab] = useState<'follower' | 'following'>(initialTab);
+
 const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   setSearchTerm(e.target.value);
 };
@@ -152,7 +156,7 @@ const handleConfirmUnfollow = () => {
     )}
 
       {/* 상단 바 */}
-      <div className="px-[20px] flex items-center justify-between px-4 pt- pb-4">
+      <div className="px-[20px] flex items-center justify-between pb-4">
         <BackButton />
         <div className="w-6 h-6" />
       </div>

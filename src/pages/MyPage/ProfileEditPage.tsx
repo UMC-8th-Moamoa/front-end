@@ -14,6 +14,8 @@ const [editingNickname, setEditingNickname] = useState('chaoni_gold'); // 입력
 const [savedNickname, setSavedNickname] = useState('chaoni_gold');     // 저장된 닉네임
 const [isEditing, setIsEditing] = useState(false);
 const [error, setError] = useState('');
+  const goResetPassword = () => navigate('/reset-password');
+
 // 최상단 useEffect 추가
 React.useEffect(() => {
   const stored = localStorage.getItem('savedNickname');
@@ -204,7 +206,7 @@ const handleEditToggle = () => {
           <Row label="사용자 ID" value={savedNickname} />
           <Row label="전화번호" value="010-1234-5678" />
           <Row label="이메일" value="user@email.com" />
-          <Row label="비밀번호" value="" actionLabel="변경" onActionClick={() => alert('비밀번호 변경')} />
+          <Row label="비밀번호" value="" actionLabel="변경" onActionClick={goResetPassword} />
         </div>
       </div>
 
