@@ -43,7 +43,7 @@ const WishlistItem = ({ imageSrc, title, price, openOption }: WishlistItemProps)
             {isMenuOpen && (
               <div className="absolute top-6 right-0 z-50 bg-white flex items-center rounded-[8px] shadow-md py-[4px] px-[20px] w-[96px] flex-col text-[15px]">
                 <button className="text-black text-left py-1 mt-1 hover:opacity-80">수정하기</button>
-                <button className="text-red-500 text-left py-1 hover:opacity-80 mt-2 mb-1">삭제</button>
+                <button className="text-red-500 text-left py-1 hover:opacity-80 mt-2 mb-1">삭제하기</button>
               </div>
             )}
           </div>

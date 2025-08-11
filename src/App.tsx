@@ -15,11 +15,10 @@ import SignupSuccessPage from "./pages/SignUpSuccessPage";
 import HomePage from "./pages/Home/HomePage";
 import WishListPage from "./pages/Wishlist/WishListPage";
 import WishListRegisterPage from "./pages/Wishlist/WishListRegisterPage";
-import WishListRegisterCompletePage from "./pages/Wishlist/WishListCompletePage";
 import SearchPage from "./pages/Home/SearchPage";
 import ParticipationPage from "./pages/Home/ParticipationPage";
 import VoteWishPage from "./pages/Home/VoteWishPage";
-import MoaCollectedPage from "./pages/Home/MoaCollectPage";
+import MoaCollectedPage from "./pages/Home/MoaCollectedPage";
 import PickGiftPage from "./pages/Home/PickGiftPage";
 import InputMoaMoneyPage from "./pages/Home/MoaMoney/InputMoaMoneyPage";
 import BeforeTransferPage from "./pages/Home/MoaMoney/BeforeTransferPage";
@@ -65,6 +64,7 @@ import CustomerServiceDetailPage from './pages/MyPage/CustomerServiceDetailPage'
 import OtherUserFollowListPage from './pages/MyPage/OtherUserFollowListPage';
 import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage'; 
 import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
+import SelectRemittancePage from './pages/Home/SelectRemittancePage';
 
 
 function AppRoutes() {
@@ -119,6 +119,12 @@ const excludedPaths = [
   "/profile/edit",
   "/user", 
   "/follow-list",
+
+  "/wishlist-register",
+  "/wishlist/register",
+  "/moa-collected",
+  "/pick-gift",
+  "/participation",
 ];
 
  
@@ -162,11 +168,10 @@ const shouldShowBottomNav = !excludedPaths.some((path) =>
           <Route path="/wishlist" element={<WishListPage />} />
           <Route path="/wishlist-register" element={<WishListRegisterPage />} />
           <Route path="/wishlist/register" element={<WishListRegisterPage />} />
-          <Route path="/wishlist/register/complete" element={<WishListRegisterCompletePage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/participation" element={<ParticipationPage />} />
           <Route path="/vote-wish" element={<VoteWishPage />} />
-          <Route path="/moa-collected" element={<MoaCollectedPage />} />
+          <Route path="/moa-collected" element={<MoaCollectedPage/>} />
           <Route path="/pick-gift" element={<PickGiftPage />} />
           <Route path="/input-moa-money" element={<InputMoaMoneyPage />} />
           <Route path="/before-transfer" element={<BeforeTransferPage />} />
@@ -181,6 +186,7 @@ const shouldShowBottomNav = !excludedPaths.some((path) =>
           <Route path="/receive-balance" element={<ReceiveBalancePage />} />
           <Route path="/gift-certification" element={<GiftCertificationPage />} />
           <Route path="/alarm" element={<AlarmPage />} />
+          <Route path="/select-remittance" element={<SelectRemittancePage />} />
 
           {/* 모아레터 */}
           <Route path="/moaletter/write" element={<WriteLetterPage />} />

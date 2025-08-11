@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { differenceInCalendarDays } from "date-fns";
 import EnvelopeIcon from "/assets/Envelope.svg";
 
@@ -8,6 +9,7 @@ interface FriendLetterItemProps {
 }
 
 const FriendLetterItem = ({ type, date, hasWrittenLetter }: FriendLetterItemProps) => {
+  const navigate = useNavigate();
   const today = new Date();
   const targetDate = new Date(date);
 
@@ -17,6 +19,10 @@ const FriendLetterItem = ({ type, date, hasWrittenLetter }: FriendLetterItemProp
 
   const dDay = differenceInCalendarDays(targetDate, today);
   const formattedDate = `${targetDate.getMonth() + 1}월 ${targetDate.getDate()}일`;
+
+  const handleClick = () => {
+    navigate("/moaletter/write"); // 작성/수정 버튼 클릭 시 이동
+  };
 
   return (
     <div className="flex items-center justify-between w-[350px] h-[64px]">
@@ -33,6 +39,7 @@ const FriendLetterItem = ({ type, date, hasWrittenLetter }: FriendLetterItemProp
 
       {/* 버튼 */}
       <button
+        onClick={handleClick}
         className={`text-[14px] font-bold rounded-[10px] px-6 py-[6px] border-[1px] ${
           hasWrittenLetter
             ? "text-[#6282E1] border-[#6282E1] bg-white"

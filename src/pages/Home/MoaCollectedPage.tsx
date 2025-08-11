@@ -8,10 +8,10 @@ const MoaCollectedPage = () => {
   const moaMoney = 80000;
   const [activeMenu, setActiveMenu] = React.useState<MenuType>("home");
 
-  const navigate = useNavigate(); // 👈 라우터 훅
+  const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/pick-gift"); // 👈 경로 이동
+    navigate("/pick-gift"); 
   };
 
   return (
@@ -39,14 +39,11 @@ const MoaCollectedPage = () => {
       />
 
       {/* 선물 고르기 버튼 */}
-      <div className="w-[350px] absolute bottom-[80px] left-1/2 -translate-x-1/2">
+      <div className="w-[350px] absolute bottom-[60px] left-1/2 -translate-x-1/2">
         <Button onClick={handleClick}>
           <p className="text-[20px] text-white text-center">선물 고르기</p>
         </Button>
       </div>
-
-      {/* 바텀 내비게이션 */}
-      <BottomNavigation />
     </div>
   );
 };

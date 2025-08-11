@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import WishListRegisterTopBar from "../../components/WishList/WishListRegisterTopBar";
 import AutoInputSection from "../../components/WishList/AutoInputSection";
 import ManualInputSection from "../../components/WishList/ManualInputSection";
@@ -8,16 +8,23 @@ import Button from "../../components/common/Button";
 const WishListRegisterPage = () => {
   const [selectedTab, setSelectedTab] = useState<"auto" | "manual">("auto");
   const [isPrivate, setIsPrivate] = useState(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // 페이지 진입 시 body 스크롤 막기
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   const handleSubmit = () => {
-    // 여기에 등록 로직 들어갈 수 있음
-    navigate("/wishlist/register/complete"); 
+    navigate("/wishlist", { state: { showToast: true } });
   };
 
   return (
-    <main className="h-screen bg-white flex justify-center overflow-hidden">
-      <div className="w-full max-w-[393px] flex flex-col relative">
+    <main className="h-screen w-screen bg-white flex justify-center overflow-hidden">
+      <div className="w-full max-w-[393px] h-full flex flex-col relative overflow-hidden">
         {/* 상단 탭바 */}
         <WishListRegisterTopBar
           selectedTab={selectedTab}
@@ -25,7 +32,7 @@ const WishListRegisterPage = () => {
         />
 
         {/* 입력 영역 */}
-        <div className="flex-grow overflow-y-auto px-4 pt-4 pb-[130px]">
+        <div className="flex-grow px-4 pt-4 pb-[130px] overflow-hidden">
           {selectedTab === "auto" && <AutoInputSection />}
           {selectedTab === "manual" && <ManualInputSection />}
         </div>
@@ -42,7 +49,13 @@ const WishListRegisterPage = () => {
               />
               <span>{isPrivate ? "비공개" : "공개"}</span>
             </label>
-            <Button variant="primary" size="medium" width="full" onClick={handleSubmit} className="h-[50px] text-[20px] !bg-[#6282E1] font-semibold">
+            <Button
+              variant="primary"
+              size="medium"
+              width="full"
+              onClick={handleSubmit}
+              className="h-[50px] mx-auto text-[20px] !bg-[#6282E1] font-semibold"
+            >
               등록하기
             </Button>
           </div>
