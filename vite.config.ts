@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://www.moamoas.com', // 백엔드 주소
+        target: 'http://54.180.138.131:3000', // 백엔드 주소
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
       },

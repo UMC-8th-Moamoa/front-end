@@ -136,10 +136,10 @@ export default function CustomerServicePage() {
   };
 
 return (
-  <div className="relative flex flex-col items-center bg-white max-w-[393px] min-h-screen mx-auto text-black pb-[120px]">
+  <div className="relative flex flex-col items-center bg-white ㄴmin-h-screen mx-auto text-black pb-[120px]">
     {/* 상단바 - 고정 */}
     <div
-      className="fixed top-0 left-1/2 transform -translate-x-1/2 w-[393px] h-[60px] flex items-center justify-center z-50 border-b border-[#EAEAEA]"
+      className="fixed top-0 left-1/2 transform -translate-x-1/2 w-[350px] h-[60px] flex items-center justify-center z-50 border-b border-[#EAEAEA]"
       style={{ backgroundColor: '#FFF' }}
     >
       {/* BackButton - 왼쪽 고정 */}

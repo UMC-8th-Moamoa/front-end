@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
 import ToggleSwitch from "../../components/mypage/ToggleSwitch";
+import { useNavigate } from "react-router-dom";
 
 export default function SettingsPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
+
   const [followAlert, setFollowAlert] = useState(false);
   const [birthdayAlert, setBirthdayAlert] = useState(false);
   const [birthdayTiming, setBirthdayTiming] = useState("당일");
@@ -35,10 +36,13 @@ export default function SettingsPage() {
             로그아웃 하시겠습니까?
           </p>
           <div className="flex gap-[12px] justify-center">
-            <button
-              onClick={() => setShowLogoutModal(false)}
-              className="h-[40px] px-[50px] rounded-[10px] bg-[#6282E1] text-[#FFF] text-[18px] font-medium"
-            >
+                  <button
+                    onClick={() => {
+                      setShowLogoutModal(false);
+                      navigate("/login"); // 로그아웃 → 로그인 페이지로 이동
+                    }}
+                    className="h-[40px] px-[50px] rounded-[10px] bg-[#6282E1] text-[#FFF] text-[18px] font-medium"
+                  >
               확인
             </button>
             <button
@@ -53,7 +57,7 @@ export default function SettingsPage() {
 
       {showWithdrawModal && (
         <>
-          <p className="font-semibold text-[17px] mb-[8px]"style={{ fontWeight: 700 }}>
+          <p className="font-semibold text-[17px] mb-[8px] mt-[32px]"style={{ fontWeight: 700 }}>
             회원 탈퇴하시겠습니까?
           </p>
           <p className="text-[14px] text-[#8F8F8F] leading-tight mb-[20px]"style={{ fontWeight: 500 }}>
@@ -62,9 +66,12 @@ export default function SettingsPage() {
           </p>
           <div className="flex gap-[12px] justify-center">
             <button
-              onClick={() => setShowWithdrawModal(false)}
-              className="h-[40px] px-[50px] rounded-[10px] bg-[#6282E1] text-[#FFF] text-[18px] font-medium"
-            >
+                    onClick={() => {
+                      setShowWithdrawModal(false);
+                      navigate("/login"); //  탈퇴 → 로그인 페이지로 이동
+                    }}
+                    className="h-[40px] px-[50px] rounded-[10px] bg-[#6282E1] text-[#FFF] text-[18px] font-medium"
+                  >
               확인
             </button>
             <button
@@ -82,7 +89,7 @@ export default function SettingsPage() {
 
 
       {/* 본문 */}
-      <div className="bg-white text-black max-w-[350px] mx-auto min-h-screen px-5 pb-[100px]">
+      <div className="bg-white text-black max-w-[350px] mx-auto min-h-screen px-5 mt-[10px] pb-[100px]">
         <div className="max-w-[393px] flex items-center mb-[16px]">
           <BackButton />
           <h1 className="text-[18px] font-bold flex-1 text-center -ml-6">설정</h1>
@@ -101,9 +108,9 @@ export default function SettingsPage() {
           <div className="flex justify-between items-center mt-6">
             <div className="flex items-center gap-[8px]">
               <span className="text-[18px]">생일 알림</span>
-              <div className="relative w-[69px]">
+              <div className="relative w-[72px]">
                 <button
-                  className="w-full text-[14px] font-medium text-[#1F1F1F] text-center px-[9px] py-[6px] rounded-[8px] bg-[#F2F2F2]"
+                  className="w-full text-[14px] font-medium text-[#1F1F1F] text-center  py-[6px] rounded-[8px] bg-[#F2F2F2]"
                   onClick={() => setOpenDropdown(!openDropdown)}
                 >
                   {birthdayTiming}

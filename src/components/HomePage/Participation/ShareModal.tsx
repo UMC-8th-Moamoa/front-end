@@ -1,4 +1,4 @@
-import X_logo from "../../../assets/X_logo.png";
+import X_logo from "../../../assets/X_logo.svg";
 import Kakaotalk_logo from "../../../assets/Kakaotalk_logo.svg";
 import Instagram_logo from "../../../assets/Instagram_logo.svg";
 import Discord_logo from "../../../assets/Discord_logo.svg";

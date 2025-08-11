@@ -7,6 +7,7 @@ function ProfileCard() {
   const [userId, setUserId] = useState('chaoni_gold');
   const [isEditing, setIsEditing] = useState(false);
 
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserId(e.target.value);
   };
@@ -15,9 +16,10 @@ function ProfileCard() {
     setIsEditing(false);
   };
 
-  const goToFollowList = (tab: 'follower' | 'following') => {
-    navigate(`/mypage/follow-list?tab=${tab}`);
-  };
+const goToFollowList = (tab: 'follower' | 'following') => {
+  navigate(`/mypage/follow-list`, { state: { tab } }); // state로 tab 전달
+};
+
 
   return (
     <div className="px-[20px] mt-[10px]  ">

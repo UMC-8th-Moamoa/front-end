@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import BackButton from '../../components/common/BackButton';
 import DownIcon from '../../assets/Down_color.svg';
 import UpIcon from '../../assets/Up_color.svg';
@@ -29,9 +29,9 @@ const filteredHistory = history.filter(item => {
 
 
   return (
-    <div className="w-full max-w-[350px] mt-[9px] mx-auto bg-white min-h-screen font-pretendard">
+    <div className="w-full max-w-[350px] mt-[10px] mx-auto bg-white min-h-screen font-pretendard">
       {/* 상단 헤더 */}
-      <div className="flex items-center px-4 pt-5 pb-3">
+      <div className="flex items-center px-4 pb-3">
         <BackButton />
         <h1 className="flex-1 text-center text-[18px] font-bold leading-[22px] text-[#1F1F1F]">구매 내역</h1>
         <div className="w-5" />
@@ -42,7 +42,7 @@ const filteredHistory = history.filter(item => {
       <div className="flex justify-end  relative z-10">
         {/* 드롭다운 전체 박스 */}
         <div
-          className="absolute text-[14px] w-full max-w-[99px] right-4 z-20 inline-flex flex-col items-center border border-[#C7D5FF] rounded-[8px] bg-white shadow-md"
+          className="absolute text-[14px] w-full max-w-[108px] right-4 z-20 inline-flex flex-col items-center border border-[#C7D5FF] rounded-[8px] bg-white shadow-md"
           style={{ padding: '6px 9px 6px 9px', gap: '17px', backgroundColor: '#FFF' }}
         >
 
@@ -56,7 +56,7 @@ const filteredHistory = history.filter(item => {
             <img
               src={open ? UpIcon : DownIcon}
               alt="화살표"
-              className=" ml-[10px] w-[20px] h-[20px]"
+              className=" w-[20px] h-[20px]"
             />
           </div>
 
@@ -101,7 +101,7 @@ const filteredHistory = history.filter(item => {
 
 
               {/* 둘째 줄: 몽코인 + 값 */}
-              <div className="flex justify-between mt-[8px] mb-[25px] items-center">
+              <div className="flex justify-between mt-[8px] mb-[10px] items-center">
                 <span className="text-[20px] font-pretendard font-bold text-[#1F1F1F]"style={{ fontWeight: 700 }}
 >{item.desc}</span>
                 <span

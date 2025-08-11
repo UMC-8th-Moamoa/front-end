@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import BackButton from "../../components/common/BackButton";
 import Button from "../../components/common/Button";
 import DefaultImage from "../../assets/default.svg";
 
@@ -8,11 +7,6 @@ export default function LetterSavedPage() {
 
   return (
     <div className="w-[393px] h-screen mx-auto bg-white font-pretendard overflow-hidden flex flex-col items-center relative">
-      {/* 상단 뒤로가기 버튼 */}
-      <div className="absolute left-[0px] top-[18px] z-10">
-        <BackButton />
-      </div>
-
       {/* 본문 전체 내용 */}
 <div className="flex flex-col pt-[82px] w-[350px]">
         {/* 디폴트 이미지 */}
@@ -37,7 +31,6 @@ export default function LetterSavedPage() {
 
         {/* 확인 버튼 */}
 <Button
-  size="large"
   width="fixed"
   onClick={() => navigate("/home")}
   className="w-[350px] h-[50px] bg-[#6282E1] text-[#FFF] text-[20px] rounded-[10px] border-none shadow-none focus:outline-none"

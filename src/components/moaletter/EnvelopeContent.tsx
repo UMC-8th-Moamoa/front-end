@@ -1,7 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import ItemCard from "./ItemCard";
 import Frame from "../../assets/Frame.svg";
-import DefaultImage from "../../assets/default.svg";
 import { useEffect, useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
 import TestImage from '../../assets/Test.png';
@@ -82,11 +81,12 @@ useEffect(() => {
     setSelectedImage(location.state.imageUrl);
     setIsCropping(true);
     setHasTriedToSelectImage(true);
-  } else {
-    setSelectedImage(null);
-    setIsCropping(false);
-    if (location.state) setHasTriedToSelectImage(true); // 사진 선택 시도는 했음
-  }
+} else {
+  // 테스트 이미지로 바로 크롭 테스트
+  setSelectedImage(TestImage);
+  setIsCropping(true);
+  setHasTriedToSelectImage(true);
+}
 }, [location.state]);
 
 
@@ -161,10 +161,10 @@ useEffect(() => {
 
     {/* 아이템 리스트 */}
 <div
-  className="mt-[8px] w-full max-w-[390px] px-5 overflow-y-scroll"
+  className="mt-[8px] w-full max-w-[390px] px-4 mt-[20px] overflow-y-scroll"
   style={{ height: "calc(100vh - 540px)" }}
 >
-  <div className="flex flex-wrap justify-center gap-x-[10px] gap-y-[10px] mt-[2] pb-[80px]">
+   <div className="grid grid-cols-2 gap-[10px] w-full max-w-[350px]">
     {isLoading
       ? [...Array(6)].map((_, i) => (
           <ItemCard key={i} isLoading={true} label="" />

@@ -26,7 +26,7 @@ const settings = [
           key={index}
           onClick={() => navigate(item.route)}
           style={{
-            width: "100%",
+            width: "110%",
             height: "55px",
             display: "flex",
             alignItems: "center",

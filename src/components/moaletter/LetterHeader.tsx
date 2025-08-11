@@ -12,7 +12,7 @@ export default function LetterHeader({ onSave, letterTextLength }: LetterHeaderP
   const navigate = useNavigate();
 
   return (
-<div className="relative w-[350px] h-[52px] mx-auto flex items-center justify-between px-4 pt-[20px]">
+<div className="relative w-full h-[52px] mx-auto flex items-center justify-between px-4 pt-[20px]">
       {/* 뒤로가기 버튼 */}
       <BackButton />
 

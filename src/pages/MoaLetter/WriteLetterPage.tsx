@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import LetterHeader from "../../components/moaletter/LetterHeader";
 import Toolbar from "../../components/moaletter/Toolbar";
 import FontItemList from "../../components/moaletter/FontItemList";
@@ -15,6 +15,11 @@ export default function WriteLetterPage() {
   const [letterText, setLetterText] = useState("");
   const [activeTool, setActiveTool] = useState<ToolType>("none");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const location = useLocation();
+ 
+  useEffect(() => {
+  if (location.state?.openTab === "envelope") setActiveTab("envelope");
+}, [location.state]);
 
   const handleKeyboardClick = () => {
     setActiveTool((prev) => (prev === "keyboard" ? "none" : "keyboard"));
@@ -30,9 +35,9 @@ export default function WriteLetterPage() {
   };
 
   return (
-<div className="flex flex-col h-screen w-full max-w-[393px] mx-auto bg-white font-pretendard overflow-hidden">
+<div className="flex flex-col h-screen w-full max-w-[393px] mx-auto bg-white font-pretendard overflow-visible">
       {/* 상단 헤더 */}
-<div className="sticky top-0 z-30 bg-white">
+<div className="sticky top-0 z-30 bg-white mb-[20px]">
   <LetterHeader
     onSave={() => {
       localStorage.setItem("moa_letter", letterText);
@@ -129,7 +134,7 @@ export default function WriteLetterPage() {
  {/* 바텀시트 패널 */}
 {activeTab === "letter" &&
   (activeTool === "font" || activeTool === "theme") && (
-    <div className="z-20 bg-white px-4 pb-6 shadow-inner w-full overflow-x-hidden">
+    <div className="z-20 bg-white px-[10px] py-[20px] pb-6 shadow-inner w-full overflow-x-hidden">
       <div className="max-h-[336px]">
         {activeTool === "font" && <FontItemList />}
         {activeTool === "theme" && <LetterThemeList />}

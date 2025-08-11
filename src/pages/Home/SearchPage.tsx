@@ -2,7 +2,6 @@ import { useState } from "react";
 import SearchTopBar from "../../components/HomePage/Search/SearchTopBar";
 import RecentSearchList from "../../components/HomePage/Search/RecentSearchList";
 import SearchUserList from "../../components/HomePage/Search/SearchUserList";
-import BottomNavigation from "../../components/common/BottomNavigation";
 
 const SearchPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -29,7 +28,6 @@ const SearchPage = () => {
 
         {/* 하단 네비게이션 */}
         <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] bg-white z-50">
-          <BottomNavigation />
         </footer>
       </div>
     </main>
