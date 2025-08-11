@@ -123,6 +123,12 @@ const excludedPaths = [
   "/moa-collected",
   "/pick-gift",
   "/participation",
+  "/select-remittance",
+  "/input-moa-money",
+  "/vote-wish",
+  "/before-transfer",
+  
+
 ];
 
  

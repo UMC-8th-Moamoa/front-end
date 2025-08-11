@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
-import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
 import ParticipantList from "../../components/HomePage/Participation/ParticipantList";
 
 const MoaCollectedPage = () => {

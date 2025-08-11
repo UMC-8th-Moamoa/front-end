@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
 import { differenceInCalendarDays } from "date-fns";
 import EnvelopeIcon from "/assets/Envelope.svg";
-import { useNavigate } from "react-router-dom"; //라우팅추가
+import { useNavigate } from "react-router-dom";
+
 
 interface FriendLetterItemProps {
   type: string;
@@ -13,7 +13,7 @@ const FriendLetterItem = ({ type, date, hasWrittenLetter }: FriendLetterItemProp
   const navigate = useNavigate();
   const today = new Date();
   const targetDate = new Date(date);
-  const navigate = useNavigate(); //라우팅추가
+  
   if (targetDate < today) {
     targetDate.setFullYear(today.getFullYear() + 1);
   }

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import Button from "../../components/common/Button";
-import BottomNavigation from "../../components/common/BottomNavigation";
 import WishListDummy from "../../components/WishList/WishListDummy";
 import { PickGiftList } from "../../components/HomePage/PickGift/PickGiftList";
 import { Modal } from "../../components/common/Modal";
@@ -143,7 +142,7 @@ const PickGiftPage = () => {
               선물 금액이 모인 금액을 초과했어요. <br />
               내 돈을 보태거나 선물을 다시 골라주세요.
             </p>
-            <div className="flex justify-between w-full px-3">
+            <div className="flex justify-between w-full px-3 gap-2">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="w-[92px] h-[40px] rounded-[8px] border border-[#6282E1] text-[#6282E1] text-[18px]"
