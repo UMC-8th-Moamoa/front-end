@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+// src/components/Alarm/AlarmList.tsx
+import { useEffect, useRef, useState } from "react";
 import AlarmItem from "./AlarmItem";
-import { fetchNotifications, type NotificationItem } from "../../../types/notifications";
+import { fetchNotifications, type NotificationItem, type Pagination } from "../../../services/notifications";
+
 
 const toDate = (iso: string) => {
   const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
@@ -12,26 +15,32 @@ const toDate = (iso: string) => {
 
 const AlarmList = () => {
   const [items, setItems] = useState<NotificationItem[]>([]);
+  const [pageInfo, setPageInfo] = useState<Partial<Pagination>>({});
+  const [hasUnread, setHasUnread] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
     (async () => {
-      setLoading(true);
-      setErr(null);
       try {
-        const { data } = await fetchNotifications(1, 10);
-        if (data.resultType === "SUCCESS" && data.success) {
-          setItems(data.success.notifications);
-        } else {
-          setErr(data.error ?? "오류가 발생했어요");
-        }
+        setLoading(true);
+        setErr(null);
+        const { items: list, pagination, hasUnread } = await fetchNotifications(1, 10); // ✅ 이름 변경
+        if (!mounted.current) return;
+        setItems(list);
+        setPageInfo(pagination);
+        setHasUnread(hasUnread);
+        console.log("[알림]", { count: list.length, pagination, hasUnread });
       } catch (e: any) {
-        setErr(e?.response?.data?.message || e.message || "요청 실패");
+        if (!mounted.current) return;
+        setErr(e?.response?.data?.message || e?.message || "요청 실패");
       } finally {
-        setLoading(false);
+        if (mounted.current) setLoading(false);
       }
     })();
+    return () => { mounted.current = false; };
   }, []);
 
   if (loading) return <div className="w-full text-center py-8">불러오는 중...</div>;
@@ -40,7 +49,12 @@ const AlarmList = () => {
 
   return (
     <div className="w-full">
-      {items.map(n => (
+      <div className="px-4 py-2 text-xs text-gray-500">
+        page {pageInfo.page ?? 1}/{pageInfo.totalPages ?? 0} · total {pageInfo.totalElements ?? 0} ·
+        {hasUnread ? " 🔔 미읽음 있음" : " 모두 읽음"}
+      </div>
+
+      {items.map((n) => (
         <AlarmItem key={n.id} date={toDate(n.createdAt)} content={n.message} />
       ))}
     </div>
