@@ -5,6 +5,7 @@ import HorizontalIcon from "../../assets/horizontal.svg";
 import VerticalIcon from "../../assets/vertical.svg";
 import { useNavigate } from "react-router-dom";
 import HeartIcon from "../../assets/Heart_2.svg";
+import { getLetters, type LetterItem } from "../../api/letters"; 
 
 const mockLetters = [
   { year: "2025.04.06", hasHeart: true },
@@ -16,6 +17,9 @@ const mockLetters = [
 export default function MoaLetterPreviewPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVertical, setIsVertical] = useState(false);
+  const [items, setItems] = useState<LetterItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const touchStartX = useRef<number | null>(null);
   const navigate = useNavigate();
 
@@ -46,6 +50,20 @@ export default function MoaLetterPreviewPage() {
     else if (savedMode === "horizontal") setIsVertical(false);
   }, []);
 
+  // 최초 1회 편지 목록 로드
+useEffect(() => {
+  const birthdayEventId = 7; // 실제 테스트할 이벤트 ID
+  setLoading(true);
+  getLetters(birthdayEventId, 1, 15)
+    .then((res) => {
+      setItems(res.content ?? []);
+      setError(null);
+    })
+    .catch(() => setError("편지 목록을 불러오지 못했습니다."))
+    .finally(() => setLoading(false));
+}, []);
+
+
   // 보기 방식 전환 + 저장
   const toggleViewMode = () => {
     setIsVertical((prev) => {
@@ -75,6 +93,14 @@ export default function MoaLetterPreviewPage() {
   return (
     <div className="w-full max-w-[393px] min-h-screen mx-auto font-pretendard bg-[linear-gradient(169deg,#6282E1_1.53%,#FEC3FF_105.97%)]">
       <div className="flex flex-col min-h-screen pb-[80px]">
+
+        {loading && (
+          <div className="text-white text-center py-4">불러오는 중…</div>
+        )}
+        {error && (
+          <div className="text-white text-center py-2">{error}</div>
+        )}
+
         {/* 상단 헤더 */}
         <div
           className="inline-flex items-center justify-end px-[9px] pt-[9px] pb-[9px] gap-[71px]"

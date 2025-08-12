@@ -29,7 +29,7 @@ export default function RollingPaperGridPage() {
   };
 
   return (
-    <div className="relative w-[393px] h-[794px] mx-auto bg-gradient-to-b from-[#6B8EE6] to-[#DBAFFE] overflow-hidden pt-[40px] px-4 pb-[20px]">
+    <div className="relative w-[393px] h-[794px] mx-auto bg-gradient-to-b from-[#6B8EE6] to-[#DBAFFE] overflow-hidden pt-[10px] px-4 pb-[20px]">
 <img
   src={Triangle}
   alt="우상단 삼각형"
@@ -69,7 +69,7 @@ export default function RollingPaperGridPage() {
 
       {/* 카드 표시 */}
 {mockLetters.length === 1 ? (
-  <div className="flex justify-center items-center h-full">
+  <div className="flex justify-center mt-[190px]">
     <div
       className="flex-shrink-0 cursor-pointer flex justify-center items-center"
       style={cardStyle}
