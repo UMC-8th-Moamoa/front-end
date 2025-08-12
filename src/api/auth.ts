@@ -1,5 +1,5 @@
 // src/api/auth.ts
-import axiosProxy from './axiosInstance'; // 프록시(/api)용 인스턴스
+import axiosProxy from './axiosInstance'; 
 import axios from 'axios';
 
 // 인증 도메인(절대 URL)
@@ -19,9 +19,12 @@ type RegisterSuccess = {
   user: { id: number; email: string; name: string };
   tokens?: { accessToken: string; refreshToken: string };
 };
+type FindIdSuccess = {
+  user_id?: string;  
+  message?: string;   
+};
 
 // 1) 아이디(닉네임) 중복 확인 — 프록시 사용
-//    (선택) AbortController 신호 지원
 export async function checkNicknameDuplicate(
   nickname: string,
   signal?: AbortSignal
@@ -30,7 +33,7 @@ export async function checkNicknameDuplicate(
   return res.data;
 }
 
-// 2) 이메일 인증코드 전송 — 현재 쿠키 불필요(임시)
+// 2) 이메일 인증코드 전송 
 export async function sendEmailCode(
   email: string,
   purpose: 'signup' | 'reset'
@@ -81,4 +84,22 @@ export async function registerUser(payload: {
     });
     throw err;
   }
+}
+
+  export async function findUserId(email: string) {
+    const res = await axiosProxy.post('/auth/find-id', { email });
+    return res.data;
+}
+
+export async function resetPassword(payload: {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}) {
+  const res = await fetch("/api/auth/change-password", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return res.json();
 }

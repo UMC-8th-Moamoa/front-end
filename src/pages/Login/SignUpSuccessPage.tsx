@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import Button from '../components/common/Button';
+import Button from '../../components/common/Button';
 
 type SuccessState = {
   name?: string;
