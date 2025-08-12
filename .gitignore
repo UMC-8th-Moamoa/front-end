@@ -137,8 +137,6 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
-<<<<<<< HEAD
-=======
 
 pnpm-debug.log*
 lerna-debug.log*
@@ -159,4 +157,5 @@ dist-ssr
 *.sln
 *.sw?
 
->>>>>>> d51d00f8fa47f4e558a84e58cd71d7fdc394b8fc
+
+.vercel

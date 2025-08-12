@@ -17,7 +17,7 @@ const UpcomingFriendList = () => {
 
   return (
     <section className="mt-[30px] px-4">
-      <h2 className="text-[18px] font-semibold text-black px-1 mb-[16px]">
+      <h2 className="text-[18px] font-semibold text-[#6282E1] px-1 mb-[16px]">
         다가오는 친구의 생일
       </h2>
       {sortedList.map((friend, idx) => (
@@ -25,6 +25,7 @@ const UpcomingFriendList = () => {
           key={idx}
           name={friend.name}
           birthday={friend.birthday}
+          image={friend.image} // ✅ 이 부분 추가
         />
       ))}
     </section>

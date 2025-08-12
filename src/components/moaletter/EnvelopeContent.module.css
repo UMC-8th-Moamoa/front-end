@@ -1,0 +1,7 @@
+/* EnvelopeContent.module.css */
+.cropArea {
+  border-radius: 20px !important;
+  background: #F2F2F2 !important;
+    overflow: hidden;
+
+}

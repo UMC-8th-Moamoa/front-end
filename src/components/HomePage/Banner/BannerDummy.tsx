@@ -1,17 +1,18 @@
 import type { SubBannerProps, MainBannerProps } from "../../../types/banner";
+import DefaultProfile from "../../../assets/DefaultProfile.svg";
+
 
 // SubBanner 더미 데이터
 export const dummySubBanners: SubBannerProps[] = [
   {
-    imageSrc: "/assets/user.png",
+    imageSrc: DefaultProfile,
     content: '유민님의 모아모아 참여 중',
     buttonText: '진행도 보러 가기',
     variant: "default"
   },
   {
-    imageSrc: "/assets/Money.svg" ,
-    content: '채원님 모아에서\n 잔액이 돌아왔습니다',
-    variant: "highlight"
+    imageSrc: "/assets/GiftCertificationBanner.svg",
+    variant: "imageOnly" // 텍스트 없는 이미지 배너
   },
 ];
 

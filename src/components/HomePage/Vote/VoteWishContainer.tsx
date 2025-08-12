@@ -14,12 +14,12 @@ const VoteWishContainer = () => {
   return (
     <div className="w-full max-w-[350px] mx-auto flex flex-col items-center pt-[10px]">
       {/* 타이틀 */}
-      <h2 className="text-[18px] font-semibold text-black  ml-5 mb-1 text-left w-full">
+      <h2 className="text-[18px] font-semibold text-[#6282E1]  ml-5 mb-1 text-left w-full">
         선물 투표하기
       </h2>
 
       {/* 리스트 */}
-      <div className="flex-1 w-full h-[445px] scrollbar-hide mb-4">
+      <div className="flex-1 w-full h-[445px] scrollbar-hide mb-4 mt-1">
         {hasVoted ? (
           <VoteWishResult />
         ) : (
@@ -30,12 +30,12 @@ const VoteWishContainer = () => {
       {/* 버튼 */}
       <button
         className={`w-full h-[50px] text-[20px] font-semibold rounded-[12px] ${
-          hasVoted ? "border border-black text-black bg-white" : "bg-black text-white"
+          hasVoted ? "text-white bg-[#C7D5FF]" : "bg-[#6282E1] text-white"
         }`}
         onClick={handleVote}
         disabled={hasVoted}
       >
-        {hasVoted ? "투표하기" : "투표하기"}
+        {hasVoted ? "다시 투표" : "투표하기"}
       </button>
     </div>
   );

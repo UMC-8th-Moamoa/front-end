@@ -19,6 +19,7 @@ interface BottomNavigationProps {
 }
 
 function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
+
   // 하단바에 표시할 메뉴 아이콘 목록 정의 
   const menuList = [
     { key: 'shopping', icon: ShoppingBagIcon, activeIcon: ShoppingBagIconActive },
@@ -43,7 +44,6 @@ function BottomNavigation({ active, onNavigate }: BottomNavigationProps) {
         left: 0,
         right: 0,
         margin: '0 auto', // 화면 중앙 정렬
-        borderTop: '1px solid #ddd', // 상단 테두리
         borderRadius: '20px 20px 0 0', // 상단 모서리 둥글게
         background: '#FFF',
         zIndex: 1000, // 다른 요소보다 위에 배치
