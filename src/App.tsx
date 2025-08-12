@@ -3,16 +3,16 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'r
 import BottomNavigation, { type MenuType } from './components/common/BottomNavigation';
 import { useLocation } from 'react-router-dom';
 import { SignupProvider } from "./contexts/SignupContext";
-import OAuthCallback from './pages/OAuthCallback';
+import OAuthCallback from './pages/Login/OAuthCallback';
 
 // 로그인/회원가입 관련 페이지
 import Login from "./pages/Login/Login";
-import FindIdPage from "./pages/FindIdPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import SignUpPage from "./pages/SignUpPage";
-import SignupNamePage from "./pages/SignUpNamePage";
-import SignupBirthdayPage from "./pages/SignUpBirthdayPage";
-import SignupSuccessPage from "./pages/SignUpSuccessPage";
+import FindIdPage from "./pages/Login/FindIdPage";
+import ResetPasswordPage from "./pages/Login/ResetPasswordPage";
+import SignUpPage from "./pages/Login/SignUpPage";
+import SignupNamePage from "./pages/Login/SignUpNamePage";
+import SignupBirthdayPage from "./pages/Login/SignUpBirthdayPage";
+import SignupSuccessPage from "./pages/Login/SignUpSuccessPage";
 
 // 홈/기능 관련 페이지
 import HomePage from "./pages/Home/HomePage";
@@ -130,7 +130,9 @@ function AppRoutes() {
     "/vote-wish",
     "/before-transfer",
     
-
+    "/login",
+    "/find-id",
+    "/reset-password",
   ];
 
 

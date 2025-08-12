@@ -1,15 +1,15 @@
 // src/pages/SignUpPage.tsx
 import React, { useState } from "react";
-import BackButton from "../components/common/BackButton";
-import InputBox from "../components/common/InputBox";
-import Button from "../components/common/Button";
-import InputWithButton from "../components/signUp/InputWithButton";
-import VisibilityToggle from "../components/common/VisibilityToggle";
-import EmailInputWithSelect from "../components/signUp/EmailInputWithSelect";
-import TermsAgreement from "../components/signUp/TermsAgreement";
-import { Modal } from "../components/common/Modal";
+import BackButton from "../../components/common/BackButton";
+import InputBox from "../../components/common/InputBox";
+import Button from "../../components/common/Button";
+import InputWithButton from "../../components/signUp/InputWithButton";
+import VisibilityToggle from "../../components/common/VisibilityToggle";
+import EmailInputWithSelect from "../../components/signUp/EmailInputWithSelect";
+import TermsAgreement from "../../components/signUp/TermsAgreement";
+import { Modal } from "../../components/common/Modal";
 import { useNavigate } from "react-router-dom";
-import { checkNicknameDuplicate, sendEmailCode, verifyEmailCode } from "../api/auth";
+import { checkNicknameDuplicate, sendEmailCode, verifyEmailCode } from "../../api/auth";
 
 // 숫자만 남기기
 const onlyDigits = (v: string) => v.replace(/\D/g, "");
