@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // 환경별 baseURL 설정
 const instance = axios.create({
-  baseURL: '/api',     
+  baseURL: '/api',
   withCredentials: true, // 쿠키 전송 필요시 true
 });
 

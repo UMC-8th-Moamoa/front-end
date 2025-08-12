@@ -8,8 +8,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://www.moamoas.com',
+        target: 'https://www.moamoas.com',
         changeOrigin: true,
+        secure: false,
 
         // ✅ 로그 출력 추가!
         configure: (proxy, options) => {

@@ -14,9 +14,9 @@ import { checkNicknameDuplicate, sendEmailCode, verifyEmailCode } from "../api/a
 // 숫자만 남기기
 const onlyDigits = (v: string) => v.replace(/\D/g, "");
 
-// 010-0000-0000 형태로 포맷 (국내 휴대폰 가정)
+// 010-0000-0000 형태로 포맷
 function formatPhone(input: string) {
-  const d = onlyDigits(input).slice(0, 11); // 최대 11자리
+  const d = onlyDigits(input).slice(0, 11);
   if (d.length < 4) return d;
   if (d.length < 8) return `${d.slice(0, 3)}-${d.slice(3)}`;
   return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7, 11)}`;
@@ -27,7 +27,7 @@ function isValidPhoneDash(v: string) {
   return /^010-\d{4}-\d{4}$/.test(v);
 }
 
-// ✅ 아이디 허용 문자 & 길이
+// 아이디 허용 문자 & 길이
 const sanitizeUserId = (v: string) => v.replace(/[^\w]/g, "").slice(0, 50); // \w = [A-Za-z0-9_]
 const isValidUserId = (v: string) => /^[A-Za-z0-9_]{4,50}$/.test(v);
 
@@ -68,49 +68,71 @@ function SignUpPage() {
   };
 
   // 닉네임 중복확인
-  const handleCheckDuplicate = async () => {
-    const id = nickname; // 이미 sanitize 된 상태
-    if (!isValidUserId(id)) {
-      return alert("아이디는 4~50자의 영문/숫자/언더스코어만 가능합니다.");
-    }
-    try {
-      const res = await checkNicknameDuplicate(id);
-      const isAvailable = res.success?.available;
-      setIsDuplicate(!isAvailable);
-      setIsChecked(true);
-      alert(isAvailable ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.");
-    } catch (e) {
-      console.error(e);
-      alert("닉네임 중복 확인 중 오류가 발생했습니다.");
-    }
-  };
+  const abortRef = React.useRef<AbortController | null>(null);
+
+const handleCheckDuplicate = async () => {
+  const id = sanitizeUserId(nickname.trim()); // 서버에 보낼 최종 문자열
+  if (!isValidUserId(id)) {
+    alert('아이디는 4~50자의 영문/숫자/언더스코어만 가능합니다.');
+    return;
+  }
+
+  // 이전 요청 취소
+  abortRef.current?.abort();
+  const ctrl = new AbortController();
+  abortRef.current = ctrl;
+
+  // 이 버튼을 눌렀을 때의 아이디(스냅샷)
+  const queriedId = id;
+
+  try {
+    const res = await checkNicknameDuplicate(queriedId, ctrl.signal);
+
+    // 응답이 왔을 때 입력값이 바뀌었으면 무시
+    if (sanitizeUserId(nickname.trim()) !== queriedId) return;
+
+    const isAvailable = res.success?.available === true;
+    setIsDuplicate(!isAvailable);
+    setIsChecked(true);
+    alert(isAvailable ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.');
+  } catch (e: any) {
+    if (e.name === 'CanceledError' || e.code === 'ERR_CANCELED') return;
+    console.error(e);
+    alert('닉네임 중복 확인 중 오류가 발생했습니다.');
+  }
+};
 
   // 이메일 인증코드 전송
   const handleSendAuthCode = async () => {
     const fullEmail = `${emailId}${emailDomain}`;
     if (!emailId.trim()) {
-      alert("이메일 아이디를 입력해 주세요.");
+      alert("이메일을 입력해 주세요.");
       return;
     }
     try {
       setSendingEmail(true);
       const res = await sendEmailCode(fullEmail, "signup");
-      if (res.resultType === "SUCCESS") {
-        alert(res.success?.message || "인증코드를 전송했습니다.");
+      console.log('sendEmailCode returned:', res);
+
+      // 상태코드별 UX
+      if (res.resultType === 'SUCCESS') {
+        alert(res.success?.message || '인증코드를 전송했습니다.');
         setShowAuthInput(true);
         setIsEmailVerified(false);
       } else {
-        alert(res.error?.reason || "인증코드 전송 실패");
+        // 서버가 FAIL일 때만 여기로
+        alert(res.error?.reason || '인증코드 전송 실패');
       }
-    } catch (err) {
-      console.error(err);
-      alert("서버 오류로 인증코드 전송에 실패했습니다.");
+    } catch (e: any) {
+      const msg = e?.response?.data?.error?.reason || e.message || "서버 오류로 전송 실패";
+      console.error(e);
+      alert(msg);
     } finally {
       setSendingEmail(false);
     }
   };
 
-  // 인증코드 확인
+  // 인증코드 확인 (쿠키에 담긴 토큰으로 검증)
   const handleVerifyCode = async () => {
     const fullEmail = `${emailId}${emailDomain}`;
     if (!authCode.trim()) {
@@ -127,9 +149,10 @@ function SignUpPage() {
         alert(res.error?.reason || "인증 실패. 코드를 확인해 주세요.");
         setIsEmailVerified(false);
       }
-    } catch (err) {
-      console.error(err);
-      alert("서버 오류로 인증에 실패했습니다.");
+    } catch (e: any) {
+      const msg = e?.response?.data?.error?.reason || e.message || "서버 오류로 인증 실패";
+      console.error(e);
+      alert(msg);
       setIsEmailVerified(false);
     } finally {
       setVerifyingCode(false);
@@ -162,7 +185,7 @@ function SignUpPage() {
         email: fullEmail,
         password: pw,
         phone: phoneFormatted,
-        nickname: id, // 공백/특수문자 제거된 값
+        nickname: id,
       },
     });
   };
@@ -182,7 +205,7 @@ function SignUpPage() {
           onChange={onChangeNickname}
           onClickButton={handleCheckDuplicate}
           placeholder="아이디 (영문/숫자/_ 4~50자)"
-          buttonText="중복확인"
+          buttonText={isChecked ? "다시확인" : "중복확인"}
           error={
             nickname && !isValidUserId(nickname)
               ? "영문/숫자/언더스코어만 가능, 4~50자"

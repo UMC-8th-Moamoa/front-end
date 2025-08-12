@@ -9,17 +9,15 @@ type PrevState = {
   email: string;
   password: string;
   phone: string;
-  nickname: string; 
+  nickname: string;
   name: string;
 };
-
 
 const SignupBirthdayPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const prev = (location.state || {}) as Partial<PrevState>;
 
-  // 이전 스텝 값이 없으면 첫 화면으로
   const isMissingPrev = useMemo(
     () => !(prev.email && prev.password && prev.phone && prev.nickname && prev.name),
     [prev]
@@ -31,7 +29,7 @@ const SignupBirthdayPage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    const birthday = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // 예: 2000-01-01
+    const birthday = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 
     try {
       setLoading(true);
@@ -39,14 +37,17 @@ const SignupBirthdayPage = () => {
         email: prev.email!,        
         password: prev.password!,  
         name: prev.name!,         
-        phone: prev.phone!,      
-        birthday,     
-        nickname: prev.nickname!,  
-        user_id: prev.nickname!,    // 임시 매핑: userId = nickname
+        phone: prev.phone!,       
+        birthday,                 
+        nickname: prev.nickname!, 
+        user_id: prev.nickname!,
       });
 
       if (res.resultType === 'SUCCESS') {
-        navigate('/signup/success', { replace: true });
+        navigate('/signup/success', {
+          replace: true,
+          state: { name: prev.name!, user_id: prev.nickname! },
+        });
       } else {
         const msg = res.error?.reason ?? '회원가입에 실패했습니다.';
         alert(msg);
@@ -74,6 +75,7 @@ const SignupBirthdayPage = () => {
         <span className="text-3xl text-[#6282E1] font-bold">생일</span>
         <span className="text-3xl font-base">을 입력해 주세요</span>
       </h1>
+
       <p className="text-lg text-gray-500 mb-10">
         이 정보는 추후에 수정이 불가능합니다
         <br />
