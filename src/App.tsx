@@ -1,6 +1,9 @@
+// src/App.tsx
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import BottomNavigation, { type MenuType } from './components/common/BottomNavigation';
 import { useLocation } from 'react-router-dom';
+import { SignupProvider } from "./contexts/SignupContext";
+import OAuthCallback from './pages/OAuthCallback';
 
 // 로그인/회원가입 관련 페이지
 import Login from "./pages/Login/Login";
@@ -34,11 +37,11 @@ import ReturnToFriendCompletePage from "./pages/Home/MoaMoney/ReturnToFriendComp
 import ReceiveBalancePage from "./pages/Home/MoaMoney/ReceiveBalancePage";
 import GiftCertificationPage from "./pages/Home/GiftCertificationPage";
 import AlarmPage from "./pages/Home/AlarmPage";
+
 // 쇼핑/결제페이지
 import ShoppingList from "./pages/Shopping/ShoppingList";
 import PurchasePage from "./pages/Purchase/PurchasePage";
 import PaymentMethodPage from "./pages/Purchase/PaymentMethodPage";
-
 
 // 모아레터 관련 페이지
 import WriteLetterPage from "./pages/MoaLetter/WriteLetterPage";
@@ -50,7 +53,6 @@ import AlbumGridPage from "./pages/MoaLetter/AlbumGridPage";
 import RollingPaperGridPage from "./pages/MoaLetter/RollingPaperPage";
 import ReceiptPage from "./pages/MoaLetter/ReceiptPage";
 import LetterDetailPage from './pages/MoaLetter/LetterDetailPage';
-
 
 // 마이페이지 관련 페이지
 import MyPage from './pages/MyPage/MyPage';
@@ -64,7 +66,6 @@ import CustomerServiceDetailPage from './pages/MyPage/CustomerServiceDetailPage'
 import OtherUserFollowListPage from './pages/MyPage/OtherUserFollowListPage';
 import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage'; 
 import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
-
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -99,46 +100,57 @@ function AppRoutes() {
   };
 
   // 바텀 네비 숨길 페이지
-const excludedPaths = [
-  "/moaletter/write",
-  "/moaletter/select-photo",
-  "/moaletter/album",
-  "/moaletter/letter-detail",
-  "/moaletter/letter-saved",
-  "/moaletter/receipt",
-  "/moaletter/rolling-paper",
+  const excludedPaths = [
+    "/moaletter/write",
+    "/moaletter/select-photo",
+    "/moaletter/album",
+    "/moaletter/letter-detail",
+    "/moaletter/letter-saved",
+    "/moaletter/receipt",
+    "/moaletter/rolling-paper",
 
-  "/settings",
-  "/purchase-history",
-  "/notice",
-  "/customer-service",
-  "/customer-service/detail",
-  "/customer-service/write",
-  "/profile/edit",
-  "/user", 
-  "/follow-list",
-];
+    "/settings",
+    "/purchase-history",
+    "/notice",
+    "/customer-service",
+    "/customer-service/detail",
+    "/customer-service/write",
+    "/profile/edit",
+    "/user", 
+    "/follow-list",
+  ];
 
- 
-const shouldShowBottomNav = !excludedPaths.some((path) =>
-  location.pathname.startsWith(path)
-);
+  const shouldShowBottomNav = !excludedPaths.some((path) =>
+    location.pathname.startsWith(path)
+  );
 
   return (
-<div className="w-full flex flex-col items-center bg-white min-h-svh">
-  <div className="w-full max-w-mobile mx-auto
-                  pb-[calc(4rem+env(safe-area-inset-bottom))]">
+    <div className="w-full flex flex-col items-center bg-white min-h-svh">
+      <div className="w-full max-w-mobile mx-auto pb-[calc(4rem+env(safe-area-inset-bottom))]">
         <Routes>
+          {/* 루트는 홈으로 리다이렉트 */}
           <Route path="/" element={<Navigate to="/home" />} />
-          
+
           {/* 로그인/회원가입 */}
           <Route path="/login" element={<Login />} />
           <Route path="/find-id" element={<FindIdPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/signup/name" element={<SignupNamePage />} />
-          <Route path="/signup/birthday" element={<SignupBirthdayPage />} />
-          <Route path="/signup/success" element={<SignupSuccessPage />} />
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
+
+          {/* 회원가입(스텝) */}
+          <Route
+            path="/signup/*"
+            element={
+              <SignupProvider>
+                <Routes>
+                  <Route path="" element={<SignUpPage />} />
+                  <Route path="name" element={<SignupNamePage />} />
+                  <Route path="birthday" element={<SignupBirthdayPage />} />
+                  <Route path="success" element={<SignupSuccessPage />} />
+                </Routes>
+              </SignupProvider>
+            }
+          />
 
           {/* 마이페이지 외부 */}
           <Route path="/profile/edit" element={<ProfileEditPage />} />
@@ -196,22 +208,19 @@ const shouldShowBottomNav = !excludedPaths.some((path) =>
           <Route path="/purchase" element={<PurchasePage />} />
           <Route path="/purchase/payment" element={<PaymentMethodPage />} />
         </Routes>
-        
       </div>
 
-
-{shouldShowBottomNav && (
-  <div className="fixed bottom-0 w-full max-w-[393px] z-50">
-    <BottomNavigation
-      active={getActiveMenu()}
-      onNavigate={handleNavigate}
-    />
-  </div>
-        )}
-  </div>
+      {shouldShowBottomNav && (
+        <div className="fixed bottom-0 w-full max-w-[393px] z-50">
+          <BottomNavigation
+            active={getActiveMenu()}
+            onNavigate={handleNavigate}
+          />
+        </div>
+      )}
+    </div>
   );
 }
-
 
 export default function App() {
   return (
