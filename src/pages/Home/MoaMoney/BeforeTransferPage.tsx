@@ -1,7 +1,6 @@
 // BeforeTransferPage.tsx
 import BackButton from "../../../components/common/BackButton";
 import Button from "../../../components/common/Button";
-import BottomNavigation from "../../../components/common/BottomNavigation";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const BeforeTransferPage = () => {
@@ -53,8 +52,6 @@ const BeforeTransferPage = () => {
         </div>
       </main>
 
-      {/* 하단 네비게이션 */}
-      <BottomNavigation />
     </div>
   );
 };

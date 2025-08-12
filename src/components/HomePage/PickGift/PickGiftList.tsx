@@ -9,7 +9,7 @@ interface PickGiftListProps {
 
 export const PickGiftList = ({ items, checkedItems, onChange }: PickGiftListProps) => {
   return (
-    <div className="w-[350px] max-h-[430px] overflow-y-auto flex flex-col gap-2 px-1">
+    <div className="w-[350px] max-h-[450px] overflow-y-auto flex flex-col gap-2 px-1">
       {items.map((item) => (
         <PickGiftItem
           key={item.id}

@@ -8,25 +8,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
+
         target: 'https://www.moamoas.com',
         changeOrigin: true,
         secure: false,
-
-        // ✅ 로그 출력 추가!
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log(`[🔁 PROXY_REQ] ${req.method} ${req.url}`);
-          });
-
-          proxy.on('proxyRes', (proxyRes, req, res) => {
-            console.log(`[✅ PROXY_RES] ${req.method} ${req.url} -> ${proxyRes.statusCode}`);
-          });
-
-          proxy.on('error', (err, req, res) => {
-            console.error(`[❌ PROXY_ERROR] ${req.method} ${req.url} - ${err.message}`);
-          });
-        },
       },
     },
   },
 });
+

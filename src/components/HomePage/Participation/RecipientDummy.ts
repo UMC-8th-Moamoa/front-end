@@ -1,7 +1,7 @@
 export const recipientDummy = {
   name: "금채원",
   userId: "chaoni_gold",
-  birthday: "2025-08-06",
+  birthday: "2025-08-11",
   profile: "profile.svg",
   wishList: [
     {

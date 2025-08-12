@@ -1,10 +1,24 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import TopBar from "../../components/common/TopBar";
 import WishListSection from "../../components/WishList/WishListSection";
 import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
 
 const WishListPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.showToast) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   const handleNavigate = (menu: MenuType) => {
     switch (menu) {
@@ -33,6 +47,16 @@ const WishListPage = () => {
         <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[393px] z-50 bg-white">
           <TopBar />
         </div>
+
+        {/* ✅ 등록 완료 안내 토스트 */}
+        {showToast && (
+          <div className="fixed top-[16px] left-1/2 -translate-x-1/2 z-[999]">
+            <div className="w-[350px] h-[77px] bg-white rounded-[12px] shadow-sm flex flex-col items-center justify-center text-center">
+              <p className="text-[18px] text-[#000000]">위시리스트 등록 완료</p>
+              <p className="text-[16px] text-[#A0A0A0]">언제든 수정, 삭제할 수 있습니다</p>
+            </div>
+          </div>
+        )}
 
         {/* ✅ 고정된 TopBar 높이만큼 여백 주기 */}
         <div className="pt-[45px]">

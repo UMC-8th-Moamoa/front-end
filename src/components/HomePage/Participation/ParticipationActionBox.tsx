@@ -24,7 +24,7 @@ const ParticipationActionBox = ({
           <Button
             width="fixed"
             size="medium"
-            onClick={() => navigate("/input-moa-money")}
+            onClick={() => navigate("/select-remittance")}
             className="text-white w-[288px] h-[50px] !font-normal !bg-[#6282E1]"
           >
             모아 참여하기

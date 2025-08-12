@@ -8,12 +8,12 @@ export interface PopularWishlistItem {
     rank: number;
   }
   
+  
   export interface PopularWishlistResponse {
     resultType: "SUCCESS" | "FAIL";
     error: string | null;
     success?: {
-      products: PopularWishlistItem[]; // ← popularWishlists → products로 변경
-      total: number;                   // ← total 필드 추가
+      products: PopularWishlistItem[];              
       metadata?: {
         ageGroup: string;
         updatedAt: string;

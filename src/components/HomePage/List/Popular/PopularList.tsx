@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import PopularItem from "./PopularItem";
 import type { PopularWishlistItem, PopularWishlistResponse } from "../../../../types/wishlist";
+import api from "../../../../services/api";
+
 
 export interface PopularListProps {
   onConfirm: () => Promise<void>;
@@ -12,40 +14,18 @@ const PopularList = ({ onConfirm }: PopularListProps) => {
   useEffect(() => {
     const fetchPopularWishlists = async () => {
       try {
-
-        const token = import.meta.env.VITE_TEMP_ACCESS_TOKEN;
-      
-        const res = await fetch("/api/wishlists/popular", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) {
-          console.error("❌ API 응답 실패:", res.status, res.statusText);
-          setItems([]);
-          return;
-        }
-
-        const data: PopularWishlistResponse = await res.json();
-        console.log("📌 API 응답 데이터:", data);
-
-        if (
-          data.resultType === "SUCCESS" &&
-          Array.isArray(data.success?.products)
-        ) {
+        const { data } = await api.get<PopularWishlistResponse>("/wishlists/popular");
+        if (data.resultType === "SUCCESS" && Array.isArray(data.success?.products)) {
           setItems(data.success.products);
         } else {
           console.warn("⚠️ 인기 위시리스트 데이터 없음");
           setItems([]);
         }
-      } catch (error) {
-        console.error("❌ API 호출 에러:", error);
+      } catch (err) {
+        console.error("❌ 인기 위시리스트 API 호출 에러:", err);
         setItems([]);
       }
     };
-
     fetchPopularWishlists();
   }, []);
 
