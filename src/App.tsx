@@ -109,7 +109,6 @@ function AppRoutes() {
     "/moaletter/receipt",
     "/moaletter/rolling-paper",
 
-
     "/settings",
     "/purchase-history",
     "/notice",
@@ -133,6 +132,9 @@ function AppRoutes() {
     "/login",
     "/find-id",
     "/reset-password",
+
+    "/purchase",
+    "/purchase/payment",
   ];
 
 

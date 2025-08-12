@@ -20,7 +20,7 @@ const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy }) => {
   const showFallback = !item.image || imageError;
 
   return (
-    <div className="w-[320px] h-[365px] bg-white rounded-[20px] shadow-md overflow-hidden flex flex-col items-center p-4 hover:shadow-lg transition-shadow">
+    <div className="relative w-[320px] h-[365px] bg-white rounded-[20px] shadow-md overflow-hidden flex flex-col items-center p-4 hover:shadow-lg transition-shadow z-[1001]">
       
       {/* 이미지 영역 */}
       {showFallback ? (
