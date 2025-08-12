@@ -1,5 +1,7 @@
 // src/services/wishlist.ts
-import api from "../services/api";
+
+import instance from "../api/axiosInstance";
+
 
 /** ====== 서버/쿼리 타입 ====== */
 export type WishlistSort = "created_at" | "price_desc" | "price_asc";
@@ -119,7 +121,7 @@ export async function getMyWishlists(params: {
 } = {}): Promise<WishlistPage> {
   const { page = 1, size = 10, sort = "created_at", visibility } = params;
 
-  const { data } = await api.get("/wishlists", {
+  const { data } = await instance.get("/wishlists", {
     params: { page, size, sort, visibility },
   });
 

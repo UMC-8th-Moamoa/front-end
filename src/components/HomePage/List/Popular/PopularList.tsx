@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import PopularItem from "./PopularItem";
-import type { PopularWishlistItem, PopularWishlistResponse } from "../../../../types/wishlist";
-import api from "../../../../services/api";
+import type { PopularWishlistItem, PopularWishlistResponse } from "../../../../services/popularwishlist";
+import instance from "../../../../api/axiosInstance";
+
+
 
 
 export interface PopularListProps {
@@ -14,7 +16,7 @@ const PopularList = ({ onConfirm }: PopularListProps) => {
   useEffect(() => {
     const fetchPopularWishlists = async () => {
       try {
-        const { data } = await api.get<PopularWishlistResponse>("/wishlists/popular");
+        const { data } = await instance.get<PopularWishlistResponse>("/wishlists/popular");
         if (data.resultType === "SUCCESS" && Array.isArray(data.success?.products)) {
           setItems(data.success.products);
         } else {

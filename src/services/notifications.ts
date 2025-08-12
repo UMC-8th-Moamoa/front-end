@@ -1,5 +1,6 @@
 // src/services/notifications.ts
-import api from "./api";
+
+import instance from "../api/axiosInstance";
 
 export interface NotificationItem {
   id: number;
@@ -33,7 +34,7 @@ export async function fetchNotifications(page = 1, size = 10): Promise<{
   pagination: Pagination;
   hasUnread: boolean;
 }> {
-  const { data } = await api.get<NotificationResponse>("/notifications", {
+  const { data } = await instance.get<NotificationResponse>("/notifications", {
     params: { page, size },
   });
 
