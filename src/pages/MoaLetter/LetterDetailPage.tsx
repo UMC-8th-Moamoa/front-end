@@ -1,8 +1,9 @@
-// pages/MoaLetter/LetterDetailPage.tsx (교체용 최소 수정본)
+// pages/MoaLetter/LetterDetailPage.tsx 
 import React, { useRef, useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
-import { getLetterById, type LetterItem } from "../../api/letters";
+// [수정 1] 상세 조회의 리턴 타입으로 교체
+import { getLetterById, type LetterDetail } from "../../services/letters";
 
 export default function LetterDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -12,17 +13,18 @@ export default function LetterDetailPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
 
-  const [letter, setLetter] = useState<LetterItem | null>(null);
+  // [수정 1] 상태 타입도 상세 타입으로 교체
+  const [letter, setLetter] = useState<LetterDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleScroll = () => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el || el.clientHeight === 0) return;
     const total = Math.ceil(el.scrollHeight / el.clientHeight);
     const current = Math.floor(el.scrollTop / el.clientHeight) + 1;
     setCurrentPage(current);
-    setTotalPage(total);
+    setTotalPage(Math.max(total, 1));
   };
 
   useEffect(() => {
@@ -48,11 +50,11 @@ export default function LetterDetailPage() {
 
   return (
     <div
-      className="w-[393px] h-[794px] mx-auto font-pretendard flex flex-col items-center px-4 "
+      className="w-[393px] h-[794px] mx-auto font-pretendard flex flex-col items-center px-4"
       style={{ background: "linear-gradient(169deg, #6282E1 1.53%, #FEC3FF 105.97%)" }}
     >
       {/* 상단바 */}
-      <div className="relative w-[350px] flex items-center absolute left mb-[26px]">
+      <div className="relative w-[350px] flex items-center mb-[26px]">
         <BackButton />
         <h1 className="absolute left-1/2 -translate-x-1/2 text-[18px] font-semibold text-white">
           {senderName}님의 편지
@@ -70,7 +72,7 @@ export default function LetterDetailPage() {
           className="w-full h-full overflow-y-auto text-[16px] leading-relaxed text-[#1F1F1F] px-[19px] pt-[16px] pb-[0px] box-border whitespace-pre-wrap"
         >
           {/* 봉투 중앙 이미지가 있으면 상단에 노출 */}
-          {letter.envelopeImageUrl && (
+          {letter.envelopeImageUrl && letter.envelopeImageUrl.trim() !== "" && (
             <img
               src={letter.envelopeImageUrl}
               alt="envelope"

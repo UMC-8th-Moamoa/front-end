@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ItemCard from "./ItemCard";
-import { getUserItems, type UserItem } from "../../api/userItems";
+import { getUserItems, type UserItem } from "../../services/userItems";
 
 type Props = {
   selectedFont?: string | null;

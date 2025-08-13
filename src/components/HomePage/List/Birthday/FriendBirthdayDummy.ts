@@ -7,7 +7,7 @@ export const FriendBirthdayDummy = [
   },
   {
     name: "골드",
-    birthday: "2025-08-11",
+    birthday: "2025-08-16",
     image: "/assets/profile.svg",
     hasWrittenLetter: true, 
   },

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"; // 👈 추가
 import BackButton from "../../../components/common/BackButton";
 import InputBox from "../../../components/common/InputBox";
 import Button from "../../../components/common/Button";
-import BottomNavigation from "../../../components/common/BottomNavigation";
 
 const InputMoaMoneyPage = () => {
   const [amount, setAmount] = useState("");
@@ -65,7 +64,7 @@ const InputMoaMoneyPage = () => {
         </div>
       </main>
 
-      <BottomNavigation />
+
     </div>
   );
 };

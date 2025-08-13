@@ -1,3 +1,4 @@
+// src/pages/MoaLetter/WriteLetterPage.tsx
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import LetterHeader from "../../components/moaletter/LetterHeader";
@@ -6,8 +7,7 @@ import FontItemList from "../../components/moaletter/FontItemList";
 import LetterThemeList from "../../components/moaletter/LetterThemeList";
 import LetterContent from "../../components/moaletter/LetterContent";
 import EnvelopeContent, { type EnvelopeHandle } from "../../components/moaletter/EnvelopeContent";
-import { createLetter, updateLetter, getLetterById } from "../../api/letters"; // ← 편지 등록 API 래퍼
-
+import { createLetter, updateLetter, getLetterById } from "../../services/letters"; // ← 편지 API
 
 type ToolType = "none" | "keyboard" | "font" | "theme";
 
@@ -19,10 +19,10 @@ export default function WriteLetterPage() {
   // 새작성: { mode: 'create', birthdayEventId, receiverId }
   // 수정:   { mode: 'edit', letterId }
 
-  const mode = location.state?.mode as 'create' | 'edit' | undefined;
+  const mode = location.state?.mode as "create" | "edit" | undefined;
   const editLetterId = location.state?.letterId as number | undefined;
   const birthdayEventId = (location.state?.birthdayEventId as number | undefined) ?? 12; // 임시
-  const receiverId = (location.state?.receiverId as number | undefined) ?? 7;            // 임시
+  const receiverId = (location.state?.receiverId as number | undefined) ?? 7; // 임시
   const senderId = 5; // TODO: 로그인 사용자 ID로 교체
 
   const [activeTab, setActiveTab] = useState<"letter" | "envelope">("letter");
@@ -40,14 +40,13 @@ export default function WriteLetterPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     if (location.state?.openTab === "envelope") setActiveTab("envelope");
   }, [location.state]);
 
   // 수정 모드 프리필
   useEffect(() => {
-    if (mode === 'edit' && editLetterId) {
+    if (mode === "edit" && editLetterId) {
       (async () => {
         try {
           setLoading(true);
@@ -65,11 +64,13 @@ export default function WriteLetterPage() {
     }
   }, [mode, editLetterId]);
 
-
-
   const handleSaveLetter = async () => {
-    if (saving || letterText.length === 0) return;
-    setSaving(true); setSaveError(null);
+    // [수정] 공백만 입력된 경우 저장 방지
+    if (saving || letterText.trim().length === 0) return;
+
+    setSaving(true);
+    setSaveError(null);
+
     try {
       let finalImageUrl = envelopeImageUrl ?? undefined;
       if (envelopeRef.current) {
@@ -77,12 +78,18 @@ export default function WriteLetterPage() {
         if (url) finalImageUrl = url;
       }
 
-      if (mode === 'edit' && editLetterId) {
+      // [수정] 스웨거 스펙에 맞춰 fontId 포함, 숫자 필드는 undefined 대신 숫자로 보정
+      const safeLetterPaperId = letterPaperId ?? 0;
+      const safeEnvelopeId = envelopeId ?? 0;
+      const safeFontId = 0; // TODO: 폰트 선택 로직 연결 시 실제 fontId 매핑
+
+      if (mode === "edit" && editLetterId) {
         const saved = await updateLetter(editLetterId, {
           content: letterText,
-          letterPaperId: letterPaperId ?? undefined,
-          envelopeId: envelopeId ?? undefined,
-          envelopeImageUrl: finalImageUrl,
+          letterPaperId: safeLetterPaperId,
+          envelopeId: safeEnvelopeId,
+          fontId: safeFontId,
+          envelopeImageUrl: finalImageUrl ?? "",
         });
         navigate(`/moaletter/letters/${saved.id}`);
       } else {
@@ -91,9 +98,10 @@ export default function WriteLetterPage() {
           senderId,
           receiverId,
           content: letterText,
-          letterPaperId: letterPaperId ?? 0,
-          envelopeId: envelopeId ?? 0,
-          envelopeImageUrl: finalImageUrl,
+          letterPaperId: safeLetterPaperId,
+          envelopeId: safeEnvelopeId,
+          fontId: safeFontId, // [추가]
+          envelopeImageUrl: finalImageUrl ?? "",
         });
         navigate(`/moaletter/letters/${saved.id}`);
       }
@@ -105,7 +113,6 @@ export default function WriteLetterPage() {
   };
 
   // 체크버튼 누를 때만 저장: LetterHeader가 이미 onSave만 호출
-  // 테마/우표 선택 시 setter를 내려준다.
 
   const handleKeyboardClick = () => {
     setActiveTool((prev) => (prev === "keyboard" ? "none" : "keyboard"));
@@ -121,22 +128,18 @@ export default function WriteLetterPage() {
   };
 
   return (
+    // [수정] JSX 구조 정리: 하단 Toolbar/바텀시트까지 모두 return 내부에 포함
     <div className="flex flex-col h-screen w-full max-w-[393px] mx-auto bg-white font-pretendard overflow-visible">
       <div className="sticky top-0 z-30 bg-white mb-[20px]">
-        <LetterHeader onSave={handleSaveLetter} letterTextLength={letterText.length} saving={saving} />
+        {/* [수정] LetterHeader에 존재하지 않을 수 있는 prop(saving) 제거 */}
+        <LetterHeader onSave={handleSaveLetter} letterTextLength={letterText.length} />
       </div>
 
       {saveError && <div className="text-red-500 text-sm text-center my-2">{saveError}</div>}
       {saving && <div className="text-blue-500 text-sm text-center my-2">저장 중...</div>}
       {loading && <div className="text-gray-500 text-sm text-center my-2">불러오는 중...</div>}
 
-
-
       {/* 탭 메뉴 */}
-      {/* LetterContent / LetterThemeList / EnvelopeContent 내부에서 선택 변경 시 아래 setter를 사용하도록 props 추가 필요 */}
-      {/* 예: <LetterThemeList onSelect={(id)=>setLetterPaperId(id)} /> */}
-      {/* 예: <EnvelopeContent onSelectStamp={(id,url)=>{setEnvelopeId(id); setEnvelopeImageUrl(url)}} /> */}
-
       <div className="flex flex-col items-center  relative w-full">
         <div className="flex justify-center gap-[90px] w-[350px] z-10">
           <button
@@ -148,9 +151,9 @@ export default function WriteLetterPage() {
           >
             <span
               className={`
-        text-center font-pretendard text-[16px] font-semibold
-        ${activeTab === "letter" ? "text-[#6282E1]" : "text-[#C7D5FF]"}
-      `}
+                text-center font-pretendard text-[16px] font-semibold
+                ${activeTab === "letter" ? "text-[#6282E1]" : "text-[#C7D5FF]"}
+              `}
               style={{ fontWeight: 600 }}
             >
               편지지
@@ -166,9 +169,9 @@ export default function WriteLetterPage() {
           >
             <span
               className={`
-        text-center font-pretendard text-[16px] font-semibold
-        ${activeTab === "envelope" ? "text-[#6282E1]" : "text-[#C7D5FF]"}
-      `}
+                text-center font-pretendard text-[16px] font-semibold
+                ${activeTab === "envelope" ? "text-[#6282E1]" : "text-[#C7D5FF]"}
+              `}
               style={{ fontWeight: 600 }}
             >
               우표
@@ -182,12 +185,11 @@ export default function WriteLetterPage() {
         {/* 진한 강조 밑줄 (선택된 탭 기준으로 175px) */}
         <div
           className={`
-      absolute bottom-[-8px] h-[3px] w-[175px] bg-[#6282E1] transition-all duration-300
-      ${activeTab === "letter" ? "left-[20px]" : "right-[20px]"}
-    `}
+            absolute bottom-[-8px] h-[3px] w-[175px] bg-[#6282E1] transition-all duration-300
+            ${activeTab === "letter" ? "left-[20px]" : "right-[20px]"}
+          `}
         />
       </div>
-
 
       {/* 본문 */}
       {activeTab === "letter" ? (
@@ -196,8 +198,8 @@ export default function WriteLetterPage() {
           onChange={setLetterText}
           activeTool={activeTool}
           textareaRef={textareaRef}
-        // 필요 시 textarea에 fontFamily 적용
-        // styleOverride={{ fontFamily: fontFamily ?? undefined }}
+          // 필요 시 textarea에 fontFamily 적용
+          // styleOverride={{ fontFamily: fontFamily ?? undefined }}
         />
       ) : (
         <EnvelopeContent
@@ -209,42 +211,32 @@ export default function WriteLetterPage() {
           }}
         />
       )}
-    </div> 
-  )
-      {/* 툴바: 입력창 아래에 고정 + 중앙 정렬 */ }
-  {
-    activeTab === "letter" && (
-      <div className="z-30 bg-white w-full flex justify-center">
-        <Toolbar
-          activeTool={activeTool}
-          onKeyboardClick={handleKeyboardClick}
-          onFontClick={handleFontClick}
-          onThemeClick={handleThemeClick}
-        />
-      </div>
-    )
-  }
 
-  {/* 바텀시트 */ }
-  {
-    activeTab === "letter" && (activeTool === "font" || activeTool === "theme") && (
-      <div className="z-20 bg-white px-[10px] py-[20px] pb-6 shadow-inner w-full overflow-x-hidden">
-        <div className="max-h-[336px]">
-          {activeTool === "font" && (
-            <FontItemList
-              selectedFont={fontFamily ?? undefined}
-              onSelect={(f) => setFontFamily(f)}
-            />
-          )}
-          {activeTool === "theme" && (
-            <LetterThemeList
-              selectedId={letterPaperId ?? undefined}
-              onSelect={(id) => setLetterPaperId(id)}
-            />
-          )}
+      {/* 툴바: 입력창 아래에 고정 + 중앙 정렬 */}
+      {activeTab === "letter" && (
+        <div className="z-30 bg-white w-full flex justify-center">
+          <Toolbar
+            activeTool={activeTool}
+            onKeyboardClick={handleKeyboardClick}
+            onFontClick={handleFontClick}
+            onThemeClick={handleThemeClick}
+          />
         </div>
-      </div>
-    )
-  }
-}
+      )}
 
+      {/* 바텀시트 */}
+      {activeTab === "letter" && (activeTool === "font" || activeTool === "theme") && (
+        <div className="z-20 bg-white px-[10px] py-[20px] pb-6 shadow-inner w-full overflow-x-hidden">
+          <div className="max-h-[336px]">
+            {activeTool === "font" && (
+              <FontItemList selectedFont={fontFamily ?? undefined} onSelect={(f) => setFontFamily(f)} />
+            )}
+            {activeTool === "theme" && (
+              <LetterThemeList selectedId={letterPaperId ?? undefined} onSelect={(id) => setLetterPaperId(id)} />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

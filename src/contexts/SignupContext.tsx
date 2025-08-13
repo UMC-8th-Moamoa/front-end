@@ -1,35 +1,18 @@
 // src/contexts/SignupContext.tsx
-
-import { createContext, useContext, useState } from 'react';
-
-interface SignupData {
-  id: string;
-  password: string;
-  phone: string;
-  email: string;
-  name: string;
-  birthday: string;
-}
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface SignupContextType {
-  data: Partial<SignupData>;
-  updateData: (newData: Partial<SignupData>) => void;
-  resetData: () => void;
+  email: string;
+  setEmail: (email: string) => void;
 }
 
 const SignupContext = createContext<SignupContextType | undefined>(undefined);
 
-export const SignupProvider = ({ children }: { children: React.ReactNode }) => {
-  const [data, setData] = useState<Partial<SignupData>>({});
-
-  const updateData = (newData: Partial<SignupData>) => {
-    setData((prev) => ({ ...prev, ...newData }));
-  };
-
-  const resetData = () => setData({});
+export const SignupProvider = ({ children }: { children: ReactNode }) => {
+  const [email, setEmail] = useState('');
 
   return (
-    <SignupContext.Provider value={{ data, updateData, resetData }}>
+    <SignupContext.Provider value={{ email, setEmail }}>
       {children}
     </SignupContext.Provider>
   );

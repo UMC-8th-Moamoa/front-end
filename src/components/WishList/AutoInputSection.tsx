@@ -1,10 +1,15 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LinkInputModal from "./LinkInputModal"; 
 import PurplePhoto from "../../assets/PurplePhoto.svg";
-// 이미지 아이콘 경로도 필요 시 조정
 
 const AutoInputSection = () => {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handlePhotoInsert = () => {
+    navigate("/moaletter/select-photo"); 
+  };
 
   return (
     <section className="w-full max-w-[393px] px-4 flex flex-col items-center gap-4">
@@ -14,12 +19,13 @@ const AutoInputSection = () => {
         onClose={() => setIsLinkModalOpen(false)}
         onConfirm={() => {
           setIsLinkModalOpen(false);
-          // 추가 로직 필요하면 여기에 작성
+          // 추가 로직 필요 시 여기에 작성
         }}
       />
 
       {/* 이미지 박스 */}
       <div className="w-[350px] h-[201px] bg-[#F2F2F2] border border-[#C7D5FF] rounded-[20px] flex mt-3 items-center justify-center">
+        {/* (필요 시 이미지 미리보기 등 삽입) */}
       </div>
 
       {/* 제품명 + 가격 */}
@@ -28,7 +34,7 @@ const AutoInputSection = () => {
         <p className="text-[24px] font-bold text-[#6282E1]">0원</p>
       </div>
 
-      {/* 링크 / 사진 넣기 */}
+      {/* 링크 / 사진 넣기 버튼 박스 */}
       <div className="w-[350px] rounded-xl border border-[#C7D5FF] flex">
         {/* 링크 버튼 */}
         <button
@@ -43,7 +49,10 @@ const AutoInputSection = () => {
         <div className="w-px bg-[#C7D5FF]" />
 
         {/* 사진 버튼 */}
-        <button className="flex-1 flex flex-col items-center justify-center gap-1 py-3">
+        <button
+          onClick={handlePhotoInsert}
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-3"
+        >
           <img src={PurplePhoto} alt="사진" className="w-[30px] h-[30px]" />
           <span className="text-sm font-semibold text-[#6282E1]">사진 넣기</span>
         </button>
