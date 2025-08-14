@@ -1,24 +1,26 @@
 import { useNavigate } from "react-router-dom";
-import { differenceInCalendarDays } from "date-fns";
 
 interface UpcomingFriendItemProps {
   name: string;
-  birthday: string;
-  image?: string;
+  displayDate: string;   // API의 "8월 23일"
+  dday: number;          // API의 dDay
+  image?: string | null;
+  eventId: number;
 }
 
-const UpcomingFriendItem = ({ name, birthday, image }: UpcomingFriendItemProps) => {
+const UpcomingFriendItem = ({
+  name,
+  displayDate,
+  dday,
+  image,
+  eventId,
+}: UpcomingFriendItemProps) => {
   const navigate = useNavigate();
-  const today = new Date();
-  const birthDate = new Date(birthday);
-  if (birthDate < today) birthDate.setFullYear(today.getFullYear() + 1);
-  const dday = differenceInCalendarDays(birthDate, today);
-
-  const formattedDate = `${birthDate.getMonth() + 1}월 ${birthDate.getDate()}일`;
-  const isUrgent = dday <= 7;
+  const isUrgent = dday <= 7; // 스펙상 7일 이내만 내려오지만 안전망
 
   const handleClick = () => {
-    navigate("/participation");
+    // 참여 페이지로 이동 (프로젝트 규칙에 맞춰 경로/파라미터 조정 가능)
+    navigate(`/participation?eventId=${eventId}`);
   };
 
   return (
@@ -37,7 +39,7 @@ const UpcomingFriendItem = ({ name, birthday, image }: UpcomingFriendItemProps) 
       <div className="flex-1">
         <p className="text-[16px] text-black">{name}</p>
         <p className="text-[16px] text-[#B7B7B7]">
-          {formattedDate}
+          {displayDate}
           <span className={isUrgent ? "text-red-500" : "text-[#B7B7B7]"}>
             {" "}
             (D-{dday})

@@ -11,7 +11,7 @@ export const Modal = ({ isOpen, onClose, children, className = "" }: ModalProps)
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+      className="fixed inset-0 flex items-center justify-center bg-black/50 z-1100"
       onClick={onClose}
     >
       <div

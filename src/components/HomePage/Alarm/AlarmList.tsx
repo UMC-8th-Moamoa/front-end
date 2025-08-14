@@ -1,7 +1,7 @@
 // src/components/Alarm/AlarmList.tsx
 import { useEffect, useRef, useState } from "react";
 import AlarmItem from "./AlarmItem";
-import { fetchNotifications, type NotificationItem, type Pagination } from "../../../services/notifications";
+import { fetchNotifications, type NotificationItem, type Pagination } from "../../../services/notification/notifications";
 
 
 const toDate = (iso: string) => {

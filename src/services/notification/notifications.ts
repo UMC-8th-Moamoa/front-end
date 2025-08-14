@@ -1,6 +1,7 @@
 // src/services/notifications.ts
 
-import instance from "../api/axiosInstance";
+import instance from "../../api/axiosInstance";
+
 
 export interface NotificationItem {
   id: number;

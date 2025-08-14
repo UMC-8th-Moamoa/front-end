@@ -1,20 +1,17 @@
-// src/services/wishlist.ts
-
-import instance from "../api/axiosInstance";
-
+// src/services/wishlist/list.ts
+import instance from "../../api/axiosInstance";
 
 /** ====== 서버/쿼리 타입 ====== */
 export type WishlistSort = "created_at" | "price_desc" | "price_asc";
-export type WishlistVisibility = "public" | "private";
 
-/** 서버가 주는 DTO (Swagger 예시 기준) */
+/** 서버 DTO — visibility 제거, isPublic 만 사용 */
 export interface WishlistDto {
   id: number;
   productName: string;
   productImageUrl: string | null;
   price: number;
-  visibility?: WishlistVisibility; // 명세에 없으면 안 내려올 수 있어 optional
-  createdAt?: string;
+  isPublic?: boolean | null;      // 공개 여부 (없으면 기본 false로 처리)
+  createdAt?: string | null;
 }
 
 /** unwrapped 응답 (Swagger 예시) */
@@ -42,13 +39,14 @@ export interface WishlistListWrapped {
 /** ====== UI에서 쓰기 쉬운 형태 ====== */
 export interface WishlistUiItem {
   id: number;
-  title: string;                 // productName
-  imageSrc: string;              // productImageUrl (fallback 포함)
-  priceText: string;             // "100,000원"
-  price: number;                 // ✅ 숫자 가격(정렬/합계용)
-  openOption: "locked" | "unlocked"; // visibility 매핑
+  title: string;           // productName
+  imageSrc: string;        // fallback 포함
+  priceText: string;       // "100,000원"
+  price: number;           // 숫자
+  isPublic: boolean;       // 🔥 공개 여부(단일 진실 소스)
 }
 
+/** 페이지 타입 */
 export interface WishlistPage {
   items: WishlistUiItem[];
   page: number;
@@ -57,21 +55,20 @@ export interface WishlistPage {
   totalElements: number;
 }
 
-/** DTO -> UI 매핑 */
+/** DTO -> UI 매핑 (isPublic만 사용) */
 const toUi = (dto: WishlistDto): WishlistUiItem => {
   const imageSrc = dto.productImageUrl ?? "/assets/gift_sample.svg";
   const priceNumber = Number(dto.price ?? 0);
   const priceText = `${priceNumber.toLocaleString()}원`;
-  const openOption: "locked" | "unlocked" =
-    dto.visibility === "private" ? "locked" : "unlocked";
+  const isPublic = Boolean(dto.isPublic ?? false); // 정의 안되면 기본 false(비공개)
 
   return {
     id: dto.id,
     title: dto.productName,
     imageSrc,
     priceText,
-    price: priceNumber,           // ✅ 추가
-    openOption,
+    price: priceNumber,
+    isPublic,
   };
 };
 
@@ -89,7 +86,7 @@ const parsePage = (data: any, fallbackPage: number, fallbackSize: number): Wishl
       totalElements: s.totalElements ?? items.length,
     };
   }
-  // unwrapped (Swagger 예시)
+  // unwrapped
   if (Array.isArray(data?.content)) {
     const r = data as WishlistPageRaw;
     const items = (r.content ?? []).map(toUi);
@@ -105,11 +102,11 @@ const parsePage = (data: any, fallbackPage: number, fallbackSize: number): Wishl
   return { items: [], page: fallbackPage, size: fallbackSize, totalPages: 0, totalElements: 0 };
 };
 
-/** 정렬 드롭다운 문자열 -> API sort 값 (필요 시 네 UI에 맞게 수정) */
+/** 정렬 드롭다운 문자열 -> API sort 값 */
 export const mapSortLabelToApi = (label: string): WishlistSort => {
-  if (label === "가격↑") return "price_asc";
-  if (label === "가격↓") return "price_desc";
-  return "created_at";
+  if (label === "높은 가격순") return "price_desc";
+  if (label === "낮은 가격순") return "price_asc";
+  return "created_at"; // 등록순
 };
 
 /** ====== API: 나의 위시리스트 목록 조회 ====== */
@@ -117,12 +114,12 @@ export async function getMyWishlists(params: {
   page?: number;
   size?: number;
   sort?: WishlistSort;
-  visibility?: WishlistVisibility;
+  /** 공개/비공개 필터는 클라이언트단에서 isPublic으로 처리(서버가 지원하면 별도 엔드포인트 사용) */
 } = {}): Promise<WishlistPage> {
-  const { page = 1, size = 10, sort = "created_at", visibility } = params;
+  const { page = 1, size = 10, sort = "created_at" } = params;
 
   const { data } = await instance.get("/wishlists", {
-    params: { page, size, sort, visibility },
+    params: { page, size, sort },
   });
 
   return parsePage(data, page, size);

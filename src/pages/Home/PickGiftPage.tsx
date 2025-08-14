@@ -4,7 +4,7 @@ import Button from "../../components/common/Button";
 import { PickGiftList } from "../../components/HomePage/PickGift/PickGiftList";
 import { Modal } from "../../components/common/Modal";
 import { useNavigate } from "react-router-dom";
-import { getMyWishlists, type WishlistUiItem } from "../../services/wishlist";
+import { getMyWishlists, type WishlistUiItem } from "../../services/wishlist/list";
 
 const sortOptions = ["친구 추천순", "등록순", "높은 가격순", "낮은 가격순"] as const;
 type SortOption = typeof sortOptions[number];
