@@ -22,8 +22,8 @@ const [searchTerm, setSearchTerm] = useState('');
 const [searchKeyword, setSearchKeyword] = useState(''); // 아이콘 클릭 시 적용될 실제 검색어
 
   const location = useLocation();
-  const initialTab = location.state?.tab === 'following' ? 'following' : 'follower';
-  const [tab, setTab] = useState<'follower' | 'following'>(initialTab);
+  const initialTab = location.state?.tab === 'followings' ? 'followings' : 'follower';
+  const [tab, setTab] = useState<'follower' | 'followings'>(initialTab);
 
 const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   setSearchTerm(e.target.value);
@@ -50,7 +50,7 @@ const filteredUsers = users.filter((user) => {
     return matchesSearch;
   }
 
-  if (tab === 'following') {
+  if (tab === 'followings') {
     return (
       matchesSearch &&
     (user.buttonType === '팔로잉' || user.buttonType === '모아참여중' || user.buttonType === '모아참여')
@@ -177,12 +177,12 @@ const handleConfirmUnfollow = () => {
       </span>
     </button>
     <button
-      onClick={() => setTab('following')}
+      onClick={() => setTab('followings')}
       className="w-1/2 pb-[10px] bg-transparent"
     >
       <span
         className={`block text-center font-pretendard text-[18px] font-semibold ${
-          tab === 'following' ? 'text-[#6282E1]' : 'text-[#C7D5FF]'
+          tab === 'followings' ? 'text-[#6282E1]' : 'text-[#C7D5FF]'
         }`}
       >
         팔로잉

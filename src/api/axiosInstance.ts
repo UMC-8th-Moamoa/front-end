@@ -23,6 +23,7 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   } else {
     headers["Authorization"] = `Bearer ${at}`;
   }
+
   return config;
 });
 
@@ -54,6 +55,7 @@ export function saveTokens(accessToken?: string | null, refreshToken?: string | 
 export function clearTokens() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+  localStorage.removeItem("my_user_id");
   delete instance.defaults.headers.common["Authorization"];
 }
 

@@ -47,8 +47,6 @@ import WriteLetterPage from "./pages/MoaLetter/WriteLetterPage";
 import LetterSavedPage from "./pages/MoaLetter/LetterSavedPage";
 import SelectPhotoPage from './pages/MoaLetter/SelectPhotoPage';
 import LetterPreviewPage from "./pages/MoaLetter/LetterPreviewPage";
-import EnvelopeContent from "./components/moaletter/EnvelopeContent";
-import AlbumGridPage from "./pages/MoaLetter/AlbumGridPage"; 
 import RollingPaperGridPage from "./pages/MoaLetter/RollingPaperPage";
 import ReceiptPage from "./pages/MoaLetter/ReceiptPage";
 import LetterDetailPage from './pages/MoaLetter/LetterDetailPage';
@@ -70,6 +68,7 @@ import SelectRemittancePage from './pages/Home/SelectRemittancePage';
 function AppRoutes() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isLoggedIn = !!localStorage.getItem("accessToken");
 
   const handleNavigate = (menu: MenuType) => {
     switch (menu) {
@@ -140,14 +139,35 @@ function AppRoutes() {
 
   const shouldShowBottomNav = !excludedPaths.some((path) =>
     location.pathname.startsWith(path)
+
+  
   );
+  // ❗ 보호해야 할 경로 목록
+  const protectedPaths = [
+    "/home",
+    "/mypage",
+    "/wishlist",
+    "/shopping",
+    "/moaletter",
+    "/purchase"
+  ];
+
+  // 로그인 안 돼 있고 보호 페이지 접근 시 -> 로그인 페이지로
+  if (!isLoggedIn && protectedPaths.some(p => location.pathname.startsWith(p))) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="w-full flex flex-col items-center bg-white min-h-svh">
       <div className="w-full max-w-mobile mx-auto pb-[calc(4rem+env(safe-area-inset-bottom))]">
         <Routes>
           {/* 루트는 홈으로 리다이렉트 */}
-          <Route path="/" element={<Navigate to="/home" />} />
+          <Route
+            path="/"
+            element={
+              isLoggedIn ? <Navigate to="/home" /> : <Navigate to="/login" />
+            }
+          />
 
           {/* 로그인/회원가입 */}
           <Route path="/login" element={<Login />} />
@@ -215,8 +235,6 @@ function AppRoutes() {
           <Route path="/moaletter/letter-saved" element={<LetterSavedPage />} />
           <Route path="/moaletter/select-photo" element={<SelectPhotoPage />} />
           <Route path="/moaletter/preview" element={<LetterPreviewPage />} />
-          <Route path="/moaletter/envelope" element={<EnvelopeContent />} />
-          <Route path="/moaletter/album/:albumName" element={<AlbumGridPage />} />
           <Route path="/moaletter/rolling-paper" element={<RollingPaperGridPage />} />
           <Route path="/moaletter/receipt" element={<ReceiptPage />} />
           <Route path="/moaletter/letter-detail" element={<LetterDetailPage />} />

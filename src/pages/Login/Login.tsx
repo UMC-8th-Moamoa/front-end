@@ -8,6 +8,8 @@ import KakaoIcon from "../../assets/Kakao.svg";
 import Logo from "../../assets/Logo_white.svg";
 import moa from "../../assets/moa_character.svg";
 import api from "../../api/axiosInstance"; // 단일 인스턴스
+import { fetchMySelfInfo, fetchMyMerged, setMyUserId } from "../../services/mypage";
+
 
 type SuccessEnvelope<T> = {
   resultType: "SUCCESS" | "FAIL";
@@ -24,6 +26,7 @@ type LoginSuccess = {
     id: number;
     user_id: string;
     name: string;
+    
   };
 };
 
@@ -65,6 +68,23 @@ function Login() {
       };
     }
   };
+// 응답에서 user_id 추출 (래퍼/비래퍼 모두 대응)
+const extractUserIdFromResponse = (data: any): string => {
+  const s = data?.success ?? data;
+  const uid = s?.user?.user_id;
+  return typeof uid === "string" ? uid.trim() : "";
+};
+
+// 이메일 → user_id 조회 API (스웨거: POST /auth/find-id { email })
+const findUserIdByEmail = async (email: string): Promise<string> => {
+  const { data } = await api.post<SuccessEnvelope<{ user_id?: string }>>(
+    "/auth/find-id",
+    { email }
+  );
+  const body = (data as any)?.success ?? data;
+  const uid = body?.user_id ?? "";
+  return typeof uid === "string" ? uid.trim() : "";
+};
 
   const handleLogin = async () => {
     setIdError("");
@@ -90,6 +110,19 @@ function Login() {
       if (!resultType || resultType === "SUCCESS") {
         const { at, rt } = extractTokens(data);
         if (at) saveTokens(at, rt);
+
+       // 1) user_id 확정: 응답 → 페이로드(ID 로그인) → 이메일 로그인 시 /auth/find-id
+       let uid = extractUserIdFromResponse(data) || trimmedId;
+       // 만약 이 페이지가 이메일 로그인으로 동작한다면 위 줄을 다음처럼 바꿔:
+       // let uid = extractUserIdFromResponse(data) || (await findUserIdByEmail(trimmedEmail));
+       if (!uid) throw new Error("CANNOT_RESOLVE_USER_ID");
+        setMyUserId(uid); 
+       // 2) 프로필 선조회(추천): 합친 값으로 미리 캐시 → 다음 화면에서 'id처럼' 즉시 뜸
+ try {
+   const merged = await fetchMyMerged(uid);
+   localStorage.setItem("cached_profile", JSON.stringify(merged));
+ } catch {}
+
         navigate("/home", { replace: true });
         return;
       }

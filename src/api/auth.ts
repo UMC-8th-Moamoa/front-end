@@ -1,5 +1,6 @@
 // src/api/auth.ts
 import api, { saveTokens, clearTokens } from "./axiosInstance";
+import { fetchMySelfInfo } from "../services/mypage"; // ⬅️ 프로필 조회
 
 /** 공통 응답 래퍼 */
 type ApiEnvelope<T> = {
@@ -152,3 +153,69 @@ export async function resetPassword(payload: {
   );
   return res.data;
 }
+ // =========================
+ // 9) 로그인 + 프로필 부트스트랩 (핵심 추가)
+ // =========================
+ export type BootstrapResult = {
+   accessToken?: string;
+   refreshToken?: string;
+   user_id: string;
+   profile?: {
+     userId: string;
+     name: string;
+     birthday: string;
+     followers: number;
+     following: number;
+     image: string;
+   };
+ };
+
+ export async function loginAndBootstrapProfile(
+   payload:
+     | { user_id: string; password: string }
+     | { email: string; password: string }
+ ): Promise<BootstrapResult> {
+   // 1) 로그인
+   const loginRes = await loginUser(payload);
+   if (loginRes.resultType !== "SUCCESS" || !loginRes.success) {
+     throw new Error(
+       (loginRes as any)?.error?.reason ??
+       "LOGIN_FAILED"
+     );
+   }
+
+   // 2) 토큰 추출 (이미 saveTokens에서 저장했지만 반환도 함께)
+   const { accessToken, refreshToken } = extractTokens(loginRes);
+
+   // 3) user_id 확정 전략
+   //    - 응답에 user?.user_id 있으면 그거 사용
+   //    - payload가 ID 로그인이라면 payload.user_id
+   //    - payload가 이메일 로그인이라면 findUserId(email)
+   let uid =
+     loginRes.success.user?.user_id ||
+     (("user_id" in payload) ? (payload as any).user_id : "");
+
+   if (!uid && "email" in payload) {
+     const found = await findUserId(payload.email);
+     uid = found?.success?.user_id || "";
+   }
+
+   if (!uid) {
+     // 마지막 방어: 백엔드가 user_id를 절대 안 내려주는 경우
+     throw new Error("CANNOT_RESOLVE_USER_ID");
+   }
+
+   // 4) 로컬 저장: 이후 화면에서 공통 사용
+   localStorage.setItem("my_user_id", uid);
+
+   // 5) 마이페이지 프로필 즉시 조회
+   const me = await fetchMySelfInfo(uid);
+   const profile = me?.success?.profile;
+
+   return {
+     accessToken,
+     refreshToken,
+     user_id: uid,
+     profile,
+   };
+ }
