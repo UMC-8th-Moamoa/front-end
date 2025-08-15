@@ -5,6 +5,7 @@ import type { SubBannerProps } from "../../../types/banner";
 
 const SubBanner = ({ imageSrc, content, buttonText, variant }: SubBannerProps) => {
   const navigate = useNavigate();
+  
 
   const isHighlight = variant === "highlight";
   const isImageOnly = variant === "imageOnly";

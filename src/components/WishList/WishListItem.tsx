@@ -1,9 +1,10 @@
 // src/components/WishList/WishListItem.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import lockedIcon from "../../assets/locked.svg";
 import unlockedIcon from "../../assets/unlocked.svg";
-import { deleteWishlist, updateWishlist } from "../../services/wishlist/mutate";
+// ✅ updateWishlist는 list.ts에 있음
+import { updateWishlist } from "../../services/wishlist/list";
 import type { WishlistUiItem } from "../../services/wishlist/list";
 
 interface Props {
@@ -15,12 +16,19 @@ interface Props {
 const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // ✅ 아이콘 표시를 위한 로컬 상태(부모 리렌더 없어도 즉시 반응)
+  const [isPublic, setIsPublic] = useState<boolean>(item.isPublic);
   const [toggling, setToggling] = useState(false);
+
+  // 부모에서 item이 바뀌면 동기화
+  useEffect(() => {
+    setIsPublic(item.isPublic);
+  }, [item.isPublic]);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
-  // isPublic -> 아이콘
-  const iconSrc = item.isPublic ? unlockedIcon : lockedIcon;
+  const iconSrc = isPublic ? unlockedIcon : lockedIcon;
 
   const handleEdit = () => {
     navigate("/wishlist/register", {
@@ -31,7 +39,7 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
           title: item.title,
           price: item.price,
           imageSrc: item.imageSrc,
-          isPublic: item.isPublic,
+          isPublic: isPublic, // 로컬 상태 사용
         },
       },
     });
@@ -39,6 +47,8 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
 
   const handleDelete = async () => {
     try {
+      // 삭제 API는 기존 위치 유지
+      const { deleteWishlist } = await import("../../services/wishlist/mutate");
       await deleteWishlist(item.id);
       onDeleted?.(item.id);
     } catch (e: any) {
@@ -49,26 +59,28 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
     }
   };
 
-  /** 🔒 아이콘 클릭 -> isPublic 토글 + 서버 반영 */
-  const handleToggleLock = async () => {
+  /** 🔒/🔓 클릭 -> 낙관적 토글 후 서버 반영, 실패 시 롤백 */
+  const handleToggleLock = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (toggling) return;
+
+    const prev = isPublic;
+    const next = !prev;
+
+    // 1) 낙관적 업데이트 (아이콘 즉시 전환)
+    setIsPublic(next);
+    onUpdated?.({ ...item, isPublic: next });
+
     setToggling(true);
-
-    const nextIsPublic = !item.isPublic;
-
-    // 낙관적 UI 업데이트
-    const optimistic: WishlistUiItem = { ...item, isPublic: nextIsPublic };
-    onUpdated?.(optimistic);
-
     try {
-      const updated = await updateWishlist(item.id, { isPublic: nextIsPublic });
-      // 서버 응답을 UI타입으로 이미 변환해줄 거라면 그대로 반영
-      onUpdated?.(updated);
-    } catch (e: any) {
-      // 실패 시 되돌리기
-      onUpdated?.(item);
-      console.error("[공개여부 변경 실패]", e?.response?.data || e);
-      alert(e?.response?.data?.message || "공개 여부 변경에 실패했어요.");
+      await updateWishlist(item.id, { isPublic: next });
+      // 성공이면 그대로 두면 됨 (부모가 목록 재조회하더라도 문제 없음)
+    } catch (err: any) {
+      // 2) 실패 시 롤백
+      setIsPublic(prev);
+      onUpdated?.({ ...item, isPublic: prev });
+      console.error("[공개 여부 변경 실패]", err?.response?.data || err);
+      alert(err?.response?.data?.message || "공개 여부 변경에 실패했어요.");
     } finally {
       setToggling(false);
     }
@@ -93,7 +105,7 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
               src="/assets/DotMenu.svg"
               alt="메뉴"
               onClick={toggleMenu}
-              className="w-[4px] h-[18px] object-contain cursor-pointer"
+              className="!w-[4px] !h-[18px] object-contain cursor-pointer"
             />
             {isMenuOpen && (
               <div className="absolute top-6 right-0 z-50 bg-white flex items-center rounded-[8px] shadow-md py-[4px] px-[20px] w-[96px] flex-col text-[15px]">
@@ -118,17 +130,21 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
           {item.priceText}
         </p>
 
-        {/* 자물쇠(공개/비공개) 토글 */}
+        {/* 🔒/🔓 공개 토글 */}
         <button
           type="button"
           onClick={handleToggleLock}
           disabled={toggling}
-          aria-label={item.isPublic ? "비공개로 전환" : "공개로 전환"}
+          aria-label={isPublic ? "비공개로 전환" : "공개로 전환"}
           className={`absolute bottom-2 right-2 w-[24px] h-[24px] ${
             toggling ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
         >
-          <img src={iconSrc} alt={item.isPublic ? "unlocked" : "locked"} className="w-full h-full" />
+          <img
+            src={iconSrc}
+            alt={isPublic ? "unlocked" : "locked"}
+            className="w-full h-full"
+          />
         </button>
       </div>
     </div>

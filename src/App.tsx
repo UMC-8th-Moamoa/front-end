@@ -64,6 +64,7 @@ import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage';
 import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
 import SelectRemittancePage from './pages/Home/SelectRemittancePage';
 import DonationCompletePage from './pages/Home/MoaMoney/DonationCompletePage';
+import SelectWishPhotoPage from './pages/Wishlist/SelectWishPhotoPage';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -133,7 +134,7 @@ function AppRoutes() {
     "/donation-select",
     "/donation-complete",
     "/convert-to-mong",
-    "/convert-to-mong-complete"
+    "/convert-to-mong-complete",
     
     "/login",
     "/find-id",
@@ -217,6 +218,7 @@ function AppRoutes() {
           <Route path="/wishlist" element={<WishListPage />} />
           <Route path="/wishlist-register" element={<WishListRegisterPage />} />
           <Route path="/wishlist/register" element={<WishListRegisterPage />} />
+          <Route path="/wishlist/select-photo" element={<SelectWishPhotoPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/participation" element={<ParticipationPage />} />
           <Route path="/vote-wish" element={<VoteWishPage />} />

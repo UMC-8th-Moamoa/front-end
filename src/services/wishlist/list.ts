@@ -10,7 +10,7 @@ export interface WishlistDto {
   productName: string;
   productImageUrl: string | null;
   price: number;
-  isPublic?: boolean | null;      // 공개 여부 (없으면 기본 false로 처리)
+  isPublic?: boolean | null; // 공개 여부 (없으면 기본 false로 처리)
   createdAt?: string | null;
 }
 
@@ -39,11 +39,11 @@ export interface WishlistListWrapped {
 /** ====== UI에서 쓰기 쉬운 형태 ====== */
 export interface WishlistUiItem {
   id: number;
-  title: string;           // productName
-  imageSrc: string;        // fallback 포함
-  priceText: string;       // "100,000원"
-  price: number;           // 숫자
-  isPublic: boolean;       // 🔥 공개 여부(단일 진실 소스)
+  title: string;      // productName
+  imageSrc: string;   // fallback 포함
+  priceText: string;  // "100,000원"
+  price: number;      // 숫자
+  isPublic: boolean;  // 🔥 공개 여부(단일 진실 소스)
 }
 
 /** 페이지 타입 */
@@ -55,13 +55,16 @@ export interface WishlistPage {
   totalElements: number;
 }
 
+/** 공통 un-wrapper */
+const unwrap = (data: any) =>
+  (data?.resultType && data?.success ? data.success : data) ?? data;
+
 /** DTO -> UI 매핑 (isPublic만 사용) */
 const toUi = (dto: WishlistDto): WishlistUiItem => {
   const imageSrc = dto.productImageUrl ?? "/assets/gift_sample.svg";
   const priceNumber = Number(dto.price ?? 0);
   const priceText = `${priceNumber.toLocaleString()}원`;
   const isPublic = Boolean(dto.isPublic ?? false); // 정의 안되면 기본 false(비공개)
-
   return {
     id: dto.id,
     title: dto.productName,
@@ -73,7 +76,11 @@ const toUi = (dto: WishlistDto): WishlistUiItem => {
 };
 
 /** 응답(any) -> 표준 페이지로 파싱 (wrapped/unwrapped 모두 대응) */
-const parsePage = (data: any, fallbackPage: number, fallbackSize: number): WishlistPage => {
+const parsePage = (
+  data: any,
+  fallbackPage: number,
+  fallbackSize: number
+): WishlistPage => {
   // wrapped
   if (data?.resultType && data?.success) {
     const s = (data as WishlistListWrapped).success!;
@@ -99,7 +106,13 @@ const parsePage = (data: any, fallbackPage: number, fallbackSize: number): Wishl
     };
   }
   // 방어
-  return { items: [], page: fallbackPage, size: fallbackSize, totalPages: 0, totalElements: 0 };
+  return {
+    items: [],
+    page: fallbackPage,
+    size: fallbackSize,
+    totalPages: 0,
+    totalElements: 0,
+  };
 };
 
 /** 정렬 드롭다운 문자열 -> API sort 값 */
@@ -114,17 +127,15 @@ export async function getMyWishlists(params: {
   page?: number;
   size?: number;
   sort?: WishlistSort;
-  /** 공개/비공개 필터는 클라이언트단에서 isPublic으로 처리(서버가 지원하면 별도 엔드포인트 사용) */
 } = {}): Promise<WishlistPage> {
   const { page = 1, size = 10, sort = "created_at" } = params;
-
   const { data } = await instance.get("/wishlists", {
     params: { page, size, sort },
   });
-
   return parsePage(data, page, size);
 }
 
+/* =====================[ 참여자 쪽: 수신자 위시리스트 조회 ]===================== */
 
 export type RecipientWishlistItem = {
   id: number;
@@ -178,7 +189,9 @@ export async function fetchRecipientWishlists(
     };
   }
 
-  const { birthdayPerson } = data.success.event ?? { birthdayPerson: { name: "" } as any };
+  const { birthdayPerson } = data.success.event ?? {
+    birthdayPerson: { name: "" } as any,
+  };
   return {
     recipientName: birthdayPerson?.name ?? "",
     items: data.success.wishlists ?? [],
@@ -205,5 +218,117 @@ export async function getRecipientWishlistUi(
       image: w.productImageUrl,
     })),
     pagination: res.pagination,
+  };
+}
+
+/* =====================[ 생성/수정 ]===================== */
+
+export type CreateWishlistManualInput = {
+  productName: string;
+  price: number;
+  /** 서버는 productImageUrl을 기대. 기존 imageUrl로 넘겨도 매핑해 줌 */
+  productImageUrl?: string | null;
+  imageUrl?: string | null; // 하위호환
+  isPublic: boolean;
+};
+
+export type CreateWishlistByUrlInput = {
+  url: string;
+  isPublic: boolean;
+};
+
+export type UpdateWishlistBody = {
+  productName?: string;
+  price?: number;
+  productImageUrl?: string | null;
+  isPublic?: boolean;
+};
+
+/** ====== API: 수동 입력 등록 (insertType: "MANUAL") ====== */
+export async function createWishlistManual(
+  input: CreateWishlistManualInput
+): Promise<WishlistDto> {
+  const productImageUrl =
+    input.productImageUrl ?? input.imageUrl ?? null; // 하위호환 처리
+
+  const payload = {
+    insertType: "MANUAL",
+    productName: input.productName,
+    price: input.price,
+    productImageUrl, // ✅ 스웨거 스펙 키
+    isPublic: input.isPublic,
+  };
+
+  const { data } = await instance.post("/wishlists", payload);
+  const res = unwrap(data);
+
+  return {
+    id: res.id,
+    productName: res.productName,
+    productImageUrl: res.productImageUrl ?? res.imageUrl ?? null,
+    price: Number(res.price ?? 0),
+    isPublic: Boolean(res.isPublic ?? input.isPublic),
+    createdAt: res.createdAt ?? null,
+  };
+}
+
+/** ====== API: URL 자동 입력 등록 (insertType: "URL") ======
+ *  - 오버로드 지원: createWishlistByUrl({url,isPublic}) 또는 createWishlistByUrl(url, isPublic)
+ */
+export function createWishlistByUrl(
+  url: string,
+  isPublic: boolean
+): Promise<WishlistDto>;
+export function createWishlistByUrl(
+  input: CreateWishlistByUrlInput
+): Promise<WishlistDto>;
+export async function createWishlistByUrl(
+  arg1: string | CreateWishlistByUrlInput,
+  arg2?: boolean
+): Promise<WishlistDto> {
+  const payload =
+    typeof arg1 === "string"
+      ? { insertType: "URL", url: arg1, isPublic: !!arg2 }
+      : { insertType: "URL", ...arg1 };
+
+  // url 필수값 방어
+  if (!payload.url || typeof payload.url !== "string" || !payload.url.trim()) {
+    throw new Error("상품 URL이 비어 있습니다. URL을 입력해 주세요.");
+  }
+
+  // 실제 전송 payload 로그
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.log("[createWishlistByUrl] POST /wishlists payload:", payload);
+  }
+
+  const { data } = await instance.post("/wishlists", payload);
+  const res = unwrap(data);
+
+  return {
+    id: res.id,
+    productName: res.productName,
+    productImageUrl: res.productImageUrl ?? null,
+    price: Number(res.price ?? 0),
+    isPublic: Boolean(res.isPublic ?? payload.isPublic),
+    createdAt: res.createdAt ?? null,
+  };
+}
+
+/** ====== API: 위시리스트 수정 ====== */
+export async function updateWishlist(
+  id: number,
+  body: UpdateWishlistBody
+): Promise<WishlistDto> {
+  const { data } = await instance.patch(`/wishlists/${id}`, body);
+  const res = unwrap(data);
+
+  return {
+    id: res.id ?? id,
+    productName: res.productName ?? body.productName ?? "",
+    productImageUrl: res.productImageUrl ?? body.productImageUrl ?? null,
+    price: Number(res.price ?? body.price ?? 0),
+    isPublic: Boolean(res.isPublic ?? body.isPublic ?? false),
+    createdAt: res.createdAt ?? null,
   };
 }

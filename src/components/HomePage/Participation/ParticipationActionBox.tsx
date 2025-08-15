@@ -1,60 +1,58 @@
+// src/components/HomePage/Participation/ParticipationActionBox.tsx
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../common/Button";
 import ShareButton from "../../../assets/ShareButton.svg";
+import type { EventButtonStatus } from "../../../services/user/event";
 
 interface ParticipationActionBoxProps {
   isMyPage: boolean;
-  participationStatus: "none" | "pending" | "confirmed";
-  onClick?: () => void;
-  onShareClick?: () => void; // 공유 버튼 클릭 시 실행할 콜백
+  /** 서버에서 내려온 버튼 상태 전체 전달 */
+  buttonStatus: EventButtonStatus;
+  /** WRITE/EDIT 등 2차 액션이 페이지마다 다르면 주입 */
+  onPrimaryClick?: () => void;
+  onShareClick?: () => void;
+  /** 라우트 커스터마이즈가 필요하면 오버라이드 */
+  actionRoutes?: {
+    participate?: string;   // 기본: "/select-remittance"
+    writeLetter?: string;   // 기본: "/moaletter/write"
+    editLetter?: string;    // 기본: "/moaletter/edit"
+  };
 }
 
 const ParticipationActionBox = ({
   isMyPage,
-  participationStatus,
-  onClick,
+  buttonStatus,
+  onPrimaryClick,
   onShareClick,
+  actionRoutes,
 }: ParticipationActionBoxProps) => {
   const navigate = useNavigate();
 
-  const getButton = () => {
-    switch (participationStatus) {
-      case "none":
-        return (
-          <Button
-            width="fixed"
-            size="medium"
-            onClick={() => navigate("/select-remittance")}
-            className="text-white w-[288px] h-[50px] !font-normal !bg-[#6282E1]"
-          >
-            모아 참여하기
-          </Button>
-        );
-      case "pending":
-        return (
-          <Button
-            width="fixed"
-            size="medium"
-            variant="gray"
-            disabled
-            className="text-white w-[288px] h-[50px] !font-normal !bg-[#C7D5FF]"
-          >
-            송금 내역을 확인 중입니다
-          </Button>
-        );
-      case "confirmed":
-        return (
-          <Button
-            width="fixed"
-            size="medium"
-            onClick={onClick}
-            className="text-white w-[288px] h-[50px] !font-normal !bg-[#6282E1]"
-          >
-            편지 작성하러 가기
-          </Button>
-        );
-      default:
-        return null;
+  const routes = useMemo(
+    () => ({
+      participate: actionRoutes?.participate ?? "/select-remittance",
+      writeLetter: actionRoutes?.writeLetter ?? "/moaletter/write",
+      editLetter: actionRoutes?.editLetter ?? "/moaletter/edit",
+    }),
+    [actionRoutes]
+  );
+
+  const handlePrimary = () => {
+    if (!buttonStatus.isEnabled) return;
+
+    switch (buttonStatus.buttonAction) {
+      case "PARTICIPATE":
+        navigate(routes.participate);
+        break;
+      case "WRITE_LETTER":
+        if (onPrimaryClick) onPrimaryClick();
+        else navigate(routes.writeLetter);
+        break;
+      case "EDIT_LETTER":
+        if (onPrimaryClick) onPrimaryClick();
+        else navigate(routes.editLetter);
+        break;
     }
   };
 
@@ -67,7 +65,22 @@ const ParticipationActionBox = ({
       )}
 
       <div className="flex items-center gap-3 max-w-[350px] mx-auto">
-        {!isMyPage && getButton()}
+        {!isMyPage && (
+          <Button
+            width="fixed"
+            size="medium"
+            onClick={handlePrimary}
+            disabled={!buttonStatus.isEnabled}
+            className={[
+              "w-[288px] h-[50px] !font-normal text-white",
+              buttonStatus.isEnabled ? "!bg-[#6282E1]" : "!bg-[#C7D5FF]",
+            ].join(" ")}
+            variant={buttonStatus.isEnabled ? "primary" : "gray"}
+          >
+            {buttonStatus.buttonText}
+          </Button>
+        )}
+
         <button
           className="w-[50px] h-[50px] flex items-center justify-center"
           aria-label="공유하기"

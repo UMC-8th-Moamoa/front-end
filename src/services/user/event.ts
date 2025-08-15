@@ -47,11 +47,39 @@ export async function getBirthdayEventDetail(eventId: number) {
   return data.success as BirthdayEventDetail;
 }
 
-/** --------- 참여 화면용 메타 (마감시간/참여 현황) ---------- */
+/** --------- 참여 화면용 메타 (마감시간/참여 현황 + 버튼상태) ---------- */
+export type ButtonStatusType =
+  | "NOT_PARTICIPATED"
+  | "PARTICIPATED_NO_LETTER"
+  | "PARTICIPATED_WITH_LETTER";
+
+export type ButtonAction = "PARTICIPATE" | "WRITE_LETTER" | "EDIT_LETTER";
+
+export type EventButtonStatus = {
+  type: ButtonStatusType;
+  message: string;
+  buttonText: string;     // 예: "모아 참여하기", "편지 작성하러 가기", "편지 수정하기"
+  buttonAction: ButtonAction;
+  isEnabled: boolean;
+};
+
 export type EventParticipationMeta = {
-  event: { id: number; birthdayPersonName: string; deadline: string; status: string };
-  countdown: { timeRemaining: string; deadlineFormatted: string };
-  participation: { currentUserParticipated: boolean; participationCount: number };
+  event: {
+    id: number;
+    birthdayPersonName: string;
+    deadline: string;
+    status: string;
+  };
+  countdown: {
+    timeRemaining: string;
+    deadlineFormatted: string;
+  };
+  participation: {
+    currentUserParticipated: boolean;
+    participationCount: number;
+    hasWrittenLetter?: boolean; // 서버가 내려주면 사용
+  };
+  buttonStatus: EventButtonStatus; // ✅ 추가
 };
 
 export async function getEventParticipationMeta(eventId: number) {

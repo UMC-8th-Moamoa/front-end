@@ -1,93 +1,149 @@
 // src/pages/WishListRegisterPage.tsx
-import { useState, useEffect, useMemo } from "react";
+// (파일 전체 – 너가 올린 최신본에서 변경 포인트 표시)
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import WishListRegisterTopBar from "../../components/WishList/WishListRegisterTopBar";
 import AutoInputSection from "../../components/WishList/AutoInputSection";
 import ManualInputSection from "../../components/WishList/ManualInputSection";
 import Button from "../../components/common/Button";
-import {
-  createWishlistByUrl,
-  createWishlistManual,
-  updateWishlist,
-} from "../../services/wishlist/mutate";
 
-// 수정 모드로 들어올 때 전달받는 형태
+import { createWishlistByUrl, createWishlistManual, updateWishlist } from "../../services/wishlist/list";
+import { uploadWishlistImageAuto, dataURLtoFile, analyzeWishlistImage } from "../../services/wishlist/uploadimage";
+
+type Tab = "auto" | "manual";
+
 type EditState = {
   mode?: "edit";
-  item?: {
-    id: number;
-    title: string;
-    price: number;           // number
-    imageSrc?: string;       // 선택
-    isPublic: boolean;
-  };
+  item?: { id: number; title: string; price: number; imageSrc?: string; isPublic: boolean };
 };
+
+type PhotoReturnState = {
+  imageUrl?: string;
+  targetTab?: Tab;
+  returnTo?: string;
+} & Partial<EditState>;
 
 const WishListRegisterPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const edit = (location.state as EditState) || {};
 
-  // 탭
-  const [selectedTab, setSelectedTab] = useState<"auto" | "manual">("auto");
-  // 공개/비공개 (체크되면 비공개 → locked)
+  const edit = (location.state as EditState) || {};
+  const [selectedTab, setSelectedTab] = useState<Tab>("auto");
+
   const [isPrivate, setIsPrivate] = useState(false);
 
-  // auto
   const [url, setUrl] = useState("");
+  const [autoImageUrl, setAutoImageUrl] = useState<string | undefined>();
 
-  // manual
   const [name, setName] = useState("");
-  const [price, setPrice] = useState(""); // 숫자 문자열
-  // const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [price, setPrice] = useState("");
+  const [manualImageUrl, setManualImageUrl] = useState<string | undefined>();
 
   const [submitting, setSubmitting] = useState(false);
 
-  // 수정 모드 여부/수정 대상 id
   const isEdit = useMemo(() => edit.mode === "edit" && !!edit.item, [edit]);
   const editId = edit.item?.id;
 
-  // 진입 시/종료 시 스크롤 잠금
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
+    return () => { document.body.style.overflow = "auto"; };
   }, []);
 
-  // ▶️ 수정 모드 프리필
   useEffect(() => {
     if (isEdit && edit.item) {
-      setSelectedTab("manual");                 // 수정은 수동 입력 탭으로
+      setSelectedTab("manual");
       setName(edit.item.title ?? "");
       setPrice(String(edit.item.price ?? 0));
-      setIsPrivate(!edit.item.isPublic);        // 공개여부 반영 (체크=비공개=locked)
-      // setImageUrl(edit.item.imageSrc ?? null); // 이미지 업로드 붙이면 사용
+      setIsPrivate(!edit.item.isPublic);
+      setManualImageUrl(edit.item.imageSrc ?? undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit]);
 
+  useEffect(() => {
+    const st = location.state as PhotoReturnState | undefined;
+    if (st?.imageUrl) {
+      if (st.targetTab === "manual") {
+        setManualImageUrl(st.imageUrl);
+        setSelectedTab("manual");
+      } else {
+        setAutoImageUrl(st.imageUrl);
+        setSelectedTab("auto");
+        setUrl(""); // 사진 선택 시 링크 비움(상호배타)
+      }
+      navigate(location.pathname, { replace: true, state: isEdit ? edit : {} });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state, location.pathname]);
+
+  useEffect(() => {
+    if (selectedTab === "auto" && url) {
+      if (autoImageUrl) setAutoImageUrl(undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
+
+  // ✅ 자동 탭: DataURL 이미지 오면 업로드→분석→필드 채움
+  useEffect(() => {
+    let running = false;
+    const run = async () => {
+      if (running) return;
+      if (selectedTab !== "auto") return;
+      if (!autoImageUrl?.startsWith("data:")) return;
+      try {
+        running = true;
+        const file = dataURLtoFile(autoImageUrl);
+        const publicUrl = await uploadWishlistImageAuto(file);   // presign → S3
+        const analyzed = await analyzeWishlistImage(publicUrl);  // 분석
+        if (!url && analyzed.result?.link) setUrl(analyzed.result.link);
+        if (!name && analyzed.result?.title) setName(analyzed.result.title);
+        if (!price && analyzed.result?.price) {
+          const num = analyzed.result.price.replace(/[^\d]/g, "");
+          if (num) setPrice(num);
+        }
+        setAutoImageUrl(publicUrl); // 미리보기는 공개 URL로 교체
+      } catch (e) {
+        console.warn("자동분석 실패:", e);
+      }
+    };
+    run();
+    return () => { running = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoImageUrl, selectedTab]);
+
+  /** 링크 모달에서 '확인' 즉시 등록 (자동 입력 모드 전용) */
+  const handleUrlSubmitNow = async (newUrl: string) => {
+    if (!newUrl) return;
+    const isPublic = !isPrivate;
+    try {
+      setSubmitting(true);
+      await createWishlistByUrl(newUrl.trim(), isPublic);
+      navigate("/wishlist", {
+        replace: true,
+        state: { showToast: true, toastMsg: "위시리스트가 등록되었습니다" },
+      });
+    } catch (e: any) {
+      const msg = e?.response?.data?.message || e?.message || "URL 등록 실패";
+      alert(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
-      // 체크박스 해제(공개)=unlocked → isPublic=true
-      // 체크박스 체크(비공개)=locked → isPublic=false
       const isPublic = !isPrivate;
 
-      // 수정 모드: PATCH
       if (isEdit && editId && selectedTab === "manual") {
-        if (!name.trim()) {
-          alert("제품명을 입력해 주세요");
-          return;
-        }
+        if (!name.trim()) return alert("제품명을 입력해 주세요");
         const priceNumber = Number(price || 0);
         await updateWishlist(editId, {
           productName: name.trim(),
           price: priceNumber,
-          // productImageUrl: imageUrl ?? undefined,
           isPublic,
         });
-
         navigate("/wishlist", {
           replace: true,
           state: { showToast: true, toastMsg: "위시리스트가 수정되었습니다" },
@@ -95,31 +151,41 @@ const WishListRegisterPage = () => {
         return;
       }
 
-      // 등록 모드: POST
       if (selectedTab === "auto") {
-        if (!url.trim()) {
-          alert("상품 링크를 입력해 주세요");
-          return;
+        // 여기는 “버튼으로 등록” 케이스. (모달에서 이미 등록하면 도달 X)
+        if (!url && !autoImageUrl) return alert("링크를 붙여넣거나 사진을 선택해 주세요");
+
+        let finalUrl = url?.trim();
+        if (!finalUrl && autoImageUrl?.startsWith("http")) {
+          try {
+            const analyzed = await analyzeWishlistImage(autoImageUrl);
+            finalUrl = analyzed.result?.link?.trim() || "";
+          } catch {}
         }
-        await createWishlistByUrl(url.trim(), isPublic);
+        if (!finalUrl) return alert("사진 분석에서 상품 링크를 찾지 못했어요. 링크를 직접 입력해 주세요.");
+
+        await createWishlistByUrl(finalUrl, isPublic);
       } else {
-        if (!name.trim()) {
-          alert("제품명을 입력해 주세요");
-          return;
-        }
+        if (!name.trim()) return alert("제품명을 입력해 주세요");
         const priceNumber = Number(price || 0);
+
+        let imageUrlForCreate: string | undefined = manualImageUrl;
+        if (manualImageUrl?.startsWith("data:")) {
+          const file = dataURLtoFile(manualImageUrl);
+          imageUrlForCreate = await uploadWishlistImageAuto(file);
+        }
+
         await createWishlistManual({
           productName: name.trim(),
           price: priceNumber,
-          // imageUrl,
+          imageUrl: imageUrlForCreate,
           isPublic,
         });
       }
 
-      // 성공 후 이동 + 토스트
       navigate("/wishlist", {
         replace: true,
-        state: { showToast: true, toastMsg: "위시리스트가 등록되었습니다" },
+        state: { showToast: true, toastMsg: isEdit ? "위시리스트가 수정되었습니다" : "위시리스트가 등록되었습니다" },
       });
     } catch (e: any) {
       const reason =
@@ -140,7 +206,12 @@ const WishListRegisterPage = () => {
 
         <div className="flex-grow px-4 pt-4 pb-[130px] overflow-hidden">
           {selectedTab === "auto" && (
-            <AutoInputSection url={url} onUrlChange={setUrl} />
+            <AutoInputSection
+              url={url}
+              onUrlChange={(v) => setUrl(v)}
+              imageUrl={autoImageUrl}
+              onUrlSubmit={handleUrlSubmitNow}   // ✅ 모달 확인 즉시 등록
+            />
           )}
 
           {selectedTab === "manual" && (
@@ -149,7 +220,7 @@ const WishListRegisterPage = () => {
               price={price}
               onNameChange={setName}
               onPriceChange={setPrice}
-              // onImageUrlChange={setImageUrl}
+              imageUrl={manualImageUrl}
             />
           )}
         </div>
@@ -174,7 +245,7 @@ const WishListRegisterPage = () => {
               disabled={submitting}
               className="h-[50px] mx-auto text-[20px] !bg-[#6282E1] font-semibold"
             >
-              {submitting ? (isEdit ? "수정 중..." : "등록 중...") : (isEdit ? "수정하기" : "등록하기")}
+              {submitting ? (isEdit ? "수정 중..." : "등록 중...") : isEdit ? "수정하기" : "등록하기"}
             </Button>
           </div>
         </div>
