@@ -144,12 +144,12 @@ export async function fetchItemDetail(opts: {
 /** 구매 API */
 export async function buyItem(payload: {
   category: 'font' | 'paper' | 'seal';
-
   user_id: string;
+
   item_no: number;
   price: number;
   event: boolean;
 }) {
-  return api.post('/shopping/item_buy', payload);
 
+  return api.post('/shopping/item_buy', payload);
 }
