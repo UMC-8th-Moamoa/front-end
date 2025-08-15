@@ -3,14 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": { "node": "18.x" },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm run build:try",
-    "lint": "eslint .",
-    "preview": "vite preview",
+    "build": "pnpm run vercel-build",
+    "vercel-build": "vite build || node scripts/force-build.mjs",
     "build:no-check": "vite build",
-    "build:try": "vite build || node scripts/force-build.mjs"  },
-    
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "@types/axios": "^0.14.4",
