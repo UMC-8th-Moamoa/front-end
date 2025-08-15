@@ -109,9 +109,13 @@ export default function WriteLetterPage() {
           fontId: safeFontId,
           envelopeImageUrl: finalImageUrl ?? "",
         });
-        navigate("/moaletter/letter-saved", {
-          state: { receiverName: "수신자", stampUrl: envelopeStampUrl },
-        });
+navigate("/moaletter/letter-saved", {
+  state: {
+    receiverName: "수신자",
+    imageUrl: finalImageUrl ?? "",   // 200x200 크롭 결과(DataURL)
+    stampUrl: envelopeStampUrl ?? "" // 우표도 같이
+  },
+});
       }
     } catch (err: any) {
       setSaveError(err?.response?.status === 401 ? "로그인이 필요합니다." : "저장 실패");
@@ -162,8 +166,8 @@ export default function WriteLetterPage() {
           onChange={setLetterText}
           activeTool={activeTool}
           textareaRef={textareaRef}
-          backgroundUrl={letterPaperImageUrl}    // ✅ 선택/기본 배경 반영
-          fontFamily={fontFamily ?? undefined}   // ✅ 선택 폰트 반영
+          backgroundUrl={letterPaperImageUrl}    // 선택/기본 배경 반영
+          fontFamily={fontFamily ?? undefined}   // 선택 폰트 반영
         />
       ) : (
         <EnvelopeContent

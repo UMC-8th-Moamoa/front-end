@@ -51,7 +51,9 @@ const EP_OTHER_INFO = "/mypage/otherpage_info";            // GET ?user_id=
 const EP_FOLLOW_REQ = "/mypage/follow/request";            // POST { user_id, target_id }
 const EP_CS_WRITE = "/mypage/customer_service";
 const EP_CHANGE_USER_ID = "/mypage/change_id";
-
+const EP_UPLOAD_USER_URL = "/upload/user-image/upload-url"; // POST
+const EP_UPLOAD_CONFIRM  = "/upload/confirm";               // POST
+const EP_UPLOAD_DELETE   = "/upload/image";                 // DELETE
 
 // ===== 공통 Envelope =====
 export type ResultType = "SUCCESS" | "FAIL";
@@ -459,134 +461,117 @@ export async function fetchMyMerged(userId: string): Promise<MyMerged> {
 }
 
 
-// ==================== 고객센터: 목록/상세 ====================
+// ==================== 고객센터====================
 
 const EP_CS_LIST   = "/customer-service/list";    // GET, (opt) ?page=&size=
 const EP_CS_DETAIL = "/customer-service/detail";  // GET, (예) ?id= 또는 /:id (지금은 ?id=로 구현)
 
-// 공통 스키마(유연 매핑)
+// === [고객센터 타입] ===
 export type InquiryItem = {
   id: number;
   title: string;
   content: string;
-  date: string;                    // YYYY-MM-DD or YYYY.MM.DD 등 문자열
-  status: "답변 보기" | "답변 대기";  // UI에서 쓰는 그대로
-  isLocked: boolean;               // private 여부
-  username: string;                // 작성자 user_id
+  username: string;   // = userId
+  date: string;       // ISO or YYYY-MM-DD HH:mm 형태 문자열
+  status: "답변 대기" | "답변 보기";
+  isLocked?: boolean; // 추후 비공개 여부 등 표시용(없으면 무시)
 };
 
-// 목록 응답 (유연 수용)
-export interface InquiryListResponse {
-  success: boolean;
-  total: number;
-  inquiries: InquiryItem[];
-}
+export type InquiryDetailResponse = {
+  inquiry: InquiryItem;
+  responses?: Array<{
+    id: number;
+    content: string;
+    isAdminResponse: boolean;
+    adminName?: string | null;
+    createdAt: string;
+  }>;
+};
 
-// 상세 응답 (유연 수용)
-export interface InquiryDetailResponse {
-  success: boolean;
-  inquiry: InquiryItem | null;
-}
-
-// 키 추출 유틸 재사용
-// pick, normalizeSuccess 등은 이미 파일 상단에 정의되어 있으므로 그대로 사용.
-
-// 내부 매퍼: 서버 필드명 다양성 흡수
-function toInquiryItemAny(src: any): InquiryItem {
-  const id       = Number(pick(src, "id", "inquiryId", "cs_id") || 0);
-  const title    = pick<string>(src, "title") || "";
-  const content  = pick<string>(src, "content") || "";
-  const isLocked = Boolean(pick(src, "private", "isPrivate", "locked") || false);
-  const username = pick<string>(src, "user_id", "username", "writer") || "";
-
-  // date: createdAt / created_at / date 등 다양한 키 수용
-  const rawDate  = pick<string>(src, "createdAt", "created_at", "date", "written_at") || "";
-  // 단순 문자열 통과 (서버 포맷을 그대로 UI에 보여줌)
-  const date     = String(rawDate);
-
-  // status: 서버가 answered / status로 줄 수도 있고, 없으면 '답변 대기'
-  const answered = pick<any>(src, "answered", "hasAnswer", "isAnswered");
-  const rawStatus = pick<string>(src, "status") || (answered ? "답변 보기" : "답변 대기");
-  const status: "답변 보기" | "답변 대기" = rawStatus === "답변 보기" ? "답변 보기" : "답변 대기";
-
-  return { id, title, content, date, status, isLocked, username };
-}
-
-/** 고객센터 목록 조회 */
-export async function fetchCustomerInquiries(params?: { page?: number; size?: number }): Promise<InquiryListResponse> {
-  try {
-    const { data } = await instance.get(EP_CS_LIST, { params });
-    // 가능한 키들에서 리스트 꺼내기: service[], inquiries[], items[], content[]
-    const list = (data?.service || data?.inquiries || data?.items || data?.content || []) as any[];
-    const total =
-      Number(pick(data, "total", "totalElements", "count") || (Array.isArray(list) ? list.length : 0));
-
-    const mapped: InquiryItem[] = Array.isArray(list) ? list.map(toInquiryItemAny) : [];
-
-    return { success: true, total, inquiries: mapped };
-  } catch (e: any) {
-    const msg = e?.response?.data?.message || e?.message || "고객센터 목록 조회 실패";
-    console.error("[CS][LIST] error:", msg);
-    return { success: false, total: 0, inquiries: [] };
-  }
-}
-
-/** 고객센터 상세 조회 */
-export async function fetchCustomerInquiryDetail(id: number): Promise<InquiryDetailResponse> {
-  try {
-    // ?id= 방식. 서버가 /detail/:id 라우팅이면 EP를 바꾸세요.
-    const { data } = await instance.get(EP_CS_DETAIL, { params: { id } });
-
-    // 가능한 키에서 단건 꺼내기: service[0], inquiry, item, content
-    const raw =
-      (Array.isArray(data?.service) && data.service[0]) ||
-      data?.inquiry ||
-      data?.item ||
-      data?.content ||
-      data;
-
-    const inquiry = raw ? toInquiryItemAny(raw) : null;
-    return { success: true, inquiry };
-  } catch (e: any) {
-    const msg = e?.response?.data?.message || e?.message || "고객센터 상세 조회 실패";
-    console.error("[CS][DETAIL] error:", msg);
-    return { success: false, inquiry: null };
-  }
+// === [서버 → 프론트 매핑 유틸] ===
+function mapInquiryFromServer(raw: any): InquiryItem {
+  return {
+    id: raw?.id,
+    title: raw?.title ?? "",
+    content: raw?.content ?? "",
+    username: raw?.userId ?? "",
+    date: raw?.createdAt ?? "",
+    status: raw?.hasResponse ? "답변 보기" : "답변 대기",
+    // 서버 스펙에 비공개 여부가 있으면 isLocked에 매핑
+    isLocked: typeof raw?.private === "boolean" ? raw.private : undefined,
+  };
 }
 
 
-// ===== 고객센터 글 등록 =====
-export interface CreateInquiryBody {
-  user_id: string;
+
+// === [목록 조회] GET /api/mypage/customer_service?page=&limit= ===
+export async function fetchCustomerInquiries(
+  page = 1,
+  limit = 10
+): Promise<{ inquiries: InquiryItem[]; total: number; currentPage: number; totalPages: number; limit: number }> {
+  const res = await instance.get("/mypage/customer_service", { params: { page, limit } });
+  const norm = normalizeSuccess<any>(res.data);
+  if (!norm.ok) throw new Error(norm.reason ?? "FAILED_TO_FETCH_INQUIRIES");
+
+  const body = norm.payload; // = data.success
+  const inquiries = Array.isArray(body?.inquiries) ? body.inquiries.map(mapInquiryFromServer) : [];
+  const pagination = body?.pagination ?? {};
+
+  return {
+    inquiries,
+    total: Number(pagination.totalCount ?? inquiries.length) || 0,
+    currentPage: Number(pagination.currentPage ?? page) || 1,
+    totalPages: Number(pagination.totalPages ?? 1) || 1,
+    limit: Number(pagination.limit ?? limit) || limit,
+  };
+}
+
+// === [상세 조회] GET /api/mypage/customer_service/{inquiryId} ===
+export async function fetchCustomerInquiryDetail(inquiryId: number): Promise<InquiryDetailResponse> {
+  const res = await instance.get(`/mypage/customer_service/${inquiryId}`);
+  const norm = normalizeSuccess<any>(res.data);
+  if (!norm.ok) throw new Error(norm.reason ?? "FAILED_TO_FETCH_INQUIRY_DETAIL");
+
+  const body = norm.payload; // = data.success
+  const inquiry = mapInquiryFromServer(body?.inquiry);
+  const responses = Array.isArray(body?.responses)
+    ? body.responses.map((r: any) => ({
+        id: r?.id,
+        content: r?.content ?? "",
+        isAdminResponse: !!r?.isAdminResponse,
+        adminName: r?.adminName ?? null,
+        createdAt: r?.createdAt ?? "",
+      }))
+    : [];
+
+  return { inquiry, responses };
+}
+
+// === [작성] POST /api/mypage/customer_service  (스펙 다르면 path/body 키만 바꿔줘) ===
+// 서버가 토큰으로 유저 식별하는 케이스까지 커버
+type CreateInquiryInput = {
   title: string;
   content: string;
-  private: boolean;
-}
-export interface CreateInquiryResponse {
-  success: boolean;
-  message: string;
-  service?: {
-    user_id: string;
-    title: string;
-    content: string;
-    category?: string;
-    private: boolean;
-  }[];
+  private?: boolean;
+  user_id?: string; // 필요하면 넣고, 아니면 제외
+};
+
+export async function createCustomerInquiry(
+  input: CreateInquiryInput
+): Promise<{ success: boolean; message?: string; id?: number }> {
+  // body를 최소 필수 필드로 구성하고, user_id가 있으면 넣는 방식
+  const { user_id, ...rest } = input;
+  const body = { ...rest, ...(user_id ? { user_id } : {}) };
+
+  const res = await instance.post("/mypage/customer_service", body);
+  const norm = normalizeSuccess<any>(res.data);
+  if (!norm.ok) return { success: false, message: norm.reason };
+
+  const id = norm.payload?.inquiry?.id ?? norm.payload?.id;
+  return { success: true, id };
 }
 
-// [ADD] 고객센터 글 등록 함수
-export async function createCustomerInquiry(
-  body: CreateInquiryBody
-): Promise<CreateInquiryResponse> {
-  try {
-    const { data } = await instance.post<CreateInquiryResponse>(EP_CS_WRITE, body);
-    return data;
-  } catch (e: any) {
-    // 서버 에러 메시지 우선 노출
-    const msg = e?.response?.data?.message || e?.message || "고객센터 글 등록 실패";
-    throw new Error(msg);
-  }
-}
+
 
 // ====== ID 변경 타입 ======
 export interface ChangeUserIdBody {
