@@ -90,6 +90,18 @@ function Login() {
       if (!resultType || resultType === "SUCCESS") {
         const { at, rt } = extractTokens(data);
         if (at) saveTokens(at, rt);
+
+        // ✅ 로그인한 사용자의 user_id(문자열) 로컬스토리지에 저장
+        const s = (data as any)?.success ?? data;
+        if (s?.user?.user_id) {
+          localStorage.setItem("user_id", s.user.user_id);
+          // 필요하면 표시용 이름/내부 id도 저장
+          if (s.user?.name) localStorage.setItem("user_name", s.user.name);
+          if (s.user?.id != null) localStorage.setItem("user_numeric_id", String(s.user.id));
+          // 디버깅 로그(원하면 남겨두세요)
+          // console.log("[LOGIN] user_id saved:", s.user.user_id);
+        }
+
         navigate("/home", { replace: true });
         return;
       }
