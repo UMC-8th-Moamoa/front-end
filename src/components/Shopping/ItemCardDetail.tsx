@@ -15,9 +15,11 @@ type Item = {
 interface ShoppingItemCardProps {
   item: Item;
   onBuy: (item: Item) => void;
+  /** 상세 API 호출에 필요 (envelope X, seal만 사용) */
   category?: 'font' | 'paper' | 'seal';
 }
 
+/** 상세 응답 타입 (배열로 내려옴) */
 type DetailItem = {
   item_no: number;
   name: string;
@@ -25,6 +27,8 @@ type DetailItem = {
   price?: number;
   image?: string;
 };
+
+/** 서버가 래퍼로 주거나(Envelope) 평문으로 줄 수 있어 둘 다 수용 */
 type DetailEnvelope = {
   resultType?: 'SUCCESS' | 'FAIL';
   success?: { success?: boolean; item?: DetailItem[] } | null;
@@ -46,6 +50,7 @@ const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy, category
     return arr;
   };
 
+  // 상세 정보 불러오기 (seal만 사용, envelope 폴백 없음)
   useEffect(() => {
     let ignore = false;
 
@@ -55,28 +60,14 @@ const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy, category
 
       setLoading(true);
       try {
-        // 1차 시도: 전달받은 category로
         const { data } = await api.get<DetailResponse>('/shopping/item_list', {
           params: { category, id: item.id, _t: Date.now() },
           headers: { 'Cache-Control': 'no-cache' },
         });
 
-        let list = extractItems(data);
-
-        // 값이 비정상/빈 경우 한 번 더 시도 (서버가 envelope 남아있을 가능성 대비)
-        if ((!list || list.length === 0) && category === 'seal') {
-          try {
-            const { data: data2 } = await api.get<DetailResponse>('/shopping/item_list', {
-              params: { category: 'envelope', id: item.id, _t: Date.now() },
-              headers: { 'Cache-Control': 'no-cache' },
-            });
-            list = extractItems(data2);
-          } catch {
-            /* ignore fallback error */
-          }
-        }
-
+        const list = extractItems(data);
         const first = list?.[0];
+
         if (!ignore && first) {
           if (typeof first.detail === 'string') setDetail(first.detail);
           if (typeof first.price === 'number') setPrice(first.price);
