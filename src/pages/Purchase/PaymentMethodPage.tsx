@@ -47,6 +47,8 @@ const PaymentMethodPage = () => {
 
   return (
     <div className="min-h-screen max-w-[393px] mx-auto bg-white px-4 pt-6 pb-10 relative">
+
+      {/* 상단 뒤로가기 */}
       <div className="absolute top-4 left-4">
         <BackButton />
       </div>
