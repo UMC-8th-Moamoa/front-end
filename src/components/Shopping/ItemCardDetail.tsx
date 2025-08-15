@@ -6,7 +6,7 @@ import api from '../../api/axiosInstance';
 type Item = {
   id: string | number;
   name: string;
-  description?: string; 
+  description?: string;
   price?: number;
   image?: string;
   isOwned?: boolean;
@@ -15,10 +15,9 @@ type Item = {
 interface ShoppingItemCardProps {
   item: Item;
   onBuy: (item: Item) => void;
-  category?: 'font' | 'paper' | 'seal'; 
+  category?: 'font' | 'paper' | 'seal';
 }
 
-/** 상세 응답 타입 (배열로 내려옴) */
 type DetailItem = {
   item_no: number;
   name: string;
@@ -26,10 +25,12 @@ type DetailItem = {
   price?: number;
   image?: string;
 };
-type DetailResponse = {
-  success: boolean;
-  item?: DetailItem[];
+type DetailEnvelope = {
+  resultType?: 'SUCCESS' | 'FAIL';
+  success?: { success?: boolean; item?: DetailItem[] } | null;
+  error?: unknown;
 };
+type DetailResponse = DetailEnvelope | { success: boolean; item?: DetailItem[] };
 
 const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy, category }) => {
   const [imageError, setImageError] = useState(false);
@@ -38,27 +39,45 @@ const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy, category
   const [image, setImage] = useState<string | undefined>(item.image);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // 상세 정보 불러오기
+  // 응답 래퍼 벗기기 + 배열 추출
+  const extractItems = (data: DetailResponse): DetailItem[] => {
+    const payload: any = (data as any)?.success ?? data;
+    const arr: DetailItem[] = Array.isArray(payload?.item) ? payload.item : [];
+    return arr;
+  };
+
   useEffect(() => {
     let ignore = false;
 
     async function load() {
-      // 카테고리/아이디 없으면 호출 안 함 (초기 props만 사용)
       if (!category || item.id == null) return;
-
-      // 허용된 카테고리만
       if (!['font', 'paper', 'seal'].includes(category)) return;
 
+      setLoading(true);
       try {
-        setLoading(true);
+        // 1차 시도: 전달받은 category로
         const { data } = await api.get<DetailResponse>('/shopping/item_list', {
-          params: { category, id: item.id },
+          params: { category, id: item.id, _t: Date.now() },
+          headers: { 'Cache-Control': 'no-cache' },
         });
 
-        // ✅ 배열 첫 원소에서 상세 추출
-        const first = Array.isArray(data?.item) ? data.item![0] : undefined;
+        let list = extractItems(data);
 
-        if (!ignore && data?.success && first) {
+        // 값이 비정상/빈 경우 한 번 더 시도 (서버가 envelope 남아있을 가능성 대비)
+        if ((!list || list.length === 0) && category === 'seal') {
+          try {
+            const { data: data2 } = await api.get<DetailResponse>('/shopping/item_list', {
+              params: { category: 'envelope', id: item.id, _t: Date.now() },
+              headers: { 'Cache-Control': 'no-cache' },
+            });
+            list = extractItems(data2);
+          } catch {
+            /* ignore fallback error */
+          }
+        }
+
+        const first = list?.[0];
+        if (!ignore && first) {
           if (typeof first.detail === 'string') setDetail(first.detail);
           if (typeof first.price === 'number') setPrice(first.price);
           if (typeof first.image === 'string') {
@@ -100,9 +119,7 @@ const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy, category
 
       {/* 텍스트 영역 */}
       <div className="mt-3 text-left w-full px-4">
-        <p className="text-[17px] font-semibold text-[#1D1D1F] mb-1">
-          {item.name}
-        </p>
+        <p className="text-[17px] font-semibold text-[#1F1F1F] mb-1">{item.name}</p>
         <p className="text-sm text-[#666666] mb-7">
           {loading ? '불러오는 중…' : (detail || '설명이 없습니다.')}
         </p>

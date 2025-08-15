@@ -62,7 +62,9 @@ export default function PaidChargeSection({
           variant="primary"
           className="w-full mb-4"
           onClick={() => {
-            navigate('/purchase/payment');
+            navigate('/purchase/payment', {
+              state: { price: totalPrice }, 
+            });
           }}
         >
           결제하기
