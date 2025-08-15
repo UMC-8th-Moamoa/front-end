@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import BackIcon from '../../assets/backbutton.svg';
 import { useNavigate } from 'react-router-dom';
+import { fetchMyMerged, createCustomerInquiry } from "../../services/mypage";
 
 
 
@@ -8,8 +9,38 @@ export default function CustomerServiceWritePage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [agreed, setAgreed] = useState(false);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
+const handleSubmit = async () => {
+    if (!agreed) {
+      alert("개인정보 수집·이용에 동의해야 문의를 등록할 수 있습니다.");
+      return;
+    }
+    if (!title.trim() || !content.trim()) {
+      alert("제목과 내용을 모두 입력해주세요.");
+      return;
+    }
+
+    try {
+      // 현재 로그인 사용자 id 가져오기
+      const my = await fetchMyMerged(""); // "" 대신 현재 로그인한 userId
+      const res = await createCustomerInquiry({
+        user_id: my.userId,
+        title,
+        content,
+        private: true,
+      });
+
+      if (res.success) {
+        alert("문의가 등록되었습니다.");
+        navigate("/customer-service");
+      } else {
+        alert(res.message || "등록에 실패했습니다.");
+      }
+    } catch (err: any) {
+      alert(err.message || "등록 중 오류가 발생했습니다.");
+    }
+  };
 
   return (
     <div className="relative flex flex-col items-center bg-white max-w-[393px] min-w-[350px] min-h-screen mx-auto text-black pb-[120px]">
@@ -76,6 +107,19 @@ const navigate = useNavigate();
           고객님의 요청을 확인하고 정보 파악을 위해 이름, 이메일 주소, 연락처 등의 개인정보를 수집하는데 동의하십니까?<br />
           이용자는 개인정보 수집 및 이용에 동의하지 않을 권리가 있으며, 동의하지 않을 경우 문의 접수 및 답변이 제한될 수 있습니다.
         </p>
+          {/* 체크 버튼 */}
+ {/* 체크박스 */}
+  <label className="flex items-center gap-2 mt-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={agreed}
+      onChange={(e) => setAgreed(e.target.checked)}
+      className="w-4 h-4 accent-[#6282E1] cursor-pointer"
+    />
+    <span className="text-[14px] font-pretendard text-[#B7B7B7]">
+      동의합니다
+    </span>
+  </label>
       </div>
 
       {/* 하단 버튼 */}
@@ -87,16 +131,13 @@ const navigate = useNavigate();
           취소
         </button>
 
-        <button
-          className="mt-[100px] ml-[10px] flex w-[260px] h-[50px] justify-center items-center bg-[#6282E1] rounded-[10px] text-[#FFFFFF] text-[18px] font-bold font-pretendard"
-         onClick={() => {
-  alert('문의가 등록되었습니다');
-  navigate('/customer-service');
-}}
+<button
+  className="mt-[100px] ml-[10px] flex w-[260px] h-[50px] justify-center items-center bg-[#6282E1] rounded-[10px] text-[#FFFFFF] text-[18px] font-bold font-pretendard"
+  onClick={handleSubmit}
+>
+  제출하기
+</button>
 
-        >
-          제출하기
-        </button>
       </div>
     </div>
   );

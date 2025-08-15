@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Button from '../components/common/Button';
-import BirthdayPicker from '../components/signUp/BirthdayPicker';
-import BackButton from '../components/common/BackButton';
-import { registerUser } from '../api/auth';
+import Button from '../../components/common/Button';
+import BirthdayPicker from '../../components/signUp/BirthdayPicker';
+import BackButton from '../../components/common/BackButton';
+import { registerUser } from '../../api/auth';
 
 type PrevState = {
   email: string;

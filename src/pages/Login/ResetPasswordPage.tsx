@@ -1,14 +1,15 @@
+// src/pages/ResetPasswordPage.tsx
 import React, { useState } from "react";
-import Button from "../components/common/Button";
-import InputBox from "../components/common/InputBox";
-import BackButton from "../components/common/BackButton";
-import VisibilityToggle from "../components/common/VisibilityToggle";
+import Button from "../../components/common/Button";
+import InputBox from "../../components/common/InputBox";
+import BackButton from "../../components/common/BackButton";
+import VisibilityToggle from "../../components/common/VisibilityToggle";
 import { Link, useNavigate } from "react-router-dom";
 
 function ResetPasswordPage() {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(""); // UI 문구 유지(여기에 이메일 입력)
   const [code, setCode] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
@@ -18,34 +19,110 @@ function ResetPasswordPage() {
 
   const navigate = useNavigate();
 
-  const handleStep1 = () => {
-    if (name === "금채원" && phone === "01011111111") {
-      setStep(2);
+  // STEP 1: 이메일로 인증 코드 전송
+  const handleStep1 = async () => {
+    const email = phone.trim(); // 두 번째 인풋에 이메일을 입력받음
+    if (!name.trim() || !email) {
+      setError("* 이름과 이메일을 입력해 주세요");
+      return;
+    }
+
+    try {
       setError("");
-    } else {
-      setError("* 가입 이력이 없는 정보입니다");
+      const res = await fetch("/api/auth/email/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email, purpose: "reset" }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.resultType === "SUCCESS") {
+        setStep(2);
+      } else {
+        const reason =
+          data?.error?.reason ||
+          data?.message ||
+          "인증코드 전송에 실패했습니다";
+        setError(`* ${reason}`);
+      }
+    } catch (e) {
+      console.error(e);
+      setError("* 서버 오류로 전송에 실패했습니다");
     }
   };
 
-  const handleStep2 = () => {
-    if (code !== "11111") {
-      setError("본인인증 번호가 일치하지 않습니다");
-    } else {
+  // STEP 2: 이메일로 받은 코드 검증
+  const handleStep2 = async () => {
+    const email = phone.trim();
+    if (code.length !== 6) {
+      setError("본인인증 번호를 정확히 입력해 주세요");
+      return;
+    }
+
+    try {
       setError("");
-      setStep(3);
+      const res = await fetch("/api/auth/email/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code, purpose: "reset" }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.resultType === "SUCCESS") {
+        setStep(3);
+      } else {
+        const reason =
+          data?.error?.reason ||
+          data?.message ||
+          "본인인증 번호가 일치하지 않습니다";
+        setError(reason);
+      }
+    } catch (e) {
+      console.error(e);
+      setError("서버 오류로 인증에 실패했습니다");
     }
   };
 
-  const handleStep3 = () => {
+  // STEP 3: 비밀번호 변경
+  const handleStep3 = async () => {
     if (!newPw || !confirmPw) {
       setError("• 비밀번호를 입력해 주세요");
-    } else if (newPw.length < 6) {
+      return;
+    }
+    if (newPw.length < 8) {
       setError("• 숫자, 문자, 특수문자 포함 8자 이상");
-    } else if (newPw !== confirmPw) {
+      return;
+    }
+    if (newPw !== confirmPw) {
       setError("• 비밀번호가 일치하지 않습니다");
-    } else {
+      return;
+    }
+
+    try {
       setError("");
-      setStep(4);
+      const res = await fetch("/api/auth/change-password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: "",
+          newPassword: newPw,
+          confirmPassword: confirmPw,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.resultType === "SUCCESS") {
+        setStep(4);
+      } else {
+        const reason =
+          data?.error?.reason ||
+          data?.message ||
+          "비밀번호 변경에 실패했습니다";
+        setError(reason);
+      }
+    } catch (e) {
+      console.error(e);
+      setError("서버 오류로 비밀번호 변경에 실패했습니다");
     }
   };
 
@@ -73,18 +150,18 @@ function ResetPasswordPage() {
                 setName(e.target.value);
                 setError("");
               }}
-              className="mb-2 bg-gray-200"
+              className="mb-2"
             />
             <InputBox
               type="text"
-              placeholder="전화번호를 입력해 주세요"
+              placeholder="이메일 혹은 전화번호를 입력해 주세요"
               value={phone}
               hasBorder={false}
               onChange={(e) => {
                 setPhone(e.target.value);
                 setError("");
               }}
-              className="mb-4 bg-gray-200"
+              className="mb-4"
             />
             <Button variant="primary" fontSize="xl" onClick={handleStep1} disabled={!name || !phone}>
               확인
@@ -108,16 +185,16 @@ function ResetPasswordPage() {
                 inputMode="numeric"
                 value={code}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "").slice(0, 5);
+                  const val = e.target.value.replace(/\D/g, "").slice(0, 6);
                   setCode(val);
                   setError("");
                 }}
-                maxLength={5}
+                maxLength={6}
                 className="absolute w-full h-full opacity-0 z-10"
                 autoFocus
               />
 
-              {[...Array(5)].map((_, i) => (
+              {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
                   className={`
@@ -130,7 +207,7 @@ function ResetPasswordPage() {
               ))}
             </div>
 
-            <Button variant="primary" fontSize="xl" onClick={handleStep2} disabled={code.length !== 5}>
+            <Button variant="primary" fontSize="xl" onClick={handleStep2} disabled={code.length !== 6}>
               확인
             </Button>
 
@@ -156,7 +233,7 @@ function ResetPasswordPage() {
                   setNewPw(e.target.value);
                   setError("");
                 }}
-                className="bg-gray-200 pr-10"
+                className="pr-10"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 <VisibilityToggle onToggle={setVisibleNewPw} />
@@ -173,7 +250,7 @@ function ResetPasswordPage() {
                   setConfirmPw(e.target.value);
                   setError("");
                 }}
-                className="bg-gray-200 pr-10"
+                className="pr-10"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 <VisibilityToggle onToggle={setVisibleConfirmPw} />

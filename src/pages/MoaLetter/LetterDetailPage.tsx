@@ -1,69 +1,78 @@
+// src/pages/MoaLetter/LetterDetailPage.tsx
+import React, { useRef, useState, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
-import React, { useRef, useState } from "react";
+import { getLetterById, type LetterDetail } from "../../services/letters";
 
-function LetterDetailPage() {
+export default function LetterDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+
   const scrollRef = useRef<HTMLDivElement>(null);
-const [currentPage, setCurrentPage] = useState(1);
-const [totalPage, setTotalPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
 
-const handleScroll = () => {
-  const el = scrollRef.current;
-  if (!el) return;
+  const [letter, setLetter] = useState<LetterDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const scrollTop = el.scrollTop;
-  const pageHeight = el.clientHeight;
-  const fullHeight = el.scrollHeight;
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el || el.clientHeight === 0) return;
+    const total = Math.ceil(el.scrollHeight / el.clientHeight);
+    const current = Math.floor(el.scrollTop / el.clientHeight) + 1;
+    setCurrentPage(current);
+    setTotalPage(Math.max(total, 1));
+  };
 
-  const total = Math.ceil(fullHeight / pageHeight);
-  const current = Math.floor(scrollTop / pageHeight) + 1;
+  useEffect(() => {
+    if (!id) return;
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await getLetterById(Number(id));
+        setLetter(data);
+      } catch {
+        setError("편지 불러오기 실패");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
 
-  setCurrentPage(current);
-  setTotalPage(total);
-};
+  if (loading) return <div className="w-[393px] mx-auto p-4">불러오는 중...</div>;
+  if (error || !letter) return <div className="w-[393px] mx-auto p-4">{error || "데이터 없음"}</div>;
+
+  const senderName = (location.state as any)?.senderName || `보낸이 ${letter.senderId}`;
 
   return (
     <div
-      className="w-[393px] h-[794px] mx-auto font-pretendard flex flex-col items-center px-4 "
-      style={{
-        background: "linear-gradient(169deg, #6282E1 1.53%, #FEC3FF 105.97%)",
-      }}
+      className="w-[393px] h-[794px] mx-auto font-pretendard flex flex-col items-center px-4"
+      style={{ background: "linear-gradient(169deg, #6282E1 1.53%, #FEC3FF 105.97%)" }}
     >
-
-      
-      {/* 상단바 */}
-      <div className="relative w-[350px] flex items-center absolute left mb-[26px]">
+      <div className="relative w-[350px] flex items-center mb-[26px]">
         <BackButton />
         <h1 className="absolute left-1/2 -translate-x-1/2 text-[18px] font-semibold text-white">
-          황유민님의 편지
+          {senderName}님의 편지
         </h1>
       </div>
 
-      {/* 흰색 카드 박스 (배경 강제 흰색) */}
-      <div
-        className="w-[350px] h-[676px] rounded-[20px] flex flex-col justify-end items-center"
-        style={{
-          backgroundColor: "#FFFFFF",
-          
-        }}
-      >
-        {/* 편지 내용 */}
-<div
-  ref={scrollRef}
-  onScroll={handleScroll}
-  className="w-full h-full overflow-y-auto text-[16px] leading-relaxed text-[#1F1F1F] px-[19px] pt-[16px] pb-[0px] box-border"
->
-Vitae lobortis laoreet nam faucibus amet proin mauris eget urna. Suspendisse sit posuere vitae quam adipiscing. Arcu mattis fusce orci lorem tristique lectus vulputate. Ultrices libero tristique leo in mauris vitae ridiculus sed id. Facilisis id justo vitae at sit etiam orci ultricies ut. Tempus dignissim enim amet vel dictum ultrices. Ut elementum sit fermentum etiam. Ipsum erat scelerisque pharetra iaculis.
-Aenean at eleifend pharetra mattis nulla eget elementum eget rhoncus. Diam penatibus vel sagittis adipiscing id in gravida. Felis a cursus purus quis cursus posuere maecenas elementum. Convallis ultricies leo rutrum aenean arcu eget at. Cursus semper pharetra et arcu ut cras ullamcorper.
+      <div className="w-[350px] h-[676px] rounded-[20px] flex flex-col justify-end items-center" style={{ backgroundColor: "#FFFFFF" }}>
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="w-full h-full overflow-y-auto text-[16px] leading-relaxed text-[#1F1F1F] px-[19px] pt-[16px] pb-[0px] box-border whitespace-pre-wrap"
+        >
+          {letter.envelopeImageUrl && letter.envelopeImageUrl.trim() !== "" && (
+            <img src={letter.envelopeImageUrl} alt="envelope" className="w-full h-[160px] object-cover rounded-[12px] mb-3" />
+          )}
+          {letter.content}
         </div>
+      </div>
 
-       
-      </div> {/* 페이지 인디케이터 */}
-<div className="mt-[16px] text-[#FFF] text-[18px] font-medium text-center">
-  {currentPage} / {totalPage}
-</div>
-
+      <div className="mt-[16px] text-[#FFF] text-[18px] font-medium text-center">
+        {currentPage} / {totalPage}
+      </div>
     </div>
   );
 }
-
-export default LetterDetailPage;

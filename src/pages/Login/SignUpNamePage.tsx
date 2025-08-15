@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import InputBox from '../components/common/InputBox';
-import Button from '../components/common/Button';
-import BackButton from '../components/common/BackButton';
+import InputBox from '../../components/common/InputBox';
+import Button from '../../components/common/Button';
+import BackButton from '../../components/common/BackButton';
 
 type PrevState = {
   email: string;

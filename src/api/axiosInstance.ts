@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosHeaders, type InternalAxiosRequestConfig } from "axios";
 
 // dev: 프록시(/api), prod: 환경변수
 const baseURL = import.meta.env.DEV
@@ -12,11 +12,18 @@ const instance = axios.create({
 });
 
 /** 요청: AccessToken 자동 첨부 */
-instance.interceptors.request.use((config) => {
+instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const at = localStorage.getItem("accessToken");
-  if (at) {
-    config.headers = { ...(config.headers || {}), Authorization: `Bearer ${at}` };
+  if (!at) return config;
+
+  const headers = config.headers as AxiosHeaders | Record<string, any>;
+
+  if (headers instanceof AxiosHeaders) {
+    headers.set("Authorization", `Bearer ${at}`);
+  } else {
+    headers["Authorization"] = `Bearer ${at}`;
   }
+
   return config;
 });
 
@@ -48,7 +55,8 @@ export function saveTokens(accessToken?: string | null, refreshToken?: string | 
 export function clearTokens() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
-  delete instance.defaults.headers.common.Authorization;
+  localStorage.removeItem("my_user_id");
+  delete instance.defaults.headers.common["Authorization"];
 }
 
 export default instance;
