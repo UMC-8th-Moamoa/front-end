@@ -16,30 +16,42 @@ export function dataURLtoFile(dataUrl: string, filename = "wishlist-image.jpg"):
  *  resp: { success, data: { uploadUrl, fileUrl, key, expires } }
  */
 export async function getWishlistImagePresign(file: File) {
+  const fileType = file.type || "application/octet-stream";
   const { data } = await instance.post("/upload/wishlist-image/upload-url", {
     fileName: file.name,
-    fileType: file.type || "application/octet-stream",
+    fileType,
   });
 
   const payload = data?.data ?? data;
   const uploadUrl: string = payload?.uploadUrl;
   const fileUrl: string = payload?.fileUrl;
+  const presignedType: string | undefined = payload?.fileType;
 
   if (!uploadUrl || !fileUrl) {
     throw new Error("presign 응답에 uploadUrl/fileUrl이 없습니다.");
+  }
+  // presign에서 받은 fileType과 실제 file.type이 다르면 에러
+  if (presignedType && presignedType !== fileType) {
+    throw new Error(`presign fileType(${presignedType})과 실제 파일 타입(${fileType})이 다릅니다. 이미지 변환 로직을 확인하세요.`);
   }
   return { uploadUrl, fileUrl };
 }
 
 /** S3 PUT (presigned URL) */
 export async function putToS3(uploadUrl: string, file: File, extraHeaders?: Record<string, string>) {
+  // presigned URL에 x-amz-acl=public-read 쿼리 파라미터가 있으면 헤더에도 추가
+  const urlObj = new URL(uploadUrl);
+  const hasAcl = urlObj.searchParams.get("x-amz-acl") === "public-read";
+  const headers: Record<string, string> = {
+    "Content-Type": file.type || "application/octet-stream",
+    ...(extraHeaders ?? {}),
+  };
+  if (hasAcl) headers["x-amz-acl"] = "public-read";
+
   const res = await fetch(uploadUrl, {
     method: "PUT",
     body: file,
-    headers: {
-      "Content-Type": file.type || "application/octet-stream",
-      ...(extraHeaders ?? {}),
-    },
+    headers,
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
