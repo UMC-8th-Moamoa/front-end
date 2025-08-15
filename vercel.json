@@ -1,13 +1,5 @@
 {
-  "buildCommand": "pnpm run vercel-build",
-  "installCommand": "pnpm i --no-frozen-lockfile",
-  "outputDirectory": "dist",
-  "ignoreCommand": "",
-  "env": {
-    "VITE_API_BASE_URL": "/api"
-  },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://www.moamoas.com/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/(.*)", "destination": "https://www.moamoas.com/api/$1" }
   ]
 }
