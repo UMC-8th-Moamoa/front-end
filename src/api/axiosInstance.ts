@@ -1,15 +1,14 @@
 import axios, { AxiosHeaders, type InternalAxiosRequestConfig } from "axios";
 
-// dev: 프록시(/api), prod: 환경변수
-const baseURL = import.meta.env.DEV
-  ? "/api"
-  : (import.meta.env.VITE_API_BASE_URL ?? "https://www.moamoas.com/api");
+// dev, prod 모두 동일하게 같은 오리진으로만 호출
+const baseURL = "/api";
 
 const instance = axios.create({
   baseURL,
-  withCredentials: true, // RT를 쿠키로 운용하면 true 유지
+  withCredentials: true, // 쿠키 쓰면 유지, 아니면 false
   timeout: 8000,
 });
+
 
 /** 요청: AccessToken 자동 첨부 */
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
