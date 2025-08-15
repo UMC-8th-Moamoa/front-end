@@ -9,7 +9,7 @@ import FriendLetterList from "../../components/HomePage/List/Birthday/FriendLett
 import UpcomingFriendList from "../../components/HomePage/List/Birthday/UpcomingFriendList";
 import PopularList from "../../components/HomePage/List/Popular/PopularList";
 import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
-import { dummyBirthdayBanner, dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
+import { dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
 import Calendar from "../../components/HomePage/Calendar/Calendar";
 import { Modal } from "../../components/common/Modal";
 
@@ -89,7 +89,7 @@ const HomePage = () => {
           {/* ✅ 등록 성공 시 HomePage 배너를 띄우는 콜백 전달 */}
           <PopularList onAdded={handleShowWishBanner} />
           <UpcomingFriendList />
-          <BirthdayBanner {...dummyBirthdayBanner} />
+          <BirthdayBanner/>
           <Calendar />
         </div>
 

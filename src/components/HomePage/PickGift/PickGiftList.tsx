@@ -1,8 +1,10 @@
+// components/HomePage/PickGift/PickGiftList.tsx
 import PickGiftItem from "./PickGiftItem";
 import PickGiftAddButton from "./PickGiftAddButton";
+import { type WishlistUiItem } from "../../../services/user/mybirthday";
 
 interface PickGiftListProps {
-  items: any[];
+  items: WishlistUiItem[];
   checkedItems: number[];
   onChange: (id: number) => void;
 }
@@ -16,16 +18,13 @@ export const PickGiftList = ({ items, checkedItems, onChange }: PickGiftListProp
           id={item.id}
           imageSrc={item.imageSrc}
           title={item.title}
-          price={item.price}
+          price={item.price}            // ✅ number로 전달
           checked={checkedItems.includes(item.id)}
           onChange={onChange}
         />
       ))}
 
-      {/* 아래 여백 확보 */}
       <div className="h-4" />
-
-      {/* 위시리스트 추가 버튼 */}
       <PickGiftAddButton />
     </div>
   );

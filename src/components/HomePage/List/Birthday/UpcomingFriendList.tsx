@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import UpcomingFriendItem from "./UpcomingFriendItem";
-import { getUpcomingBirthdays, type UpcomingFriend } from "../../../../services/birthday/friendbirthday";
+import {
+  getUpcomingBirthdays,
+  type UpcomingFriend,
+} from "../../../../services/user/friendbirthday";
 
 const UpcomingFriendList = () => {
   const [items, setItems] = useState<UpcomingFriend[]>([]);
@@ -9,15 +12,22 @@ const UpcomingFriendList = () => {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
-  const load = async (cursor?: string | null, direction: "next" | "prev" = "next") => {
+  const load = async (
+    cursor?: string | null,
+    direction: "next" | "prev" = "next"
+  ) => {
     try {
       setLoading(true);
       setErr(null);
-      const res = await getUpcomingBirthdays({ limit: 3, cursor: cursor ?? null, direction });
+      const res = await getUpcomingBirthdays({
+        limit: 3,
+        cursor: cursor ?? null,
+        direction,
+      });
       setItems(res.upcomingBirthdays);
       setNextCursor(res.pagination.nextCursor);
       setPrevCursor(res.pagination.prevCursor);
-    } catch (e) {
+    } catch {
       setErr("다가오는 생일을 불러오지 못했어.");
     } finally {
       setLoading(false);
@@ -51,7 +61,7 @@ const UpcomingFriendList = () => {
             />
           ))}
 
-          {/* 좌우 스와이프 대신 간단 버튼 페이징 (원하면 숨겨도 됨) */}
+          {/* 간단 버튼 페이징 */}
           <div className="flex justify-between mt-2">
             <button
               disabled={!prevCursor}

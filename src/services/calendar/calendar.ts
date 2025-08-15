@@ -33,7 +33,7 @@ export type CalendarDateDetailResp = {
 // 특정 월의 생일 달력 조회
 export async function getBirthdaysCalendar(params?: { year?: number; month?: number }) {
   const { year, month } = params ?? {};
-  const { data } = await instance.get("/api/calendar/birthdays", {
+  const { data } = await instance.get("/calendar/birthdays", {
     params: { year, month },
   });
   return data.success as CalendarMonthResp["calendar"];
@@ -41,6 +41,6 @@ export async function getBirthdaysCalendar(params?: { year?: number; month?: num
 
 // 특정 날짜의 상세 조회
 export async function getBirthdaysByDate(date: string) {
-  const { data } = await instance.get(`/api/calendar/birthdays/${date}`);
+  const { data } = await instance.get(`/calendar/birthdays/${date}`);
   return data.success as CalendarDateDetailResp;
 }

@@ -2,8 +2,8 @@ import { useNavigate } from "react-router-dom";
 
 interface UpcomingFriendItemProps {
   name: string;
-  displayDate: string;   // API의 "8월 23일"
-  dday: number;          // API의 dDay
+  displayDate: string;   // API: "8월 23일"
+  dday: number;          // API: dDay
   image?: string | null;
   eventId: number;
 }
@@ -16,16 +16,15 @@ const UpcomingFriendItem = ({
   eventId,
 }: UpcomingFriendItemProps) => {
   const navigate = useNavigate();
-  const isUrgent = dday <= 7; // 스펙상 7일 이내만 내려오지만 안전망
+  const isUrgent = dday <= 7; // 스펙상 7일 이내만 오지만 안전망
 
   const handleClick = () => {
-    // 참여 페이지로 이동 (프로젝트 규칙에 맞춰 경로/파라미터 조정 가능)
+    // 참여 페이지 네비게이션 (쿼리로 eventId 전달)
     navigate(`/participation?eventId=${eventId}`);
   };
 
   return (
     <div className="w-[350px] flex items-center gap-4 mb-4 mx-auto">
-      {/* 프로필 이미지 */}
       {image ? (
         <img
           src={image}

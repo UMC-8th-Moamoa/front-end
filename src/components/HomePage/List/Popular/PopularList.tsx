@@ -1,7 +1,7 @@
 // src/components/HomePage/List/Popular/PopularList.tsx
 import { useEffect, useState } from "react";
 import PopularItem from "./PopularItem";
-import type { PopularWishlistItem, PopularWishlistResponse } from "../../../../services/popularwishlist";
+import type { PopularWishlistItem, PopularWishlistResponse } from "../../../../services/wishlist/popularwishlist";
 import instance from "../../../../api/axiosInstance";
 import { createWishlistManual } from "../../../../services/wishlist/mutate";
 

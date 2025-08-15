@@ -1,7 +1,7 @@
 // components/HomePage/List/Birthday/FriendLetterList.tsx
 import { useEffect, useState } from "react";
 import FriendLetterItem from "./FriendLetterItem";
-import { getLetterHome, type LetterHomeItem } from "../../../../services/birthday/friendbirthday";
+import { getLetterHome, type LetterHomeItem } from "../../../../services/user/friendbirthday";
 
 
 const FriendLetterList = () => {
@@ -20,7 +20,7 @@ const FriendLetterList = () => {
       setPrevCursor(res.pagination.prevCursor);
       setErr(null);
     } catch (e: any) {
-      setErr("편지 목록을 불러오지 못했어.");
+      setErr("편지 목록을 불러오지 못했어요.");
     } finally {
       setLoading(false);
     }

@@ -1,36 +1,56 @@
-import { useState, useEffect } from "react";
+// src/components/HomePage/Search/SearchUserList.tsx
+import { useEffect, useState } from "react";
 import SearchUserItem from "./SearchUserItem";
-import { searchUserDummy } from "./SearchUserDummy";
+import { searchUsers, type UserSearchItem } from "../../../services/user/search";
 
 interface SearchUserListProps {
   keyword: string;
 }
 
 const SearchUserList = ({ keyword }: SearchUserListProps) => {
-  const [filteredUsers, setFilteredUsers] = useState(searchUserDummy);
+  const [items, setItems] = useState<UserSearchItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    if (keyword.trim() === "") {
-      setFilteredUsers([]);
-    } else {
-      const lowerKeyword = keyword.toLowerCase();
-      const result = searchUserDummy.filter(
-        (user) =>
-          user.name.includes(lowerKeyword) ||
-          user.userId.toLowerCase().includes(lowerKeyword)
-      );
-      setFilteredUsers(result);
-    }
+    let cancelled = false;
+
+    const run = async () => {
+      if (!keyword.trim()) {
+        setItems([]);
+        setErr(null);
+        return;
+      }
+      try {
+        setLoading(true);
+        setErr(null);
+        const { users } = await searchUsers(keyword, { limit: 10, page: 1 });
+        if (!cancelled) setItems(users);
+      } catch (e: any) {
+        if (!cancelled) setErr(e?.response?.data?.message || e?.message || "검색 실패");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [keyword]);
+
+  if (loading) return <div className="w-full text-center py-8">검색 중…</div>;
+  if (err) return <div className="w-full text-center py-8 text-red-500">{err}</div>;
+  if (items.length === 0) return <div className="w-full text-center py-8">검색 결과가 없어요</div>;
 
   return (
     <div className="w-full px-4 space-y-2 max-w-[350px] mx-auto">
-      {filteredUsers.map((user, index) => (
+      {items.map((u) => (
         <SearchUserItem
-          key={`${user.userId}-${index}`}
-          name={user.name}
-          userId={user.userId}
-          profile={user.profile}
+          key={u.id}
+          name={u.name}
+          userId={u.userId}
+          photo={u.photo}
         />
       ))}
     </div>

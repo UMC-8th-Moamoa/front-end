@@ -1,42 +1,52 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import BackButton from "../../../components/common/BackButton";
 import Button from "../../../components/common/Button";
-import { convertToMong, type ConvertResult } from "../../../services/money/moamoney";
+import { donateToOrganization, type DonateResult } from "../../../services/money/moamoney";
 import axios from "axios";
 
-const ConvertToMongCompletePage = () => {
+type NavState = { organizationId?: number; organizationName?: string };
+
+const DonationCompletePage = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState<ConvertResult | null>(null);
+  const { state } = useLocation() as { state?: NavState };
+
+  const [res, setRes] = useState<DonateResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    const ac = new AbortController();
+  const fallbackName = state?.organizationName ?? "재단";
 
+  const headerText = useMemo(
+    () => res?.message ?? `${fallbackName}에\n기부했어요`,
+    [res?.message, fallbackName]
+  );
+
+  useEffect(() => {
+    if (!state?.organizationId) {
+      navigate("/donation-select", { replace: true });
+      return;
+    }
+
+    const ac = new AbortController();
     (async () => {
       try {
-        const res = await convertToMong(ac.signal);
-        setData(res);
+        const result = await donateToOrganization(state.organizationId!, ac.signal);
+        setRes(result);
       } catch (e) {
-        // StrictMode로 인한 취소는 조용히 무시
+        // 취소는 무시
         if (axios.isAxiosError(e) && e.code === "ERR_CANCELED") return;
-        console.error("[convert] error", e);
-        setErrMsg("전환 처리에 실패했습니다. 잠시 후 다시 시도해주세요.");
+        console.error("[donate] error", e);
+        setErrMsg("기부 처리에 실패했어요. 잠시 후 다시 시도해 주세요.");
       } finally {
         setLoading(false);
       }
     })();
 
     return () => ac.abort();
-  }, []);
+  }, [state?.organizationId, navigate]);
 
-  const coinsText = useMemo(
-    () => (data?.convertedCoins != null ? `${data.convertedCoins}MC` : "-"),
-    [data?.convertedCoins]
-  );
-
-  const handleConfirm = () => navigate("/"); // 편지 보러가기
+  const handleConfirm = () => navigate("/");
   const handleGoHome = () => navigate("/");
 
   if (loading) {
@@ -57,34 +67,21 @@ const ConvertToMongCompletePage = () => {
       {/* 본문 */}
       <main className="w-full flex-grow flex flex-col items-start justify-center px-6">
         <div className="w-full max-w-[393px] flex flex-col items-start">
-          <h1 className="text-[32px] mt-10 text-black font-normal mb-2 ml-1 leading-snug">
-            <span className="font-bold text-[#6282E1]">
-              {data?.message ? data.message.replace(" 전환되었습니다", "") : coinsText}
-            </span>
-            {data?.message
-              ? data.message.endsWith("전환되었습니다")
-                ? " 전환되었습니다"
-                : ""
-              : "로"}
-            {!data?.message && (
-              <>
-                <br />
-                전환되었습니다
-              </>
-            )}
+          <h1 className="text-[32px] text-black font-normal mb-2 ml-1 leading-snug whitespace-pre-line">
+            {headerText}
           </h1>
 
           <p className="text-[20px] text-gray-400 mb-10 mt-4 ml-1">
-            {errMsg ?? data?.description ?? "상점에서 원하는 아이템으로 교환해 보세요"}
+            {errMsg ?? res?.description ?? "기부금이 전달되면 인증서를 보여 드려요"}
           </p>
 
           <Button
             size="medium"
             width="large"
-            className="bg-[#6282E1] text-white text-[20px] font-medium mt-30 w-[350px] h-[50px]"
+            className="bg-[#6282E1] text-white text-[20px] font-medium mt-16 w-[350px] h-[50px]"
             onClick={handleConfirm}
           >
-            편지 보러가기
+            확인
           </Button>
 
           <button
@@ -99,4 +96,4 @@ const ConvertToMongCompletePage = () => {
   );
 };
 
-export default ConvertToMongCompletePage;
+export default DonationCompletePage;

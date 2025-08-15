@@ -124,3 +124,86 @@ export async function getMyWishlists(params: {
 
   return parsePage(data, page, size);
 }
+
+
+export type RecipientWishlistItem = {
+  id: number;
+  productName: string;
+  productImageUrl: string;
+  price: number;
+  productUrl: string;
+};
+
+export type RecipientWishlistPagination = {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+};
+
+type RawResponse = {
+  resultType: "SUCCESS" | "FAIL";
+  error: string | null;
+  success?: {
+    event: {
+      id: number;
+      birthdayPerson: { id: number; name: string };
+    };
+    wishlists: RecipientWishlistItem[];
+    pagination: RecipientWishlistPagination;
+  };
+};
+
+/** ---- UI에서 바로 쓰기 좋은 형태 ---- */
+export type WishlistUi = { id: number; name: string; image: string };
+
+export async function fetchRecipientWishlists(
+  eventId: number,
+  page = 1,
+  size = 10
+): Promise<{
+  recipientName: string;
+  items: RecipientWishlistItem[];
+  pagination: RecipientWishlistPagination;
+}> {
+  const { data } = await instance.get<RawResponse>(
+    `/birthdays/events/${eventId}/wishlists`,
+    { params: { page, size } }
+  );
+
+  if (data.resultType !== "SUCCESS" || !data.success) {
+    return {
+      recipientName: "",
+      items: [],
+      pagination: { currentPage: page, totalPages: 0, totalItems: 0 },
+    };
+  }
+
+  const { birthdayPerson } = data.success.event ?? { birthdayPerson: { name: "" } as any };
+  return {
+    recipientName: birthdayPerson?.name ?? "",
+    items: data.success.wishlists ?? [],
+    pagination: data.success.pagination,
+  };
+}
+
+/** MemberWishList가 쓰기 좋은 간단 매핑 버전 */
+export async function getRecipientWishlistUi(
+  eventId: number,
+  page = 1,
+  size = 10
+): Promise<{
+  recipientName: string;
+  items: WishlistUi[];
+  pagination: RecipientWishlistPagination;
+}> {
+  const res = await fetchRecipientWishlists(eventId, page, size);
+  return {
+    recipientName: res.recipientName,
+    items: (res.items ?? []).map((w) => ({
+      id: w.id,
+      name: w.productName,
+      image: w.productImageUrl,
+    })),
+    pagination: res.pagination,
+  };
+}

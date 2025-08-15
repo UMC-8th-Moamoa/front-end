@@ -66,7 +66,7 @@ export type UpcomingResponse = {
 /** ------------------ APIs ------------------ */
 // 1) 현재 로그인 사용자의 생일 카운트다운
 export async function getMyBirthdayCountdown() {
-  const { data } = await instance.get("/api/users/me/birthday-countdown");
+  const { data } = await instance.get("/users/me/birthday-countdown");
   return data.success as BirthdayCountdown;
 }
 
@@ -77,7 +77,7 @@ export async function getLetterHome(params?: {
   direction?: "next" | "prev";    // 기본 next
 }) {
   const { limit = 3, cursor, direction = "next" } = params ?? {};
-  const { data } = await instance.get("/api/home/letters", {
+  const { data } = await instance.get("/home/letters", {
     params: { limit, cursor, direction },
   });
   return data.success as LetterHomeResponse;
@@ -90,7 +90,7 @@ export async function getUpcomingBirthdays(params?: {
   direction?: "next" | "prev";    // 기본 next
 }) {
   const { limit = 3, cursor, direction = "next" } = params ?? {};
-  const { data } = await instance.get("/api/birthdays/upcoming", {
+  const { data } = await instance.get("/birthdays/upcoming", {
     params: { limit, cursor, direction },
   });
   return data.success as UpcomingResponse;
