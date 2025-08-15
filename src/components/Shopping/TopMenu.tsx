@@ -1,10 +1,12 @@
+type UiTab = '폰트' | '편지지' | '우표' | '보관함';
+
 type TopMenuProps = {
-  selected: string; // 현재 선택된 탭 이름
-  onChange: (tab: string) => void; // 탭 클릭 시 부모에 알림
+  selected: UiTab;
+  onChange: (tab: UiTab) => void;
 };
 
 export const TopMenu = ({ selected, onChange }: TopMenuProps) => {
-  const tabs = ['폰트', '편지지', '우표', '보관함'];
+  const tabs: UiTab[] = ['폰트', '편지지', '우표', '보관함'];
 
   return (
     <div className="flex justify-around border-b border-[#C7D5FF] text-md font-semibold">

@@ -16,7 +16,7 @@ const PaymentMethodPage = () => {
   const depositDeadline = '7월 10일 23:59'; // ← 이 값도 props나 fetch로 받아와야 함
 
   return (
-    <div className="min-h-screen bg-white px-4 pt-6 pb-10 relative">
+    <div className="min-h-screen max-w-[393px] mx-auto bg-white px-4 pt-6 pb-10 relative">
       {/* 상단 뒤로가기 */}
       <div className="absolute top-4 left-4">
         <BackButton />

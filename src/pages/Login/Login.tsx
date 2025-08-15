@@ -111,17 +111,16 @@ const findUserIdByEmail = async (email: string): Promise<string> => {
         const { at, rt } = extractTokens(data);
         if (at) saveTokens(at, rt);
 
-       // 1) user_id 확정: 응답 → 페이로드(ID 로그인) → 이메일 로그인 시 /auth/find-id
-       let uid = extractUserIdFromResponse(data) || trimmedId;
-       // 만약 이 페이지가 이메일 로그인으로 동작한다면 위 줄을 다음처럼 바꿔:
-       // let uid = extractUserIdFromResponse(data) || (await findUserIdByEmail(trimmedEmail));
-       if (!uid) throw new Error("CANNOT_RESOLVE_USER_ID");
-        setMyUserId(uid); 
-       // 2) 프로필 선조회(추천): 합친 값으로 미리 캐시 → 다음 화면에서 'id처럼' 즉시 뜸
- try {
-   const merged = await fetchMyMerged(uid);
-   localStorage.setItem("cached_profile", JSON.stringify(merged));
- } catch {}
+        // ✅ 로그인한 사용자의 user_id(문자열) 로컬스토리지에 저장
+        const s = (data as any)?.success ?? data;
+        if (s?.user?.user_id) {
+          localStorage.setItem("user_id", s.user.user_id);
+          // 필요하면 표시용 이름/내부 id도 저장
+          if (s.user?.name) localStorage.setItem("user_name", s.user.name);
+          if (s.user?.id != null) localStorage.setItem("user_numeric_id", String(s.user.id));
+          // 디버깅 로그(원하면 남겨두세요)
+          // console.log("[LOGIN] user_id saved:", s.user.user_id);
+        }
 
         navigate("/home", { replace: true });
         return;

@@ -35,9 +35,13 @@ const ItemCard: React.FC<ItemCardProps> = ({
     >
       {/* 카드 본체 (이미지 + 이름) */}
       <div className="bg-white rounded-xl shadow-sm p-2 flex flex-col items-center w-43">
-        <div className="w-full h-28 bg-gray-100 rounded-xl overflow-hidden mb-2">
+        <div className="w-full h-28 bg-gray-100 rounded-xl overflow-hidden mb-2 flex items-center justify-center">
           {imageUrl ? (
-            <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+            <img
+              src={imageUrl}
+              alt={name}
+              className="max-w-full max-h-full object-contain"
+            />
           ) : (
             <div className="w-full h-full bg-gray-200" />
           )}
