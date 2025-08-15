@@ -19,6 +19,7 @@ export default function CustomerServicePage() {
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // 서버 페이징을 쓰더라도 total이 있으니 페이지 수 계산은 유지
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(total / ITEMS_PER_PAGE)),
     [total]
@@ -28,17 +29,19 @@ export default function CustomerServicePage() {
     let mounted = true;
     (async () => {
       setLoading(true);
-      const res = await fetchCustomerInquiries(); // 서버가 페이징 제공하면 {page,size} 넘겨도 됨
+      // [변경] 현재 페이지가 바뀔 때마다 서버에서 해당 페이지를 요청
+      const res = await fetchCustomerInquiries(currentPage, ITEMS_PER_PAGE);
       if (!mounted) return;
       setList(res.inquiries || []);
       setTotal(res.total || (res.inquiries?.length ?? 0));
       setLoading(false);
-      setCurrentPage(1); // 새로 고치면 1페이지부터
+      // [삭제] setCurrentPage(1) → 이 줄 때문에 항상 1페이지로 돌아갔음
     })();
     return () => {
       mounted = false;
     };
-  }, []);
+    // [변경] currentPage 의존 추가
+  }, [currentPage]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -46,12 +49,16 @@ export default function CustomerServicePage() {
     }
   }, [totalPages, currentPage]);
 
-  const currentItems = useMemo(() => {
-    // 서버가 페이징 미제공이면 클라이언트에서 슬라이싱
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    return list.slice(start, end);
-  }, [list, currentPage]);
+  // [선택] 서버가 페이징 제공 → 그대로 list 사용
+  // 클라 슬라이싱은 비활성화 (아래 한 줄처럼 그냥 list를 그대로 씀)
+  const currentItems = list;
+
+  // 만약 서버가 페이징을 “아직” 안 준다면, 아래 슬라이싱으로 교체:
+  // const currentItems = useMemo(() => {
+  //   const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  //   const end = start + ITEMS_PER_PAGE;
+  //   return list.slice(start, end);
+  // }, [list, currentPage]);
 
   const handlePrevPage = () => setCurrentPage((p) => Math.max(1, p - 1));
   const handleNextPage = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
@@ -91,7 +98,8 @@ export default function CustomerServicePage() {
               content={item.content}
               date={item.date}
               status={item.status}
-              isLocked={item.isLocked}
+              // [핵심 수정] boolean | undefined → boolean 강제 변환
+              isLocked={!!item.isLocked}
               username={item.username}
               onClick={() => {
                 if (item.status === "답변 보기") {

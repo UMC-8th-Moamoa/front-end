@@ -55,7 +55,7 @@ const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeConte
         const list = (page.content || []).filter((x) => isStamp(x.category));
         setItems(list);
 
-        // ✅ 초기 진입 시 기본(또는 첫 번째) 우표 자동 선택
+        //  초기 진입 시 기본(또는 첫 번째) 우표 자동 선택
         if (selectedEnvelopeId == null && list.length > 0) {
           const def = (list as any[]).find((x: any) => x.isDefault) ?? list[0];
           const sid = stableIdOf(def);
@@ -100,12 +100,13 @@ const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeConte
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("No context");
-    canvas.width = pixelCrop.width;
-    canvas.height = pixelCrop.height;
+    const TARGET = 200;
+    canvas.width = TARGET;
+    canvas.height = TARGET;
     ctx.drawImage(
       image,
-      pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height,
-      0, 0, pixelCrop.width, pixelCrop.height
+      pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, // 원본에서 자를 영역
+      0, 0, TARGET, TARGET                                       // 캔버스(저장)의 최종 크기
     );
     return canvas.toDataURL("image/jpeg");
   };
