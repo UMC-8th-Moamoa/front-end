@@ -144,10 +144,17 @@ export async function fetchItemDetail(opts: {
 /** 구매 API */
 export async function buyItem(payload: {
   category: 'font' | 'paper' | 'seal';
-  user_id: string;
+  user_id: string;   // 문자열!
   item_no: number;
   price: number;
   event: boolean;
 }) {
-  return api.post('/shopping/item_buy', payload);
+  // ✅ 서버는 아직 envelope 사용 → seal을 envelope로 변환해서 전송
+  const serverCategory =
+    payload.category === 'seal' ? 'envelope' : payload.category;
+
+  return api.post('/shopping/item_buy', {
+    ...payload,
+    category: serverCategory,
+  });
 }
