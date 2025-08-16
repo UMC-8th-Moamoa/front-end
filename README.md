@@ -1,5 +1,7 @@
 # 🎁 MOA MOA (모아모아) - Frontend
 
+### 트러블슈팅 Notion link : https://foregoing-zebra-57b.notion.site/Web-201d68872da8806ea1b1fa86e5c38b34?source=copy_link
+
 ## 📌 프로젝트 소개
 
 **모아모아**는 사용자가 함께 선물을 준비하고, 감성적인 편지를 주고받을 수 있는 **공동 선물 플랫폼**입니다.
