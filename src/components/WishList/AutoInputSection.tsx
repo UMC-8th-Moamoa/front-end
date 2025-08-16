@@ -7,11 +7,10 @@ import PurplePhoto from "../../assets/PurplePhoto.svg";
 type Props = {
   url: string;
   onUrlChange: (v: string) => void;
-  imageUrl?: string;
-  onUrlSubmit?: (v: string) => Promise<void> | void; // ✅ 추가: 확인 즉시 등록
+  imageUrl?: string; // 미리보기용
 };
 
-const AutoInputSection = ({ url, onUrlChange, imageUrl, onUrlSubmit }: Props) => {
+const AutoInputSection = ({ url, onUrlChange, imageUrl }: Props) => {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -26,24 +25,38 @@ const AutoInputSection = ({ url, onUrlChange, imageUrl, onUrlSubmit }: Props) =>
         isOpen={isLinkModalOpen}
         onClose={() => setIsLinkModalOpen(false)}
         defaultValue={url}
-        onConfirm={async (newUrl) => {
-          onUrlChange(newUrl);
+        onConfirm={(newUrl) => {
+          onUrlChange(newUrl.trim());
           setIsLinkModalOpen(false);
-          if (onUrlSubmit) await onUrlSubmit(newUrl); // ✅ 즉시 등록 트리거
+          alert("링크가 입력되었습니다. (데모 모드: API 미연결)");
         }}
       />
 
       <div className="w-[350px] h-[201px] bg-[#F2F2F2] border border-[#C7D5FF] rounded-[20px] flex mt-3 items-center justify-center overflow-hidden">
-        {imageUrl && <img src={imageUrl} alt="선택한 이미지" className="w-full h-full object-cover rounded-[20px]" />}
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt="선택한 이미지"
+            className="w-full h-full object-cover rounded-[20px]"
+          />
+        ) : (
+          <div className="text-[#B7B7B7] text-sm">이미지가 없어요</div>
+        )}
       </div>
 
       <div className="w-[350px] rounded-xl border border-[#C7D5FF] flex">
-        <button className="flex-1 flex flex-col items-center justify-center gap-1 py-3" onClick={() => setIsLinkModalOpen(true)}>
+        <button
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-3"
+          onClick={() => setIsLinkModalOpen(true)}
+        >
           <img src="/assets/Link.svg" alt="링크" className="w-[30px] h-[30px]" />
           <span className="text-sm font-semibold text-[#6282E1]">링크 붙여넣기</span>
         </button>
         <div className="w-px bg-[#C7D5FF]" />
-        <button onClick={handlePhotoInsert} className="flex-1 flex flex-col items-center justify-center gap-1 py-3">
+        <button
+          onClick={handlePhotoInsert}
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-3"
+        >
           <img src={PurplePhoto} alt="사진" className="w-[30px] h-[30px]" />
           <span className="text-sm font-semibold text-[#6282E1]">사진 넣기</span>
         </button>

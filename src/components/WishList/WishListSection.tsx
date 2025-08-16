@@ -8,7 +8,6 @@ import {
   getMyWishlists,
   mapSortLabelToApi,
   type WishlistUiItem,
-  type WishlistVisibility, // "public" | "private"
 } from "../../services/wishlist/list";
 
 const WishListSection = () => {
@@ -31,11 +30,8 @@ const WishListSection = () => {
   };
 
   /** 라벨이 공개/비공개 필터인지 판별 */
-  const labelToVisibility = (label: string): WishlistVisibility | undefined => {
-    if (label === "공개") return "public";
-    if (label === "비공개") return "private";
-    return undefined;
-  };
+  const isVisibilityLabel = (label: string) =>
+    label === "공개" || label === "비공개";
 
   /** 라벨이 정렬(등록/가격)인지 판별 */
   const isSortLabel = (label: string) =>
@@ -46,18 +42,25 @@ const WishListSection = () => {
       setLoading(true);
       setErr(null);
 
-      // 정렬: 등록/가격 / 필터: 공개/비공개
-      const visibility = labelToVisibility(label);
+      // 정렬 라벨을 API sort 값으로 변환 (공개/비공개 선택 시에도 정렬 기준은 등록순으로)
       const sortApi = isSortLabel(label) ? mapSortLabelToApi(label) : "created_at";
 
+      // 서버에서는 정렬만 요청
       const page = await getMyWishlists({
         page: 1,
         size: 10,
         sort: sortApi,
-        visibility, // 공개/비공개 선택 시에만 값이 들어감
       });
 
-      setList(page.items);
+      // 공개/비공개 필터는 클라이언트에서 적용
+      let items = page.items;
+      if (label === "공개") {
+        items = items.filter((it) => it.isPublic === true);
+      } else if (label === "비공개") {
+        items = items.filter((it) => it.isPublic === false);
+      }
+
+      setList(items);
     } catch (e: any) {
       setErr(e?.response?.data?.message || "불러오기 실패");
     } finally {

@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import lockedIcon from "../../assets/locked.svg";
 import unlockedIcon from "../../assets/unlocked.svg";
-// ✅ updateWishlist는 list.ts에 있음
-import { updateWishlist } from "../../services/wishlist/list";
 import type { WishlistUiItem } from "../../services/wishlist/list";
 
 interface Props {
@@ -17,17 +15,15 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // ✅ 아이콘 표시를 위한 로컬 상태(부모 리렌더 없어도 즉시 반응)
+  // 공개/비공개 아이콘을 위한 로컬 상태 (API 없이 즉시 반응)
   const [isPublic, setIsPublic] = useState<boolean>(item.isPublic);
-  const [toggling, setToggling] = useState(false);
 
-  // 부모에서 item이 바뀌면 동기화
+  // 부모에서 item이 갱신되면 동기화
   useEffect(() => {
     setIsPublic(item.isPublic);
   }, [item.isPublic]);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-
   const iconSrc = isPublic ? unlockedIcon : lockedIcon;
 
   const handleEdit = () => {
@@ -39,51 +35,27 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
           title: item.title,
           price: item.price,
           imageSrc: item.imageSrc,
-          isPublic: isPublic, // 로컬 상태 사용
+          isPublic,
         },
       },
     });
   };
 
-  const handleDelete = async () => {
-    try {
-      // 삭제 API는 기존 위치 유지
-      const { deleteWishlist } = await import("../../services/wishlist/mutate");
-      await deleteWishlist(item.id);
+  // 🔥 API 제거: 확인만 받고 상위 콜백 호출
+  const handleDelete = () => {
+    const ok = confirm("이 위시리스트 항목을 삭제할까요? (데모 모드: 서버 미연결)");
+    if (ok) {
       onDeleted?.(item.id);
-    } catch (e: any) {
-      console.error("[삭제 실패]", e?.response?.data || e);
-      alert(e?.response?.data?.message || "삭제에 실패했어요.");
-    } finally {
       setIsMenuOpen(false);
     }
   };
 
-  /** 🔒/🔓 클릭 -> 낙관적 토글 후 서버 반영, 실패 시 롤백 */
-  const handleToggleLock = async (e: React.MouseEvent) => {
+  // 🔒/🔓 로컬 토글만 수행 (API 호출 제거)
+  const handleToggleLock = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (toggling) return;
-
-    const prev = isPublic;
-    const next = !prev;
-
-    // 1) 낙관적 업데이트 (아이콘 즉시 전환)
+    const next = !isPublic;
     setIsPublic(next);
     onUpdated?.({ ...item, isPublic: next });
-
-    setToggling(true);
-    try {
-      await updateWishlist(item.id, { isPublic: next });
-      // 성공이면 그대로 두면 됨 (부모가 목록 재조회하더라도 문제 없음)
-    } catch (err: any) {
-      // 2) 실패 시 롤백
-      setIsPublic(prev);
-      onUpdated?.({ ...item, isPublic: prev });
-      console.error("[공개 여부 변경 실패]", err?.response?.data || err);
-      alert(err?.response?.data?.message || "공개 여부 변경에 실패했어요.");
-    } finally {
-      setToggling(false);
-    }
   };
 
   return (
@@ -130,15 +102,12 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
           {item.priceText}
         </p>
 
-        {/* 🔒/🔓 공개 토글 */}
+        {/* 🔒/🔓 공개 토글 (로컬 상태만 변경) */}
         <button
           type="button"
           onClick={handleToggleLock}
-          disabled={toggling}
           aria-label={isPublic ? "비공개로 전환" : "공개로 전환"}
-          className={`absolute bottom-2 right-2 w-[24px] h-[24px] ${
-            toggling ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-          }`}
+          className="absolute bottom-2 right-2 w-[24px] h-[24px] cursor-pointer"
         >
           <img
             src={iconSrc}
