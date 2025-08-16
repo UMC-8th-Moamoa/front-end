@@ -1,23 +1,45 @@
+// src/components/Home/Popular/PopularItem.tsx
 import { useState } from "react";
 import { Modal } from "../../../common/Modal";
 import WhitePlus from "../../../../assets/WhitePlus.svg";
+import { createWishlistManual } from "../../../../services/wishlist/mutate";
 
 interface PopularItemProps {
   imageUrl: string;
   title: string;
-  onConfirm: () => Promise<void>; // HomePage에서 내려오는 콜백
+  /** 부모가 넘겨주면 이 콜백을 우선 실행. (없으면 기본 등록 로직 수행) */
+  onConfirm?: () => Promise<void>;
 }
 
 const PopularItem = ({ imageUrl, title, onConfirm }: PopularItemProps) => {
-  const [isOpen, setIsOpen] = useState(false); // 모달 열림 상태
-  const [isLoading, setIsLoading] = useState(false); // API 호출 로딩 상태
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const defaultRegister = async () => {
+    // 기본 값: 공개 true, 가격 0원으로 수동 등록
+    await createWishlistManual({
+      productName: title,
+      price: 0,
+      imageUrl,
+      isPublic: true,
+    });
+  };
 
   const handleConfirm = async () => {
     if (isLoading) return; // 중복 클릭 방지
     setIsLoading(true);
     try {
-      await onConfirm(); // HomePage에서 내려준 콜백 실행
-      setIsOpen(false);  // 모달 닫기
+      if (onConfirm) {
+        await onConfirm();        // 부모 콜백 우선
+      } else {
+        await defaultRegister();  // 콜백 없으면 기본 등록
+      }
+      setIsOpen(false);
+      // 필요하면 여기서 토스트 노출 트리거를 올려도 됩니다.
+      // ex) showToast("위시리스트에 추가되었습니다");
+    } catch (e: any) {
+      console.error("[인기 아이템 추가 실패]", e?.response?.data || e);
+      alert(e?.response?.data?.message || "위시리스트 추가에 실패했어요.");
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +67,7 @@ const PopularItem = ({ imageUrl, title, onConfirm }: PopularItemProps) => {
       <p className="mt-[8px] text-[12px] text-black">{title}</p>
 
       {/* 위시리스트 추가 확인 모달 */}
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} className="w-[350px] h-[144px]">
         <div className="w-[350px] h-[130px] bg-white rounded-[20px] flex flex-col items-center justify-center">
           <p className="text-[18px] text-center mb-[16px]">
             위시리스트에 추가하시겠습니까?

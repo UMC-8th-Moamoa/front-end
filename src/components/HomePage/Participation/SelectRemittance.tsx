@@ -1,3 +1,4 @@
+// src/components/HomePage/Participation/SelectRemittance.tsx
 import clsx from "clsx";
 
 interface SelectRemittanceProps {
@@ -19,7 +20,6 @@ const SelectRemittance = ({
   onClick,
   className = "",
 }: SelectRemittanceProps) => {
-  // 상태별 아이콘 맵핑
   const iconMap: Record<string, string> = {
     "with-money-on": "/assets/PiggyBankOn.svg",
     "with-money-off": "/assets/PiggyBankOff.svg",
@@ -46,7 +46,7 @@ const SelectRemittance = ({
         "relative w-[170px] h-[122px] rounded-[12px] bg-white p-3 text-left",
         "flex flex-col justify-between border transition-all",
         isSelected
-          ? "border-[#6282E1]"
+          ? "border-[#6282E1] shadow-[0_0_0_3px_rgba(98,130,225,0.15)]"
           : "border-[#E5E7EB] hover:border-[#C7D5FF]",
         disabled && "opacity-40 pointer-events-none",
         className
@@ -54,12 +54,7 @@ const SelectRemittance = ({
     >
       {/* 상단: 아이콘 + 라디오 */}
       <div className="flex items-center justify-between">
-        <img
-          src={iconSrc}
-          alt=""
-          className="w-[35px] h-[35px]" // ✅ 크기 35x35 고정
-        />
-        {/* 라디오 모양 */}
+        <img src={iconSrc} alt="" className="w-[35px] h-[35px]" />
         <div
           className={clsx(
             "w-5 h-5 rounded-full border flex items-center justify-center",

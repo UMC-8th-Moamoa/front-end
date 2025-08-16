@@ -1,16 +1,16 @@
+// src/components/HomePage/List/Popular/PopularList.tsx
 import { useEffect, useState } from "react";
 import PopularItem from "./PopularItem";
-import type { PopularWishlistItem, PopularWishlistResponse } from "../../../../services/popularwishlist";
+import type { PopularWishlistItem, PopularWishlistResponse } from "../../../../services/wishlist/popularwishlist";
 import instance from "../../../../api/axiosInstance";
+import { createWishlistManual } from "../../../../services/wishlist/mutate";
 
-
-
-
-export interface PopularListProps {
-  onConfirm: () => Promise<void>;
+interface PopularListProps {
+  /** 등록 성공 후 HomePage에서 배너 띄우도록 호출 */
+  onAdded?: () => void;
 }
 
-const PopularList = ({ onConfirm }: PopularListProps) => {
+const PopularList = ({ onAdded }: PopularListProps) => {
   const [items, setItems] = useState<PopularWishlistItem[]>([]);
 
   useEffect(() => {
@@ -20,16 +20,31 @@ const PopularList = ({ onConfirm }: PopularListProps) => {
         if (data.resultType === "SUCCESS" && Array.isArray(data.success?.products)) {
           setItems(data.success.products);
         } else {
-          console.warn("⚠️ 인기 위시리스트 데이터 없음");
           setItems([]);
         }
       } catch (err) {
-        console.error("❌ 인기 위시리스트 API 호출 에러:", err);
+        console.error("❌ 인기 위시리스트 API 에러:", err);
         setItems([]);
       }
     };
     fetchPopularWishlists();
   }, []);
+
+  // 아이템별 "확인" 클릭 시: 등록 → 성공 시 onAdded 호출
+  const handleConfirmAdd = (item: PopularWishlistItem) => async () => {
+    try {
+      await createWishlistManual({
+        productName: item.productName,
+        price: Number(item.price ?? 0),
+        imageUrl: item.productImageUrl,
+        isPublic: true,
+      });
+      onAdded?.(); // ✅ 부모(HomePage)에게 성공 알림
+    } catch (e: any) {
+      console.error("[인기 아이템 추가 실패]", e?.response?.data || e);
+      alert(e?.response?.data?.message || "위시리스트 추가에 실패했어요.");
+    }
+  };
 
   return (
     <section className="w-[393px] mt-[32px] px-4">
@@ -43,7 +58,7 @@ const PopularList = ({ onConfirm }: PopularListProps) => {
               key={item.id}
               imageUrl={item.productImageUrl}
               title={item.productName}
-              onConfirm={onConfirm}
+              onConfirm={handleConfirmAdd(item)}  
             />
           ))
         ) : (

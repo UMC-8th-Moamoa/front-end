@@ -1,12 +1,25 @@
 import ParticipantItem from "./ParticipantItem";
-import { participantDummy } from "./ParticipantDummy";
 
-const ParticipantList = () => {
+export type Participant = {
+  id: number;
+  name: string;
+  photo: string | null;
+};
+
+type Props = {
+  participants: Participant[];
+};
+
+const ParticipantList = ({ participants }: Props) => {
   return (
     <div className="w-full overflow-x-auto h-[74px] scrollbar-hide">
       <div className="flex items-center space-x-2.5 mt-2 whitespace-nowrap px-4">
-        {participantDummy.map((user) => (
-          <ParticipantItem key={user.id} name={user.name} profile={user.profile} />
+        {participants.map((p) => (
+          <ParticipantItem
+            key={p.id}
+            name={p.name}
+            profile={p.photo ?? "/assets/profile.svg"}
+          />
         ))}
       </div>
     </div>

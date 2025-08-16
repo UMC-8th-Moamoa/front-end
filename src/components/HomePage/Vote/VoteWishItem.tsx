@@ -35,7 +35,7 @@ const VoteWishItem = ({
       {/* 세로 선 */}
       <div className="w-px h-[80px] mr-2 bg-[#D9D9D9]" />
 
-      {/* 체크박스 */}
+      {/* 체크박스(단일 선택 표시용) */}
       <input
         type="checkbox"
         checked={selected}
@@ -44,6 +44,7 @@ const VoteWishItem = ({
         style={{
           backgroundImage: selected ? `url(${WhiteCheck})` : undefined,
         }}
+        aria-label={`${title} 선택`}
       />
     </label>
   );

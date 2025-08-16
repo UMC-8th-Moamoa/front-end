@@ -1,8 +1,12 @@
-// src/components/Alarm/AlarmList.tsx
 import { useEffect, useRef, useState } from "react";
 import AlarmItem from "./AlarmItem";
-import { fetchNotifications, type NotificationItem, type Pagination } from "../../../services/notifications";
-
+import {
+  fetchNotifications,
+  getUnreadStatus,
+  markAllNotificationsRead,
+  type NotificationItem,
+  type Pagination,
+} from "../../../services/notification/notifications";
 
 const toDate = (iso: string) => {
   const d = new Date(iso);
@@ -21,37 +25,67 @@ const AlarmList = () => {
   const [err, setErr] = useState<string | null>(null);
   const mounted = useRef(true);
 
+  const load = async () => {
+    try {
+      setLoading(true);
+      setErr(null);
+      const [{ items: list, pagination }, unread] = await Promise.all([
+        fetchNotifications(1, 10),
+        getUnreadStatus(),
+      ]);
+      if (!mounted.current) return;
+      setItems(list);
+      setPageInfo(pagination);
+      setHasUnread(unread);
+    } catch (e: any) {
+      if (!mounted.current) return;
+      setErr(e?.response?.data?.message || e?.message || "요청 실패");
+    } finally {
+      if (mounted.current) setLoading(false);
+    }
+  };
+
   useEffect(() => {
     mounted.current = true;
-    (async () => {
-      try {
-        setLoading(true);
-        setErr(null);
-        const { items: list, pagination, hasUnread } = await fetchNotifications(1, 10); // ✅ 이름 변경
-        if (!mounted.current) return;
-        setItems(list);
-        setPageInfo(pagination);
-        setHasUnread(hasUnread);
-        console.log("[알림]", { count: list.length, pagination, hasUnread });
-      } catch (e: any) {
-        if (!mounted.current) return;
-        setErr(e?.response?.data?.message || e?.message || "요청 실패");
-      } finally {
-        if (mounted.current) setLoading(false);
-      }
-    })();
-    return () => { mounted.current = false; };
+    load();
+    return () => {
+      mounted.current = false;
+    };
   }, []);
+
+  const handleReadAll = async () => {
+    try {
+      await markAllNotificationsRead();
+      await load();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   if (loading) return <div className="w-full text-center py-8">불러오는 중...</div>;
   if (err) return <div className="w-full text-center py-8 text-red-500">{err}</div>;
-  if (items.length === 0) return <div className="w-full text-center py-8">알림이 없어요</div>;
+  if (items.length === 0)
+    return (
+      <div className="w-full text-center py-8">
+        알림이 없어요
+        {hasUnread ? " (미읽음 표시 오류?)" : ""}
+      </div>
+    );
 
   return (
     <div className="w-full">
-      <div className="px-4 py-2 text-xs text-gray-500">
-        page {pageInfo.page ?? 1}/{pageInfo.totalPages ?? 0} · total {pageInfo.totalElements ?? 0} ·
-        {hasUnread ? " 🔔 미읽음 있음" : " 모두 읽음"}
+      <div className="px-4 py-2 text-xs text-gray-500 flex items-center justify-between">
+        <span>
+          page {pageInfo.page ?? 1}/{pageInfo.totalPages ?? 0} · total {pageInfo.totalElements ?? 0} ·
+          {hasUnread ? " 🔔 미읽음 있음" : " 모두 읽음"}
+        </span>
+        <button
+          onClick={handleReadAll}
+          className="text-[12px] underline disabled:opacity-40"
+          disabled={!hasUnread}
+        >
+          모두 읽음 처리
+        </button>
       </div>
 
       {items.map((n) => (

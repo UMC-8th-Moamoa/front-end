@@ -7,8 +7,9 @@ const SearchPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
 
   return (
-    <main className="min-h-screen bg-white flex justify-center">
-      <div className="w-full max-w-[393px] flex flex-col items-center relative">
+    // ✅ 뷰포트 고정 + 스크롤 완전 차단
+    <main className="fixed inset-0 bg-white flex justify-center overflow-hidden overscroll-none">
+      <div className="w-full max-w-[393px] h-full flex flex-col items-center relative overflow-hidden">
         {/* 상단 검색 바 */}
         <header className="sticky top-0 bg-white z-50 w-full">
           <SearchTopBar
@@ -17,18 +18,14 @@ const SearchPage = () => {
           />
         </header>
 
-        {/* 검색 결과 또는 최근 검색 리스트 */}
-        <div className="flex-1 w-full px-4 mt-4 mb-[60px] overflow-y-auto">
+        {/* ✅ 내부 컨텐츠도 스크롤 차단 */}
+        <div className="flex-1 w-full px-4 mt-4 mb-[60px] overflow-hidden">
           {searchKeyword.trim() === "" ? (
             <RecentSearchList />
           ) : (
             <SearchUserList keyword={searchKeyword} />
           )}
         </div>
-
-        {/* 하단 네비게이션 */}
-        <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] bg-white z-50">
-        </footer>
       </div>
     </main>
   );

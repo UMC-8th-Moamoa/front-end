@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+// src/pages/HomePage.tsx
+import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TopBar from "../../components/common/TopBar";
 import BirthdayBanner from "../../components/HomePage/Banner/BirthdayBanner";
@@ -8,7 +9,7 @@ import FriendLetterList from "../../components/HomePage/List/Birthday/FriendLett
 import UpcomingFriendList from "../../components/HomePage/List/Birthday/UpcomingFriendList";
 import PopularList from "../../components/HomePage/List/Popular/PopularList";
 import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
-import { dummyBirthdayBanner, dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
+import { dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
 import Calendar from "../../components/HomePage/Calendar/Calendar";
 import { Modal } from "../../components/common/Modal";
 
@@ -18,6 +19,7 @@ const HomePage = () => {
 
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [showWishBanner, setShowWishBanner] = useState(false);
+  const bannerTimer = useRef<number | null>(null);
 
   useEffect(() => {
     if (location.state?.showTransferPendingModal) {
@@ -26,16 +28,17 @@ const HomePage = () => {
     }
   }, [location.state]);
 
-  const handleWishConfirm = (): Promise<void> => {
-    return new Promise((resolve) => {
-      setShowWishBanner(true);
-      setTimeout(() => {
-        setShowWishBanner(false);
-        resolve();
-      }, 3000);
-    });
+  const handleShowWishBanner = () => {
+    setShowWishBanner(true);
+    if (bannerTimer.current) window.clearTimeout(bannerTimer.current);
+    bannerTimer.current = window.setTimeout(() => setShowWishBanner(false), 3000);
   };
-  
+
+  useEffect(() => {
+    return () => {
+      if (bannerTimer.current) window.clearTimeout(bannerTimer.current);
+    };
+  }, []);
 
   const handleNavigate = (menu: MenuType) => {
     switch (menu) {
@@ -63,7 +66,13 @@ const HomePage = () => {
         {showWishBanner && (
           <div className="fixed top-[10px] left-1/2 -translate-x-1/2 w-[350px] h-[77px] bg-white rounded-[12px] shadow-md flex flex-col items-center justify-center z-[9999]">
             <p className="text-[18px] font-medium text-[#1F1F1F]">위시리스트에 등록 완료</p>
-            <p className="text-[12px] font-medium text-[#B7B7B7] mt-[4px]">위시리스트로 가기 &gt;</p>
+            <button
+              type="button"
+              onClick={() => navigate("/wishlist")}
+              className="text-[12px] font-medium text-[#B7B7B7] mt-[4px] underline underline-offset-2"
+            >
+              위시리스트로 가기 &gt;
+            </button>
           </div>
         )}
 
@@ -77,9 +86,10 @@ const HomePage = () => {
           <MainBanner {...dummyMainBanner} onClick={() => navigate("/moa-collected")} />
           <SubBannerCarousel />
           <FriendLetterList />
-          <PopularList onConfirm={handleWishConfirm} />
+          {/* ✅ 등록 성공 시 HomePage 배너를 띄우는 콜백 전달 */}
+          <PopularList onAdded={handleShowWishBanner} />
           <UpcomingFriendList />
-          <BirthdayBanner {...dummyBirthdayBanner} />
+          <BirthdayBanner/>
           <Calendar />
         </div>
 
@@ -103,9 +113,7 @@ const HomePage = () => {
                 onClick={() => {
                   setIsTransferModalOpen(false);
                   navigate("/receive-complete", {
-                    state: {
-                      amount: location.state?.amount || 0,
-                    },
+                    state: { amount: location.state?.amount || 0 },
                   });
                 }}
                 className="w-[120px] h-[40px] bg-[#6282E1] text-white text-[18px] rounded-[12px] mt-3"

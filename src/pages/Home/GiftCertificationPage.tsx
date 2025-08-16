@@ -1,13 +1,16 @@
+// GiftCertificationPage.tsx
 import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
 import BottomNavigation from "../../components/common/BottomNavigation";
 import InputBox from "../../components/common/InputBox";
-import ParticipantList from "../../components/HomePage/Participation/ParticipantList";
+import ParticipantList, { type Participant } from "../../components/HomePage/Participation/ParticipantList";
 import WhitePhoto from "../../assets/WhitePhoto.svg";
 
 const GiftCertificationPage = () => {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  // 🔹 participants prop 전달 (초기에는 빈 배열로 시작)
+  const participants: Participant[] = [];
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center bg-white relative pb-[84px]">
@@ -21,7 +24,7 @@ const GiftCertificationPage = () => {
 
       {/* 참가자 리스트 */}
       <div className="w-full max-w-[393px] px-4 mt-3">
-        <ParticipantList />
+        <ParticipantList participants={participants} />
       </div>
 
       {/* 구분선 */}
@@ -48,17 +51,19 @@ const GiftCertificationPage = () => {
 
       {/* 등록하기 버튼 */}
       <div className="absolute bottom-[80px] w-full flex justify-center">
-        <button className="w-[350px] h-[50px] bg-[#6282E1] text-white text-[16px] font-semibold rounded-xl"
-                onClick={() => navigate("/")}>
+        <button
+          className="w-[350px] h-[50px] bg-[#6282E1] text-white text-[16px] font-semibold rounded-xl"
+          onClick={() => navigate("/")}
+        >
           등록하기
         </button>
       </div>
 
       {/* 하단 네비게이션 */}
-<BottomNavigation
-  active="home"
-  onNavigate={(menu) => navigate(`/${menu}`)}
-/>
+      <BottomNavigation
+        active="home"
+        onNavigate={(menu) => navigate(`/${menu}`)}
+      />
     </div>
   );
 };

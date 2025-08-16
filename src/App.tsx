@@ -28,7 +28,6 @@ import BeforeTransferPage from "./pages/Home/MoaMoney/BeforeTransferPage";
 import ReceiveCompletePage from "./pages/Home/MoaMoney/ReceiveCompletePage";
 import RemainMoneySelectPage from "./pages/Home/MoaMoney/RemainMoneySelectPage";
 import DonationSelectPage from "./pages/Home/MoaMoney/DonationSelectPage";
-import DonationToGoodneighborsPage from "./pages/Home/MoaMoney/DonationToGoodneighborsPage";
 import ConvertToMongPage from "./pages/Home/MoaMoney/ConvertToMongPage";
 import ConvertToMongCompletePage from "./pages/Home/MoaMoney/ConvertToMongCompletePage";
 import ReturnToFriendPage from "./pages/Home/MoaMoney/ReturnToFriendPage";
@@ -64,6 +63,8 @@ import OtherUserFollowListPage from './pages/MyPage/OtherUserFollowListPage';
 import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage'; 
 import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
 import SelectRemittancePage from './pages/Home/SelectRemittancePage';
+import DonationCompletePage from './pages/Home/MoaMoney/DonationCompletePage';
+import SelectWishPhotoPage from './pages/Wishlist/SelectWishPhotoPage';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -127,6 +128,13 @@ function AppRoutes() {
     "/input-moa-money",
     "/vote-wish",
     "/before-transfer",
+    "/search",
+    "/remain-money-select",
+    "/receive-complete",
+    "/donation-select",
+    "/donation-complete",
+    "/convert-to-mong",
+    "/convert-to-mong-complete",
     
     "/login",
     "/find-id",
@@ -210,6 +218,7 @@ function AppRoutes() {
           <Route path="/wishlist" element={<WishListPage />} />
           <Route path="/wishlist-register" element={<WishListRegisterPage />} />
           <Route path="/wishlist/register" element={<WishListRegisterPage />} />
+          <Route path="/wishlist/select-photo" element={<SelectWishPhotoPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/participation" element={<ParticipationPage />} />
           <Route path="/vote-wish" element={<VoteWishPage />} />
@@ -220,7 +229,7 @@ function AppRoutes() {
           <Route path="/receive-complete" element={<ReceiveCompletePage />} />
           <Route path="/remain-money-select" element={<RemainMoneySelectPage />} />
           <Route path="/donation-select" element={<DonationSelectPage />} />
-          <Route path="/donation-complete-goodneighbors" element={<DonationToGoodneighborsPage />} />
+          <Route path="/donation-complete" element={<DonationCompletePage />} />
           <Route path="/convert-to-mong" element={<ConvertToMongPage />} />
           <Route path="/convert-to-mong-complete" element={<ConvertToMongCompletePage />} />
           <Route path="/return-to-friend" element={<ReturnToFriendPage />} />

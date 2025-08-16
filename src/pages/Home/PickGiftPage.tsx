@@ -1,13 +1,28 @@
 // src/pages/PickGiftPage.tsx
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import { PickGiftList } from "../../components/HomePage/PickGift/PickGiftList";
 import { Modal } from "../../components/common/Modal";
-import { useNavigate } from "react-router-dom";
-import { getMyWishlists, type WishlistUiItem } from "../../services/wishlist";
+
+// ✅ 서비스 헬퍼 (경로 확인: birthday 디렉터리)
+import {
+  getMyWishlists,
+  selectMyWishlistItems,          // 선택 일괄 저장 API
+  type WishlistUiItem,
+  type WishlistSortBy,
+} from "../../services/user/mybirthday";
 
 const sortOptions = ["친구 추천순", "등록순", "높은 가격순", "낮은 가격순"] as const;
 type SortOption = typeof sortOptions[number];
+
+// UI → API enum 매핑
+const sortMap: Record<SortOption, WishlistSortBy> = {
+  "친구 추천순": "VOTE_COUNT",
+  "등록순": "CREATED_AT",
+  "높은 가격순": "PRICE_DESC",
+  "낮은 가격순": "PRICE_ASC",
+};
 
 const PickGiftPage = () => {
   const navigate = useNavigate();
@@ -16,6 +31,11 @@ const PickGiftPage = () => {
   const [list, setList] = useState<WishlistUiItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasNext, setHasNext] = useState(false);
+
+  // 서버 제공 금액
+  const [currentAmount, setCurrentAmount] = useState(0);
 
   // UI 상태
   const [withMyMoney, setWithMyMoney] = useState(false);
@@ -23,59 +43,94 @@ const PickGiftPage = () => {
   const [checkedItems, setCheckedItems] = useState<number[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false); // ✅ 선택 저장 중
 
-  // 예산/잔액(예시: 서버 연동되면 교체)
-  const myMoamoaMoney = -10000; // TODO: API 연동 후 교체
-  const isWarning = !withMyMoney && myMoamoaMoney < 0;
+  // 데이터 불러오기 (정렬 변경 시 새로 로드)
+  const load = async (reset = true, nextCursor: string | null = null) => {
+    try {
+      setLoading(true);
+      setErr(null);
+      const page = await getMyWishlists({
+        size: 20,
+        sortBy: sortMap[sortOption],
+        cursor: reset ? null : nextCursor,
+      });
 
-  // 데이터 불러오기
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        setErr(null);
-        const page = await getMyWishlists({ page: 1, size: 50 }); // 한번에 충분히 가져오기
+      setCurrentAmount(page.currentAmount);
+      setCursor(page.nextCursor);
+      setHasNext(!!page.hasNext);
+
+      if (reset) {
         setList(page.items);
-      } catch (e: any) {
-        setErr(e?.response?.data?.message || "위시리스트를 불러오지 못했어요");
-      } finally {
-        setLoading(false);
+        // 서버에 이미 선택된 항목이 있다면 반영
+        setCheckedItems(page.selectedItems ?? []);
+      } else {
+        // 중복 없는 병합
+        setList((prev) => {
+          const exist = new Set(prev.map((i) => i.id));
+          const add = page.items.filter((i) => !exist.has(i.id));
+          return [...prev, ...add];
+        });
       }
-    })();
-  }, []);
+    } catch (e: any) {
+      setErr(e?.response?.data?.message || "위시리스트를 불러오지 못했어요");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load(true, null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortOption]);
 
   // 체크 토글
   const handleCheckboxChange = (id: number) => {
-    setCheckedItems(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+    setCheckedItems((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
-  // 정렬 적용 (등록순: id 오름차 fallback, 친구 추천순: 서버 정렬 없으니 일단 그대로)
+  // 정렬 적용 후(또는 체크 변경 후) 합계 금액
   const sortedList = useMemo(() => {
-    const arr = [...list];
-    if (sortOption === "높은 가격순") arr.sort((a, b) => b.price - a.price);
-    else if (sortOption === "낮은 가격순") arr.sort((a, b) => a.price - b.price);
-    else if (sortOption === "등록순") arr.sort((a, b) => a.id - b.id);
-    // "친구 추천순"은 서버 지표 없으니 원본 유지
-    return arr;
+    // 서버 정렬을 쓰므로 여기서는 보정 정도만
+    if (sortOption === "높은 가격순") return [...list].sort((a, b) => b.price - a.price);
+    if (sortOption === "낮은 가격순") return [...list].sort((a, b) => a.price - b.price);
+    if (sortOption === "등록순") return [...list].sort((a, b) => a.id - b.id);
+    return list; // 친구 추천순은 서버 정렬 사용
   }, [list, sortOption]);
 
-  // 합계 금액 (체크된 항목 기준)
   const totalPrice = useMemo(() => {
     const set = new Set(checkedItems);
-    return sortedList
-      .filter(item => set.has(item.id))
-      .reduce((sum, item) => sum + (item.price ?? 0), 0);
+    return sortedList.filter((it) => set.has(it.id)).reduce((sum, it) => sum + (it.price ?? 0), 0);
   }, [sortedList, checkedItems]);
 
-  // 정산 버튼 클릭
-  const handleSettlementClick = () => {
+  // 상단 “나의 모아모아” 표시: 현재 모인 금액 - 내가 고른 합계
+  const myMoamoaMoney = currentAmount - totalPrice;
+  const isWarning = !withMyMoney && myMoamoaMoney < 0;
+
+  // 정산 버튼 클릭 → 서버에 선택 저장 후 다음 단계
+  const handleSettlementClick = async () => {
     if (!withMyMoney && myMoamoaMoney < 0) {
       setIsModalOpen(true);
       return;
     }
-    navigate("/before-transfer", { state: { amount: totalPrice } });
+
+    try {
+      setSaving(true);
+      // ✅ 서버에 선택 목록 저장
+      await selectMyWishlistItems(checkedItems);
+
+      navigate("/before-transfer", {
+        state: {
+          amount: totalPrice,
+          items: checkedItems,
+          withMyMoney,
+        },
+      });
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? "선택 내역을 저장하지 못했어요. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleConfirmMyMoney = () => {
@@ -83,7 +138,18 @@ const PickGiftPage = () => {
     setIsModalOpen(false);
   };
 
-  // 페이지 진입 시 스크롤 차단
+  // 무한 스크롤(선택): 바닥 근처에서 다음 페이지
+  useEffect(() => {
+    const onScroll = () => {
+      if (!hasNext || loading) return;
+      const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+      if (nearBottom) load(false, cursor);
+    };
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [cursor, hasNext, loading]);
+
+  // 페이지 진입 시 전체 스크롤 잠금 (디자인 유지용)
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -92,11 +158,9 @@ const PickGiftPage = () => {
   }, []);
 
   // 로딩/에러/빈 상태
-  if (loading)
+  if (loading && list.length === 0)
     return (
-      <div className="w-full h-screen flex items-center justify-center">
-        불러오는 중…
-      </div>
+      <div className="w-full h-screen flex items-center justify-center">불러오는 중…</div>
     );
   if (err)
     return (
@@ -121,7 +185,7 @@ const PickGiftPage = () => {
             checked={withMyMoney}
             onChange={() => setWithMyMoney(!withMyMoney)}
           />
-          <span className="text-[15px] font-medium text-white">내 돈 보태기</span>
+          <span className="text-[15px] font-medium text.white">내 돈 보태기</span>
         </label>
       </div>
 
@@ -133,7 +197,7 @@ const PickGiftPage = () => {
             <p className="text-[14px] px-3 mb-2 text-[#B7B7B7] mt-1">체크박스를 눌러 선물을 담으세요!</p>
           </div>
 
-          {/* 드롭다운 */}
+          {/* 정렬 드롭다운 */}
           <div className="relative w-[108px]">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -157,6 +221,8 @@ const PickGiftPage = () => {
                     onClick={() => {
                       setSortOption(option);
                       setIsDropdownOpen(false);
+                      // 선택 즉시 새로 로드(효과 훅에서도 다시 로드됨)
+                      load(true, null);
                     }}
                   >
                     {option}
@@ -168,13 +234,7 @@ const PickGiftPage = () => {
         </div>
 
         <PickGiftList
-          items={sortedList.map(it => ({
-            id: it.id,
-            imageSrc: it.imageSrc,
-            title: it.title,
-            price: it.price,             // ← 숫자!
-            openOption: it.openOption,
-          }))}
+          items={sortedList}
           checkedItems={checkedItems}
           onChange={handleCheckboxChange}
         />
@@ -182,9 +242,11 @@ const PickGiftPage = () => {
 
       {/* 정산하기 버튼 */}
       <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 z-50 w-[350px] h-[50px]">
-        <Button className="bg-[#6282E1]" onClick={handleSettlementClick}>
+        <Button className="bg-[#6282E1]" onClick={handleSettlementClick} disabled={saving}>
           <div className="flex justify-between items-center w-full">
-            <span className="text-[16px] font-medium text-white ml-33">정산하기</span>
+            <span className="text-[16px] font-medium text-white ml-33">
+              {saving ? "저장 중..." : "정산하기"}
+            </span>
             <span className="text-[12px] font-medium text-white">
               {totalPrice.toLocaleString()}원
             </span>
