@@ -50,7 +50,7 @@ type RawUserItem = {
   holditem_id?: number;
   holditem_no?: number;
   item_no?: number;
-  category: 'font' | 'paper' | 'seal'; // envelope 제거
+  category: 'font' | 'paper' | 'seal'; 
   name?: string;
   image?: string;
   user_id?: string;
@@ -66,13 +66,17 @@ type UserItemsPayload = {
 
 /** ---------- Normalizers ---------- */
 function normalizeItemList(p?: ItemListPayload | null): ItemListResponse {
-  const list = p?.itemListEntry ?? p?.item ?? [];
+  const list = (p?.itemListEntry ?? p?.item ?? []).map((it: any) => ({
+    ...it,
+    image: it.image ?? it.imageUrl ?? it.img ?? null, 
+  }));
   return {
     success: Boolean(p?.success ?? Array.isArray(list)),
     num: Number(p?.num ?? list.length),
     item: list,
   };
 }
+
 
 function normalizeUserItems(p?: UserItemsPayload | null): UserItemsResponse {
   const anyP = (p as any) ?? {};
@@ -124,18 +128,17 @@ export async function fetchUserItems(num: number): Promise<UserItemsResponse> {
 export async function fetchItemDetail(opts: {
   category: 'font' | 'paper' | 'seal';
   id: number;
-}): Promise<{ name?: string; image?: string; detail?: string; price?: number }> {
+}) {
   const { data } = await api.get('/shopping/item_list', {
     params: { category: opts.category, id: opts.id, _t: Date.now() },
     headers: { 'Cache-Control': 'no-cache' },
   });
-
   const payload = (data as any)?.success ?? (data as any);
   const arr = Array.isArray(payload?.item) ? payload.item : [];
-  const first = arr[0] ?? {};
+  const first: any = arr[0] ?? {};
   return {
     name: first?.name,
-    image: first?.image,
+    image: first?.image ?? first?.imageUrl ?? first?.img ?? null,
     detail: first?.detail,
     price: first?.price,
   };

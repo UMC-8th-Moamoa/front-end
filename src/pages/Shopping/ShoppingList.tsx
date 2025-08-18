@@ -157,7 +157,7 @@ export default function ShoppingList() {
         const results = await Promise.all(
           Array.from(keys.values()).map(async (u) => {
             const { name, image } = await fetchItemDetail({
-              category: u.category, // 이미 'seal' 체계
+              category: u.category,
               id: Number(u.item_no),
             });
             return { key: `${u.category}|${u.item_no}`, name, image };
@@ -239,7 +239,7 @@ export default function ShoppingList() {
       const event = Number(selectedItem.price ?? 0) === 0;
       const body = {
         category: apiCategory as ApiCategory,
-        user_id: userId,                 // 문자열 user_id
+        user_id: userId,             
         item_no: Number(selectedItem.id),
         price: Number(selectedItem.price ?? 0),
         event,
