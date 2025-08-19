@@ -214,6 +214,8 @@ function AppRoutes() {
           <Route path="/convert-to-mong" element={<ConvertToMongPage />} />
           <Route path="/convert-to-mong-complete" element={<ConvertToMongCompletePage />} />
           <Route path="/select-remittance" element={<SelectRemittancePage />} />
+          <Route path="/alarm" element={<AlarmPage />} />
+          <Route path="/gift-certification" element={<GiftCertificationPage />} />
 
           {/* 모아레터 (실사용) */}
           <Route path="/moaletter/write" element={<WriteLetterPage />} />
