@@ -1,9 +1,18 @@
+// src/components/WishList/WishListSection.tsx
 import { useEffect, useRef, useState } from "react";
 import SortDropdown from "./SortDropDown";
 import WishlistItem from "./WishListItem";
 import ToastBanner from "./ToastBanner";
 
-/** UI 전용 타입 (서비스 의존 제거) */
+// ✅ API 헬퍼
+import {
+  fetchMyWishlists,
+  mapToUi,
+  type WishlistSort,
+  type WishlistVisibility,
+} from "../../services/wishlist/wishlist";
+
+/** UI 전용 타입 (기존 유지) */
 export type WishlistUiItem = {
   id: number;
   title: string;
@@ -13,9 +22,8 @@ export type WishlistUiItem = {
   isPublic: boolean;
 };
 
-/** 필요하면 여기에 더미 데이터를 넣어서 UI 확인 가능 */
+/** 필요하면 여기에 더미 데이터를 넣어서 UI 확인 가능 (기존 유지) */
 const INITIAL_ITEMS: WishlistUiItem[] = [
-  // 예시) 주석 해제해서 써도 됨
   // {
   //   id: 1,
   //   title: "선물 상자 A",
@@ -36,7 +44,7 @@ const WishListSection = () => {
   // 화면에 보여줄 목록
   const [list, setList] = useState<WishlistUiItem[]>(INITIAL_ITEMS);
 
-  // 로딩/에러는 UI 유지용 플래그 (네트워크 없음)
+  // 로딩/에러 플래그 (기존 유지 — UI에서는 사용하지 않음)
   const [loading] = useState(false);
   const [err] = useState<string | null>(null);
 
@@ -52,45 +60,57 @@ const WishListSection = () => {
     toastTimer.current = window.setTimeout(() => setToastShow(false), 3000);
   };
 
-  /** 정렬/필터 계산 (클라이언트 전용) */
-  useEffect(() => {
-    let items = [...allItems];
-
-    // 공개/비공개 필터
-    if (sortLabel === "공개") {
-      items = items.filter((it) => it.isPublic === true);
-    } else if (sortLabel === "비공개") {
-      items = items.filter((it) => it.isPublic === false);
-    }
-
-    // 가격 정렬
-    if (sortLabel === "높은 가격순") {
-      items.sort((a, b) => b.price - a.price);
-    } else if (sortLabel === "낮은 가격순") {
-      items.sort((a, b) => a.price - b.price);
-    }
-    // "등록순"은 allItems의 현재 순서 유지
-
-    setList(items);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortLabel, allItems]);
-
   useEffect(() => {
     return () => {
       if (toastTimer.current) window.clearTimeout(toastTimer.current);
     };
   }, []);
 
-  /** 아이템 토글/수정 시 allItems 업데이트 → 화면 목록도 자동 반영 */
-  const handleUpdated = (next: WishlistUiItem) => {
-    setAllItems((prev) => prev.map((x) => (x.id === next.id ? next : x)));
-  };
+  /** 🔄 서버 호출: 정렬/필터 라벨에 따라 목록 불러오기 */
+  useEffect(() => {
+    let aborted = false;
 
-  /** 삭제 시 allItems에서 제거 */
-  const handleDeleted = (id: number) => {
-    setAllItems((prev) => prev.filter((x) => x.id !== id));
-    showToast("위시리스트가 삭제되었습니다");
-  };
+    const load = async () => {
+      // UI 라벨 -> 서버 파라미터 매핑
+      const sortLabelToSort: Record<string, WishlistSort> = {
+        "등록순": "created_at",
+        "높은 가격순": "price_desc",
+        "낮은 가격순": "price_asc",
+      };
+      const sort: WishlistSort = sortLabelToSort[sortLabel] ?? "created_at";
+
+      const visibilityLabelToParam: Record<string, WishlistVisibility> = {
+        "공개": "public",
+        "비공개": "private",
+      };
+      const visibility: WishlistVisibility | undefined =
+        visibilityLabelToParam[sortLabel];
+
+      try {
+        const res = await fetchMyWishlists({
+          sort,
+          visibility,
+          page: 1,
+          size: 50, // 한 번에 넉넉히
+        });
+        if (aborted) return;
+
+        const ui = mapToUi(res.content);
+        setAllItems(ui);
+        setList(ui);
+      } catch (e: any) {
+        if (aborted) return;
+        console.error("[위시리스트 불러오기 실패]", e?.response?.data || e);
+        setAllItems([]);
+        setList([]);
+      }
+    };
+
+    load();
+    return () => {
+      aborted = true;
+    };
+  }, [sortLabel]);
 
   if (loading) return <div className="w-[393px] px-4 py-6">불러오는 중…</div>;
   if (err) return <div className="w-[393px] px-4 py-6 text-red-500">{err}</div>;
@@ -100,20 +120,33 @@ const WishListSection = () => {
       <ToastBanner show={toastShow} message={toastMsg} />
 
       <div className="flex items-center justify-between">
-        <h2 className="text-[18px] font-semibold text-[#6282E1] px-2">나의 위시리스트</h2>
+        <h2 className="text-[18px] font-semibold text-[#6282E1] px-2">
+          나의 위시리스트
+        </h2>
         <SortDropdown selected={sortLabel} onChange={setSortLabel} />
       </div>
 
       {list.length === 0 ? (
-        <div className="mt-6 text-sm text-gray-500 px-2">위시리스트가 없어요</div>
+        <div className="mt-6 text-sm text-gray-500 px-2">
+          위시리스트가 없어요
+        </div>
       ) : (
         <div className="w-full mx-auto flex flex-col gap-3">
           {list.map((item) => (
             <WishlistItem
               key={item.id}
               item={item}
-              onUpdated={handleUpdated}
-              onDeleted={handleDeleted}
+              // 로컬 토글/삭제 — 서버 연동 전 UI만 반영
+              onUpdated={(next) =>
+                setAllItems((prev) =>
+                  prev.map((x) => (x.id === next.id ? next : x))
+                )
+              }
+              onDeleted={(id) => {
+                setAllItems((prev) => prev.filter((x) => x.id !== id));
+                setList((prev) => prev.filter((x) => x.id !== id));
+                showToast("위시리스트가 삭제되었습니다");
+              }}
             />
           ))}
         </div>

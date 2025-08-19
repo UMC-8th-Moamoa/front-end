@@ -7,6 +7,25 @@ import AutoInputSection from "../../components/WishList/AutoInputSection";
 import ManualInputSection from "../../components/WishList/ManualInputSection";
 import Button from "../../components/common/Button";
 
+// 등록 API
+import {
+  createWishlistByUrl,
+  createWishlistManual,
+} from "../../services/wishlist/register";
+
+// 수정 API
+import { updateWishlist } from "../../services/wishlist/mutate";
+
+// 업로드/분석 API (새 플로우)
+import {
+  createUserImagePresignedUrl,
+  putToS3,
+  verifyUpload,
+  analyzeAndRegisterWishlistByImage,
+  dataUrlToFile,
+  extFromMime,
+} from "../../services/wishlist/uploadimage";
+
 type Tab = "auto" | "manual";
 
 type EditState = {
@@ -24,7 +43,7 @@ const WishListRegisterPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 편집 모드 진입 시 전달될 수 있는 state (UI만 유지)
+  // 편집 모드 진입 시 전달될 수 있는 state
   const edit = (location.state as EditState) || {};
   const isEdit = useMemo(() => edit.mode === "edit" && !!edit.item, [edit]);
 
@@ -46,13 +65,15 @@ const WishListRegisterPage = () => {
   // 제출 중 UI
   const [submitting, setSubmitting] = useState(false);
 
-  /** 진입/종료 시 스크롤 잠금 (UI 유지용) */
+  /** 진입/종료 시 스크롤 잠금 */
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = "auto"; };
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, []);
 
-  /** 편집 모드 프리필 (네트워크 없음) */
+  /** 편집 모드 프리필 */
   useEffect(() => {
     if (isEdit && edit.item) {
       setSelectedTab("manual");
@@ -64,7 +85,7 @@ const WishListRegisterPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit]);
 
-  /** 사진 선택 페이지에서 돌아온 state 처리 (네비게이션 상태만 사용) */
+  /** 사진 선택 페이지에서 돌아온 state 처리 */
   useEffect(() => {
     const st = location.state as PhotoReturnState | undefined;
     if (st?.imageUrl) {
@@ -74,7 +95,7 @@ const WishListRegisterPage = () => {
       } else {
         setAutoImageUrl(st.imageUrl);
         setSelectedTab("auto");
-        setUrl(""); // 사진 선택 시 링크 입력은 비움
+        setUrl(""); // 사진 선택 시 링크 입력 비움
       }
       // 히스토리 상태 정리
       navigate(location.pathname, { replace: true, state: isEdit ? edit : {} });
@@ -82,7 +103,7 @@ const WishListRegisterPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, location.pathname]);
 
-  /** 자동 탭에서 URL을 입력하면 사진 미리보기는 초기화 (UI 정합성) */
+  /** 자동 탭에서 URL을 입력하면 사진 미리보기는 초기화 */
   useEffect(() => {
     if (selectedTab === "auto" && url && autoImageUrl) {
       setAutoImageUrl(undefined);
@@ -90,43 +111,125 @@ const WishListRegisterPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
-  /** URL 모달의 "확인" 액션 — 네트워크 제거, 상태만 반영 */
-  const handleUrlSubmitNow = (newUrl: string) => {
-    setUrl(newUrl.trim());
-    alert("링크가 입력되었습니다. (데모 모드: API 미연결)");
+  /** 공통: dataURL 또는 http(s) URL을 받아 최종 업로드된 http URL을 반환 */
+  const ensureUploadedUrl = async (src: string): Promise<string> => {
+    if (!src) return "";
+    if (/^https?:\/\//i.test(src)) return src; // 이미 URL
+
+    // dataURL → File
+    const file = dataUrlToFile(src, "wishlist-image");
+    const mime = file.type || "image/jpeg";
+    const fileName = `wishlist_${Date.now()}.${extFromMime(mime)}`;
+
+    // 1) presigned
+    const { uploadUrl, fileUrl } = await createUserImagePresignedUrl({
+      fileName,
+      fileType: mime,
+    });
+
+    // 2) PUT to S3
+    await putToS3({ uploadUrl, file, fileType: mime });
+
+    // 3) verify
+    await verifyUpload(fileUrl);
+
+    return fileUrl;
   };
 
-  /** 제출 버튼 — 네트워크 제거, 기본 입력값 검증 후 안내만 */
+  /** 제출 — 등록/수정 분기 */
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
+      const isPublic = !isPrivate;
 
-      if (isEdit && selectedTab === "manual") {
-        if (!name.trim()) return alert("제품명을 입력해 주세요");
-        // 데모: 네비게이션만 수행
+      // ✅ 편집 모드: PATCH /wishlists/{id}
+      if (isEdit && edit.item) {
+        if (!name.trim()) {
+          alert("제품명을 입력해 주세요");
+          return;
+        }
+        const priceNumber = Number(price.replace(/[^0-9]/g, "")) || 0;
+
+        // 편집 중 새로 고른 이미지가 dataURL이면 업로드
+        let finalImageUrl = manualImageUrl ?? null;
+        if (finalImageUrl && !/^https?:\/\//i.test(finalImageUrl) && finalImageUrl.startsWith("data:")) {
+          finalImageUrl = await ensureUploadedUrl(finalImageUrl);
+        }
+
+        await updateWishlist(edit.item.id, {
+          productName: name.trim(),
+          price: priceNumber,
+          productImageUrl: finalImageUrl,
+          isPublic,
+        });
+
         navigate("/wishlist", {
           replace: true,
-          state: { showToast: true, toastMsg: "수정 화면 데모 완료 (API 미연결)" },
+          state: { showToast: true, toastMsg: "위시리스트가 수정되었습니다" },
         });
         return;
       }
 
+      // ✅ 신규 등록
       if (selectedTab === "auto") {
-        if (!url && !autoImageUrl) {
-          alert("링크를 붙여넣거나 사진을 선택해 주세요");
+        // 1) URL이 있으면 크롤링 등록
+        if (url.trim()) {
+          await createWishlistByUrl({ url: url.trim(), isPublic });
+          navigate("/wishlist", {
+            replace: true,
+            state: { showToast: true, toastMsg: "위시리스트가 등록되었습니다" },
+          });
           return;
         }
+
+        // 2) URL이 없고 이미지가 있으면 업로드 → verify → analyze 등록
+        if (!autoImageUrl) {
+          alert("링크를 붙여넣거나 이미지를 선택해 주세요");
+          return;
+        }
+
+        const uploadedUrl = await ensureUploadedUrl(autoImageUrl);
+
+        // 4) 업로드된 URL로 AI 분석 + 자동 위시리스트 등록
+        await analyzeAndRegisterWishlistByImage(uploadedUrl);
+
         navigate("/wishlist", {
           replace: true,
-          state: { showToast: true, toastMsg: "자동 입력 데모 완료 (API 미연결)" },
+          state: { showToast: true, toastMsg: "위시리스트가 등록되었습니다" },
         });
-      } else {
-        if (!name.trim()) return alert("제품명을 입력해 주세요");
-        navigate("/wishlist", {
-          replace: true,
-          state: { showToast: true, toastMsg: "수동 입력 데모 완료 (API 미연결)" },
-        });
+        return;
       }
+
+      // 수동 입력
+      if (!name.trim()) {
+        alert("제품명을 입력해 주세요");
+        return;
+      }
+      const priceNumber = Number(price.replace(/[^0-9]/g, "")) || 0;
+
+      // 수동 탭 이미지가 dataURL이면 먼저 업로드
+      let manualUrlToSend: string | null = manualImageUrl ?? null;
+      if (manualUrlToSend && !/^https?:\/\//i.test(manualUrlToSend) && manualUrlToSend.startsWith("data:")) {
+        manualUrlToSend = await ensureUploadedUrl(manualUrlToSend);
+      }
+
+      await createWishlistManual({
+        productName: name.trim(),
+        price: priceNumber,
+        imageUrl: manualUrlToSend,
+        isPublic,
+      });
+
+      navigate("/wishlist", {
+        replace: true,
+        state: { showToast: true, toastMsg: "위시리스트가 등록되었습니다" },
+      });
+    } catch (e: any) {
+      const msg =
+        e?.response?.data?.message ||
+        e?.message ||
+        "요청에 실패했어요. 잠시 후 다시 시도해 주세요.";
+      alert(msg);
     } finally {
       setSubmitting(false);
     }
@@ -143,7 +246,6 @@ const WishListRegisterPage = () => {
               url={url}
               onUrlChange={(v) => setUrl(v)}
               imageUrl={autoImageUrl}
-              onUrlSubmit={handleUrlSubmitNow}  // 더미 동작
             />
           )}
 

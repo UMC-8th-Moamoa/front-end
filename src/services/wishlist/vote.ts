@@ -1,15 +1,13 @@
-// src/services/wishlist/vote.ts
 import instance from "../../api/axiosInstance";
 
-/** -------- 공통 타입 -------- */
 export type VoteListItem = {
   id: number;
   name: string;
   price: number;
   image: string;
-  totalVotes: number;    // 스펙상 있거나 0일 수 있음
-  userVoted: boolean;    // 내가 이 항목에 이미 투표했는지
-  addedAt: string;       // ISO
+  totalVotes: number;
+  userVoted: boolean;
+  addedAt: string;
 };
 
 export type VoteListSuccess = {
@@ -32,37 +30,34 @@ export type VoteResultsSuccess = {
   results: VoteResultsItem[];
 };
 
-/** -------- GET: 투표용 위시리스트 --------
- *  GET /api/birthdays/events/{eventId}/wishlist/vote
- */
+const unwrap = (d: any) => d?.success ?? d;
+
+/** GET: 투표용 위시리스트 (단수) */
 export async function getWishlistForVote(eventId: number) {
-  const { data } = await instance.get(`/birthdays/events/${eventId}/wishlist/vote`);
-  // 스웨거의 200 응답 success 필드 그대로 반환
-  return data.success as VoteListSuccess;
+  const { data } = await instance.get(
+    `/birthdays/events/${eventId}/wishlist/vote`
+  );
+  return unwrap(data) as VoteListSuccess;
 }
 
-/** -------- POST: 투표하기 --------
- *  POST /api/birthdays/events/{eventId}/wishlist/vote
- *  body: { wishlistIds: number[] }
- *  (여러 개 허용 스펙이지만 단일 선택도 가능)
- */
+/** POST: 투표하기 (단수) */
 export async function submitWishlistVote(eventId: number, wishlistIds: number[]) {
-  const { data } = await instance.post(`/birthdays/events/${eventId}/wishlist/vote`, {
-    wishlistIds,
-  });
-  // 보통 { resultType, error, success } 형태. 메시지 정도만 있을 수 있음
-  return data.success as { message?: string } | undefined;
+  const { data } = await instance.post(
+    `/birthdays/events/${eventId}/wishlist/vote`,
+    { wishlistIds }
+  );
+  return unwrap(data) as { message?: string } | undefined;
 }
 
-/** -------- GET: 투표 결과 --------
- *  GET /api/birthdays/events/{eventId}/wishlist/vote/results
- */
+/** GET: 투표 결과 (단수) */
 export async function getWishlistVoteResults(eventId: number) {
-  const { data } = await instance.get(`/birthdays/events/${eventId}/wishlist/vote/results`);
-  return data.success as VoteResultsSuccess;
+  const { data } = await instance.get(
+    `/birthdays/events/${eventId}/wishlist/vote/results`
+  );
+  return unwrap(data) as VoteResultsSuccess;
 }
 
-/** -------- UI 매핑(선택) -------- */
+/** UI 매핑 */
 export type VoteUiItem = {
   id: number;
   imageUrl: string;
@@ -73,12 +68,12 @@ export type VoteUiItem = {
 };
 
 export function toUiItems(list: VoteListItem[]): VoteUiItem[] {
-  return (list ?? []).map((i) => ({
+  return (list ?? []).map((i: any) => ({
     id: i.id,
-    imageUrl: i.image,
-    title: i.name,
-    price: i.price,
-    totalVotes: i.totalVotes,
+    imageUrl: i.image ?? i.imageUrl ?? i.productImageUrl ?? "",
+    title: i.name ?? i.productName ?? i.title ?? "",
+    price: i.price ?? 0,
+    totalVotes: i.totalVotes ?? i.voteCount,
     userVoted: i.userVoted,
   }));
 }

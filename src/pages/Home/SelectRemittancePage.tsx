@@ -4,20 +4,41 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Button from "../../components/common/Button";
 import BackButton from "../../components/common/BackButton";
 import SelectRemittance from "../../components/HomePage/Participation/SelectRemittance";
-import { getEventParticipationMeta, participateInEvent, type EventParticipationMeta } from "../../services/user/event";
+import {
+  getBirthdayEventDetail,
+  participateInEvent,
+  type EventButtonStatus,
+} from "../../services/user/event";
 
-
-function hmsToSeconds(hms?: string) {
-  if (!hms) return 0;
-  const [hh, mm, ss] = hms.split(":").map((v) => Number(v) || 0);
-  return hh * 3600 + mm * 60 + ss;
-}
+// HH:MM:SS ↔ seconds
 function secondsToHMS(s: number) {
-  const sec = Math.max(0, s);
+  const sec = Math.max(0, Math.floor(s));
   const hh = String(Math.floor(sec / 3600)).padStart(2, "0");
   const mm = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
   const ss = String(sec % 60).padStart(2, "0");
   return `${hh}:${mm}:${ss}`;
+}
+
+// ✅ 생일(ISO, 연도 무시) -> 마감시각(올해 기준, 이미 지났으면 내년의 전날 23:59)
+function calcDeadlineFromBirthday(birthdayISO: string) {
+  const now = new Date();
+  const b = new Date(birthdayISO); // 월/일만 사용
+  const month = b.getMonth();      // 0~11
+  const date = b.getDate();        // 1~31
+
+  // 올해 생일 00:00
+  let targetYear = now.getFullYear();
+  let startOfBirthday = new Date(targetYear, month, date, 0, 0, 0);
+
+  // 이미 그 시각을 지난 경우 → 내년으로
+  if (now >= startOfBirthday) {
+    targetYear += 1;
+    startOfBirthday = new Date(targetYear, month, date, 0, 0, 0);
+  }
+
+  // “00:00 1분 전” = 전날 23:59:00
+  const deadline = new Date(startOfBirthday.getTime() - 60 * 1000);
+  return deadline;
 }
 
 type Choice = "remit" | "noRemit";
@@ -37,12 +58,15 @@ const SelectRemittancePage = () => {
   const [choice, setChoice] = useState<Choice>("remit");
   const isRemit = choice === "remit";
 
-  const [meta, setMeta] = useState<EventParticipationMeta | null>(null);
+  const [buttonInfo, setButtonInfo] = useState<EventButtonStatus | null>(null);
+  const [deadline, setDeadline] = useState<Date | null>(null);
   const [remainSec, setRemainSec] = useState(0);
+
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // ✅ 상세 조회해서 생일 → 마감시각 계산
   useEffect(() => {
     if (!eventId) {
       setErr("eventId가 없어요.");
@@ -53,9 +77,16 @@ const SelectRemittancePage = () => {
       try {
         setLoading(true);
         setErr(null);
-        const res = await getEventParticipationMeta(eventId);
-        setMeta(res);
-        setRemainSec(hmsToSeconds(res.countdown?.timeRemaining));
+
+        const detail = await getBirthdayEventDetail(eventId);
+        setButtonInfo(detail.buttonInfo);
+
+        // 생일 기반 마감시각 계산
+        const d = calcDeadlineFromBirthday(detail.birthdayPerson.birthday);
+        setDeadline(d);
+
+        const now = Date.now();
+        setRemainSec(Math.floor((d.getTime() - now) / 1000));
       } catch (e: any) {
         const s = e?.response?.status;
         if (s === 401) setErr("로그인이 필요해요.");
@@ -68,14 +99,20 @@ const SelectRemittancePage = () => {
     })();
   }, [eventId]);
 
+  // 1초마다 카운트다운
   useEffect(() => {
-    if (!remainSec) return;
-    const t = setInterval(() => setRemainSec((s) => (s > 0 ? s - 1 : 0)), 1000);
-    return () => clearInterval(t);
-  }, [remainSec]);
+    if (!deadline) return;
+    const timer = setInterval(() => {
+      setRemainSec((prev) => {
+        const next = Math.floor((deadline.getTime() - Date.now()) / 1000);
+        return next > 0 ? next : 0;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [deadline]);
 
-  const isExpired =
-    (meta && meta.event?.status?.toLowerCase() !== "active") || remainSec <= 0;
+  // ✅ “마감시간이 0초 초과”일 때만 참여 가능
+  const isExpired = remainSec <= 0;
 
   const moaImageSrc = isRemit
     ? "/assets/MoaRemittance.svg"
@@ -85,19 +122,16 @@ const SelectRemittancePage = () => {
     if (!eventId || isExpired || submitting) return;
 
     if (isRemit) {
-      // ✅ 금액 입력 페이지로 eventId 전달
       navigate(`/input-moa-money?eventId=${eventId}`);
       return;
     }
 
-    // ✅ 송금 없이 참여 즉시 처리
     try {
       setSubmitting(true);
       await participateInEvent(eventId, {
         participationType: "WITHOUT_MONEY",
         amount: 0,
       });
-      // 편지 작성은 별도 화면에서 계속
       navigate(`/moaletter/write?eventId=${eventId}`);
     } catch (e: any) {
       const s = e?.response?.status;
@@ -107,8 +141,7 @@ const SelectRemittancePage = () => {
       else if (s === 404) setErr("이벤트를 찾을 수 없어요.");
       else if (s === 400 && code === "B002") setErr("이미 참여한 이벤트예요.");
       else if (s === 400 && code === "B003") setErr("마감된 이벤트예요.");
-      else if (s === 400 && code === "B005")
-        setErr("본인의 생일 이벤트에는 참여할 수 없어요.");
+      else if (s === 400 && code === "B005") setErr("본인의 생일 이벤트에는 참여할 수 없어요.");
       else setErr("참여 처리에 실패했어요.");
     } finally {
       setSubmitting(false);
@@ -127,6 +160,16 @@ const SelectRemittancePage = () => {
         {err}
       </main>
     );
+
+  // 표시용 포맷 (예: 08-16 23:59 → 연도 제외!)
+  const deadlineText =
+    deadline
+      ? `${String(deadline.getMonth() + 1).padStart(2, "0")}-${String(
+          deadline.getDate()
+        ).padStart(2, "0")} ${String(deadline.getHours()).padStart(2, "0")}:${String(
+          deadline.getMinutes()
+        ).padStart(2, "0")}`
+      : "";
 
   return (
     <main className="min-h-screen bg-white flex justify-center">
@@ -167,9 +210,7 @@ const SelectRemittancePage = () => {
         <div className="absolute bottom-10 w-full px-4 flex flex-col items-stretch gap-3">
           <div className="w-full text-lg text-black text-left">
             마감 시간 {secondsToHMS(remainSec)}
-            {meta?.countdown?.deadlineFormatted
-              ? ` ( ${meta.countdown.deadlineFormatted} )`
-              : ""}
+            {deadlineText ? ` ( ${deadlineText} )` : ""}
           </div>
 
           <Button

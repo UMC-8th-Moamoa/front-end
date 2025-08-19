@@ -1,9 +1,8 @@
 // src/components/WishList/WishListItem.tsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import lockedIcon from "../../assets/locked.svg";
-import unlockedIcon from "../../assets/unlocked.svg";
-import type { WishlistUiItem } from "../../services/wishlist/list";
+import type { WishlistUiItem } from "./WishListSection";
+import { deleteWishlist } from "../../services/wishlist/mutate";
 
 interface Props {
   item: WishlistUiItem;
@@ -14,17 +13,9 @@ interface Props {
 const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // 공개/비공개 아이콘을 위한 로컬 상태 (API 없이 즉시 반응)
-  const [isPublic, setIsPublic] = useState<boolean>(item.isPublic);
-
-  // 부모에서 item이 갱신되면 동기화
-  useEffect(() => {
-    setIsPublic(item.isPublic);
-  }, [item.isPublic]);
+  const [deleting, setDeleting] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-  const iconSrc = isPublic ? unlockedIcon : lockedIcon;
 
   const handleEdit = () => {
     navigate("/wishlist/register", {
@@ -35,31 +26,31 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
           title: item.title,
           price: item.price,
           imageSrc: item.imageSrc,
-          isPublic,
+          isPublic: item.isPublic,
         },
       },
     });
   };
 
-  // 🔥 API 제거: 확인만 받고 상위 콜백 호출
-  const handleDelete = () => {
-    const ok = confirm("이 위시리스트 항목을 삭제할까요? (데모 모드: 서버 미연결)");
-    if (ok) {
+  const handleDelete = async () => {
+    const ok = confirm("이 위시리스트 항목을 삭제할까요?");
+    if (!ok) return;
+
+    try {
+      setDeleting(true);
+      await deleteWishlist(item.id);
       onDeleted?.(item.id);
       setIsMenuOpen(false);
+    } catch (e: any) {
+      console.error("[위시리스트 삭제 실패]", e?.response?.data || e);
+      alert("삭제에 실패했어요. 잠시 후 다시 시도해줘.");
+    } finally {
+      setDeleting(false);
     }
   };
 
-  // 🔒/🔓 로컬 토글만 수행 (API 호출 제거)
-  const handleToggleLock = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const next = !isPublic;
-    setIsPublic(next);
-    onUpdated?.({ ...item, isPublic: next });
-  };
-
   return (
-    <div className="w-full bg-white rounded-[14px] shadow-sm flex p-2 gap-4 relative">
+    <div className="w-full bg-white rounded-[14px] shadow-sm flex p-2 gap-4 relative opacity-100">
       <img
         src={item.imageSrc}
         alt={item.title}
@@ -88,34 +79,23 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
                   수정하기
                 </button>
                 <button
-                  className="text-red-500 text-left py-1 hover:opacity-80 mt-2 mb-1"
+                  disabled={deleting}
+                  className={`text-left py-1 mt-2 mb-1 ${
+                    deleting ? "text-gray-400" : "text-red-500 hover:opacity-80"
+                  }`}
                   onClick={handleDelete}
                 >
-                  삭제하기
+                  {deleting ? "삭제중…" : "삭제하기"}
                 </button>
               </div>
             )}
           </div>
-
         </div>
 
         <p className="text-[20px] font-semibold text-black mb-2">
           {item.priceText}
         </p>
-
-        {/* 🔒/🔓 공개 토글 (로컬 상태만 변경) */}
-        <button
-          type="button"
-          onClick={handleToggleLock}
-          aria-label={isPublic ? "비공개로 전환" : "공개로 전환"}
-          className="absolute bottom-2 right-2 w-[24px] h-[24px] cursor-pointer"
-        >
-          <img
-            src={iconSrc}
-            alt={isPublic ? "unlocked" : "locked"}
-            className="w-full h-full"
-          />
-        </button>
+        {/* 🔒 아이콘 표시/동작 완전 제거 */}
       </div>
     </div>
   );

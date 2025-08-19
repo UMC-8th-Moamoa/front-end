@@ -13,7 +13,7 @@ type Props = {
 const ParticipantList = ({ participants }: Props) => {
   return (
     <div className="w-full overflow-x-auto h-[74px] scrollbar-hide">
-      <div className="flex items-center space-x-2.5 mt-2 whitespace-nowrap px-4">
+      <div className="flex items-center space-x-2.5 whitespace-nowrap px-4">
         {participants.map((p) => (
           <ParticipantItem
             key={p.id}

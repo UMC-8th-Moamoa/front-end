@@ -82,7 +82,7 @@ const HomePage = () => {
         </header>
 
         {/* 스크롤 가능한 콘텐츠 */}
-        <div className="flex flex-col items-center flex-1 overflow-y-auto pb-[60px]">
+        <div className="flex flex-col items-center flex-1 overflow-y-auto pb-[30px]">
           <MainBanner {...dummyMainBanner} onClick={() => navigate("/moa-collected")} />
           <SubBannerCarousel />
           <FriendLetterList />

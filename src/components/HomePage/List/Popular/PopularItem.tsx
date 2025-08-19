@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Modal } from "../../../common/Modal";
 import WhitePlus from "../../../../assets/WhitePlus.svg";
-import { createWishlistManual } from "../../../../services/wishlist/mutate";
+import { createWishlistManual } from "../../../../services/wishlist/register";
 
 interface PopularItemProps {
   imageUrl: string;

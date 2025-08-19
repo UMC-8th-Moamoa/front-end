@@ -10,6 +10,8 @@ interface SearchUserItemProps {
   onDelete?: () => void;
 }
 
+const FALLBACK = "/assets/profile.svg";
+
 const SearchUserItem = ({
   name,
   userId,
@@ -20,7 +22,6 @@ const SearchUserItem = ({
   const navigate = useNavigate();
 
   const goProfile = () => {
-    // /user/:id 로 이동. 여기서 id는 userId(문자열 핸들)
     navigate(`/user/${encodeURIComponent(userId)}`);
   };
 
@@ -35,20 +36,21 @@ const SearchUserItem = ({
     >
       {/* 프로필 + 텍스트 */}
       <div className="flex items-center gap-[12px]">
-        {photo ? (
-          <img
-            src={photo}
-            alt={`${name}의 프로필`}
-            className="w-[64px] h-[64px] rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-[64px] h-[64px] bg-gray-300 rounded-full" />
-        )}
+        <img
+          src={photo || FALLBACK}
+          alt={`${name}의 프로필`}
+          className="w-[64px] h-[64px] rounded-full object-cover"
+          onError={(e) => {
+            // 이미지 로드 실패 시 기본 이미지로 대체
+            const img = e.currentTarget as HTMLImageElement;
+            if (img.src !== window.location.origin + FALLBACK && !img.src.endsWith(FALLBACK)) {
+              img.src = FALLBACK;
+            }
+          }}
+        />
         <div className="flex flex-col justify-center">
           <span className="text-[16px] font-medium text-black">{name}</span>
-          <span className="text-[16px] font-semibold text-[#B7B7B7]">
-            {userId}
-          </span>
+          <span className="text-[16px] font-semibold text-[#B7B7B7]">{userId}</span>
         </div>
       </div>
 
@@ -56,7 +58,7 @@ const SearchUserItem = ({
       {showDeleteButton && (
         <button
           onClick={(e) => {
-            e.stopPropagation(); // 프로필 페이지로 넘어가는 것 방지
+            e.stopPropagation();
             onDelete?.();
           }}
           aria-label="검색 기록 삭제"

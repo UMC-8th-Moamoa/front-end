@@ -1,9 +1,12 @@
+// components/HomePage/List/Birthday/UpcomingFriendList.tsx
 import { useEffect, useState } from "react";
 import UpcomingFriendItem from "./UpcomingFriendItem";
 import {
   getUpcomingBirthdays,
   type UpcomingFriend,
 } from "../../../../services/user/friendbirthday";
+
+const LIMIT = 3;
 
 const UpcomingFriendList = () => {
   const [items, setItems] = useState<UpcomingFriend[]>([]);
@@ -12,6 +15,10 @@ const UpcomingFriendList = () => {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
+  // dot 인디케이터용
+  const [pageIndex, setPageIndex] = useState(0);
+  const [totalPages, setTotalPages] = useState(1); // 최소 1
+
   const load = async (
     cursor?: string | null,
     direction: "next" | "prev" = "next"
@@ -19,14 +26,32 @@ const UpcomingFriendList = () => {
     try {
       setLoading(true);
       setErr(null);
+
       const res = await getUpcomingBirthdays({
-        limit: 3,
+        limit: LIMIT,
         cursor: cursor ?? null,
         direction,
       });
+
       setItems(res.upcomingBirthdays);
       setNextCursor(res.pagination.nextCursor);
       setPrevCursor(res.pagination.prevCursor);
+
+      // 처음 로드일 땐 인덱스 0 고정, 커서 있을 때만 이동
+      if (cursor) {
+        if (direction === "next") setPageIndex((p) => p + 1);
+        else if (direction === "prev") setPageIndex((p) => Math.max(0, p - 1));
+      } else {
+        setPageIndex(0);
+      }
+
+      // 전체 페이지 수 계산 (totalCount 있으면 사용)
+      const totalCount = (res.pagination as any).totalCount;
+      if (typeof totalCount === "number") {
+        setTotalPages(Math.max(1, Math.ceil(totalCount / LIMIT)));
+      } else {
+        setTotalPages(1); // 정보 없으면 1페이지로
+      }
     } catch {
       setErr("다가오는 생일을 불러오지 못했어.");
     } finally {
@@ -50,33 +75,29 @@ const UpcomingFriendList = () => {
         <div className="text-sm text-red-600 py-2">{err}</div>
       ) : (
         <>
-          {items.map((item) => (
-            <UpcomingFriendItem
-              key={`${item.friend.id}-${item.birthday.date}`}
-              name={item.friend.name}
-              displayDate={item.birthday.displayDate}
-              dday={item.birthday.dDay}
-              image={item.friend.photo}
-              eventId={item.eventId}
-            />
-          ))}
+          <div className="flex flex-col gap-[1px]">
+            {items.map((item) => (
+              <UpcomingFriendItem
+                key={`${item.friend.id}-${item.birthday.date}`}
+                name={item.friend.name}
+                displayDate={item.birthday.displayDate}
+                dday={item.birthday.dDay}
+                image={item.friend.photo}
+                eventId={(item as any).eventId ?? (item as any).event?.id ?? null}
+              />
+            ))}
+          </div>
 
-          {/* 간단 버튼 페이징 */}
-          <div className="flex justify-between mt-2">
-            <button
-              disabled={!prevCursor}
-              onClick={() => load(prevCursor, "prev")}
-              className="text-sm underline disabled:opacity-30"
-            >
-              이전
-            </button>
-            <button
-              disabled={!nextCursor}
-              onClick={() => load(nextCursor, "next")}
-              className="text-sm underline disabled:opacity-30"
-            >
-              다음
-            </button>
+          {/* dot 인디케이터: 최소 1개 */}
+          <div className="flex justify-center space-x-[6px]">
+            {Array.from({ length: Math.max(1, totalPages) }).map((_, idx) => (
+              <div
+                key={idx}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  idx === pageIndex ? "bg-[#97B1FF]" : "bg-gray-300"
+                }`}
+              />
+            ))}
           </div>
         </>
       )}

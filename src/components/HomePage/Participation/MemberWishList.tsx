@@ -1,12 +1,12 @@
+// components/HomePage/Participation/MemberWishList.tsx
 import { useNavigate } from "react-router-dom";
 import MemberWishItem from "./MemberWishItem";
-
-type WishlistUi = { id: number; name: string; image: string };
+import type { WishlistUi } from "../../../services/user/event"; // ✅ 서비스 타입 사용
 
 interface MemberWishListProps {
   isMyPage: boolean;
   recipientName: string;
-  items: WishlistUi[];
+  items: WishlistUi[];          // ✅ title / imageUrl 사용
   eventId?: number;
 }
 
@@ -36,7 +36,11 @@ const MemberWishList = ({ isMyPage, recipientName, items, eventId }: MemberWishL
       ) : (
         <div className="w-full max-w-[350px] font-normal flex overflow-x-auto scrollbar-hide px-2">
           {items.map((it) => (
-            <MemberWishItem key={it.id} imageUrl={it.image} title={it.name} />
+            <MemberWishItem
+              key={it.id}
+              imageUrl={it.imageUrl ?? ""}   // ✅ 이미지 필드 정정
+              title={it.title}               // ✅ 제목 필드 정정
+            />
           ))}
         </div>
       )}
