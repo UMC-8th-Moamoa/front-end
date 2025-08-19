@@ -1,5 +1,9 @@
 // src/components/HomePage/Participation/SelectRemittance.tsx
 import clsx from "clsx";
+import PaperKiteOn from "../../../assets/PaperKiteOn.svg";
+import PaperKiteOff from "../../../assets/PaperKiteOff.svg";
+import PiggyBankOn from "../../../assets/PiggyBankOn.svg";
+import PiggyBankOff from "../../../assets/PiggyBankOff.svg";
 
 interface SelectRemittanceProps {
   type: "with-money" | "without-money"; // 송금참여 / 무송금참여
@@ -20,11 +24,11 @@ const SelectRemittance = ({
   onClick,
   className = "",
 }: SelectRemittanceProps) => {
-  const iconMap: Record<string, string> = {
-    "with-money-on": "/assets/PiggyBankOn.svg",
-    "with-money-off": "/assets/PiggyBankOff.svg",
-    "without-money-on": "/assets/PaperKiteOn.svg",
-    "without-money-off": "/assets/PaperKiteOff.svg",
+  const iconMap = {
+    "with-money-on": PiggyBankOn,
+    "with-money-off": PiggyBankOff,
+    "without-money-on": PaperKiteOn,
+    "without-money-off": PaperKiteOff,
   };
 
   const iconSrc =

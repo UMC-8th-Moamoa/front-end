@@ -72,12 +72,12 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
             {item.title}
           </p>
 
-          <div className="relative mt-4 mr-4">
+          <div className="relative mt-4 mr-4 flex-shrink-0">
             <img
               src="/assets/DotMenu.svg"
               alt="메뉴"
               onClick={toggleMenu}
-              className="!w-[4px] !h-[18px] object-contain cursor-pointer"
+              className="w-[18px] h-[18px] object-contain cursor-pointer"
             />
             {isMenuOpen && (
               <div className="absolute top-6 right-0 z-50 bg-white flex items-center rounded-[8px] shadow-md py-[4px] px-[20px] w-[96px] flex-col text-[15px]">
@@ -96,6 +96,7 @@ const WishlistItem = ({ item, onUpdated, onDeleted }: Props) => {
               </div>
             )}
           </div>
+
         </div>
 
         <p className="text-[20px] font-semibold text-black mb-2">

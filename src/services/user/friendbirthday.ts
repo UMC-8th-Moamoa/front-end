@@ -72,15 +72,20 @@ export async function getMyBirthdayCountdown() {
 
 // 2) 홈 편지 목록 (스와이프/커서 페이징)
 export async function getLetterHome(params?: {
-  limit?: number;                 // 기본 3
-  cursor?: string | null;         // Base64
-  direction?: "next" | "prev";    // 기본 next
+  limit?: number;
+  cursor?: string | null;
+  direction?: "next" | "prev";
 }) {
   const { limit = 3, cursor, direction = "next" } = params ?? {};
   const { data } = await instance.get("/home/letters", {
     params: { limit, cursor, direction },
   });
-  return data.success as LetterHomeResponse;
+
+  if (data.resultType === "SUCCESS" && data.success) {
+    return data.success as LetterHomeResponse;
+  } else {
+    throw new Error(data.error?.reason || "편지 조회 실패");
+  }
 }
 
 // 3) 다가오는 친구 생일 (7일 이내, 스와이프/커서)
