@@ -260,7 +260,20 @@ const nonEmpty = (v: any) => v !== undefined && v !== null && String(v).trim() !
 /** 마이페이지 본인정보 확인 */
 export async function fetchMySelfInfo(userId: string): Promise<MySelfInfoResponse> {
   try {
-    const { data } = await instance.get(EP_SELF_INFO, { params: { user_id: userId } });
+    // ✅ 가드: 파라미터 비면 localStorage 보정, 그래도 없으면 API 호출 안 함
+    let uid = (userId ?? "").trim();
+    if (!uid && typeof window !== "undefined") {
+      uid = (localStorage.getItem("my_user_id") || "").trim();
+    }
+    if (!uid) {
+      return {
+        resultType: "FAIL",
+        error: "EMPTY_USER_ID",
+        success: { profile: emptyProfile("") },
+      };
+    }
+
+    const { data } = await instance.get(EP_SELF_INFO, { params: { user_id: uid } });
     console.log('[INFO][RAW]', JSON.stringify(data, null, 2)); // 디버그
 
     // ① 래퍼 + success.MyInfo
