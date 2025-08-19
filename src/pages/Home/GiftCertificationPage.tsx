@@ -1,7 +1,6 @@
 // GiftCertificationPage.tsx
 import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
-import BottomNavigation from "../../components/common/BottomNavigation";
 import InputBox from "../../components/common/InputBox";
 import ParticipantList, { type Participant } from "../../components/HomePage/Participation/ParticipantList";
 import WhitePhoto from "../../assets/WhitePhoto.svg";
@@ -58,12 +57,6 @@ const GiftCertificationPage = () => {
           등록하기
         </button>
       </div>
-
-      {/* 하단 네비게이션 */}
-      <BottomNavigation
-        active="home"
-        onNavigate={(menu) => navigate(`/${menu}`)}
-      />
     </div>
   );
 };

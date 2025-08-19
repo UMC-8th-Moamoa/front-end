@@ -1,21 +1,44 @@
-// src/components/WishList/WishListSection.tsx
 import { useEffect, useRef, useState } from "react";
 import SortDropdown from "./SortDropDown";
 import WishlistItem from "./WishListItem";
 import ToastBanner from "./ToastBanner";
 
-import {
-  getMyWishlists,
-  mapSortLabelToApi,
-  type WishlistUiItem,
-} from "../../services/wishlist/list";
+/** UI 전용 타입 (서비스 의존 제거) */
+export type WishlistUiItem = {
+  id: number;
+  title: string;
+  price: number;
+  priceText: string;
+  imageSrc: string;
+  isPublic: boolean;
+};
+
+/** 필요하면 여기에 더미 데이터를 넣어서 UI 확인 가능 */
+const INITIAL_ITEMS: WishlistUiItem[] = [
+  // 예시) 주석 해제해서 써도 됨
+  // {
+  //   id: 1,
+  //   title: "선물 상자 A",
+  //   price: 12000,
+  //   priceText: "12,000원",
+  //   imageSrc: "/assets/WhitePhoto.svg",
+  //   isPublic: true,
+  // },
+];
 
 const WishListSection = () => {
   // 드롭다운 라벨: "등록순" | "높은 가격순" | "낮은 가격순" | "공개" | "비공개"
   const [sortLabel, setSortLabel] = useState("등록순");
-  const [list, setList] = useState<WishlistUiItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+
+  // 전체 원본 목록(등록순은 이 배열의 현재 순서를 기준으로 함)
+  const [allItems, setAllItems] = useState<WishlistUiItem[]>(INITIAL_ITEMS);
+
+  // 화면에 보여줄 목록
+  const [list, setList] = useState<WishlistUiItem[]>(INITIAL_ITEMS);
+
+  // 로딩/에러는 UI 유지용 플래그 (네트워크 없음)
+  const [loading] = useState(false);
+  const [err] = useState<string | null>(null);
 
   // toast
   const [toastMsg, setToastMsg] = useState("");
@@ -29,59 +52,43 @@ const WishListSection = () => {
     toastTimer.current = window.setTimeout(() => setToastShow(false), 3000);
   };
 
-  /** 라벨이 공개/비공개 필터인지 판별 */
-  const isVisibilityLabel = (label: string) =>
-    label === "공개" || label === "비공개";
+  /** 정렬/필터 계산 (클라이언트 전용) */
+  useEffect(() => {
+    let items = [...allItems];
 
-  /** 라벨이 정렬(등록/가격)인지 판별 */
-  const isSortLabel = (label: string) =>
-    label === "등록순" || label === "높은 가격순" || label === "낮은 가격순";
-
-  const load = async (label: string) => {
-    try {
-      setLoading(true);
-      setErr(null);
-
-      // 정렬 라벨을 API sort 값으로 변환 (공개/비공개 선택 시에도 정렬 기준은 등록순으로)
-      const sortApi = isSortLabel(label) ? mapSortLabelToApi(label) : "created_at";
-
-      // 서버에서는 정렬만 요청
-      const page = await getMyWishlists({
-        page: 1,
-        size: 10,
-        sort: sortApi,
-      });
-
-      // 공개/비공개 필터는 클라이언트에서 적용
-      let items = page.items;
-      if (label === "공개") {
-        items = items.filter((it) => it.isPublic === true);
-      } else if (label === "비공개") {
-        items = items.filter((it) => it.isPublic === false);
-      }
-
-      setList(items);
-    } catch (e: any) {
-      setErr(e?.response?.data?.message || "불러오기 실패");
-    } finally {
-      setLoading(false);
+    // 공개/비공개 필터
+    if (sortLabel === "공개") {
+      items = items.filter((it) => it.isPublic === true);
+    } else if (sortLabel === "비공개") {
+      items = items.filter((it) => it.isPublic === false);
     }
-  };
+
+    // 가격 정렬
+    if (sortLabel === "높은 가격순") {
+      items.sort((a, b) => b.price - a.price);
+    } else if (sortLabel === "낮은 가격순") {
+      items.sort((a, b) => a.price - b.price);
+    }
+    // "등록순"은 allItems의 현재 순서 유지
+
+    setList(items);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortLabel, allItems]);
 
   useEffect(() => {
-    load(sortLabel);
     return () => {
       if (toastTimer.current) window.clearTimeout(toastTimer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortLabel]);
+  }, []);
 
+  /** 아이템 토글/수정 시 allItems 업데이트 → 화면 목록도 자동 반영 */
   const handleUpdated = (next: WishlistUiItem) => {
-    setList((prev) => prev.map((x) => (x.id === next.id ? next : x)));
+    setAllItems((prev) => prev.map((x) => (x.id === next.id ? next : x)));
   };
 
+  /** 삭제 시 allItems에서 제거 */
   const handleDeleted = (id: number) => {
-    setList((prev) => prev.filter((x) => x.id !== id));
+    setAllItems((prev) => prev.filter((x) => x.id !== id));
     showToast("위시리스트가 삭제되었습니다");
   };
 

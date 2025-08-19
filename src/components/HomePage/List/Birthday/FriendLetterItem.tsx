@@ -3,12 +3,12 @@ import EnvelopeIcon from "/assets/Envelope.svg";
 import { useNavigate } from "react-router-dom";
 
 interface FriendLetterItemProps {
-  name: string;              // birthdayPersonName
-  birthday: string;          // "YYYY-MM-DD"
-  daysLeft: number;          // API 제공 D-day
+  name: string;     
+  birthday: string;      
+  daysLeft: number;        
   hasLetter: boolean;
-  letterId?: number | null;  // 수정 시 필요
-  eventId: number;           // 작성 시 필요
+  letterId?: number | null; 
+  eventId: number;         
 }
 
 const FriendLetterItem = ({
@@ -28,10 +28,8 @@ const FriendLetterItem = ({
 
   const handleClick = () => {
     if (hasLetter && letterId) {
-      // ✍️ 편지 수정 화면으로 (라우팅 규칙에 맞춰 경로만 바꿔)
       navigate(`/moaletter/edit/${letterId}`);
     } else {
-      // 📝 새 편지 작성 화면으로 (이벤트 ID 전달)
       navigate(`/moaletter/write?eventId=${eventId}`);
     }
   };
