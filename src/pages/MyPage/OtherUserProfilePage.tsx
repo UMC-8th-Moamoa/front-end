@@ -58,6 +58,7 @@ function OtherUserProfilePage() {
   // 파생 상태: 현재 팔로잉 여부(UI용)
   const isFollowing = profile?.isFollowing ?? false;
 
+
   useEffect(() => {
     let mounted = true;
 

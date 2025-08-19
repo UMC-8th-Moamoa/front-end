@@ -20,46 +20,60 @@ type UsersApiEnvelope = {
   success?: { profile: OtherUserProfile };
 };
 
+/** 스웨거 실제 응답 형태 */
+type OtherPageInfoEnvelope = {
+  success: boolean;
+  OtherInfo?: {
+    user_id: string;
+    name: string;
+    birthday: string;
+    followers_num: number;
+    following_num: number;  // ← 단수
+    is_following: boolean;
+    is_follower: boolean;
+    photo: string | null;
+  };
+};
+
 export async function fetchOtherUserProfile(
   targetId: string | number
 ): Promise<OtherUserProfile | null> {
   const uid = String(targetId);
 
-  // 1) 문서화된 otherpage_info 먼저
+  // 1) 문서화된 otherpage_info 사용
   try {
-    const { data } = await instance.get("/mypage/otherpage_info", {
+    const { data } = await instance.get<OtherPageInfoEnvelope>("/mypage/otherpage_info", {
       params: { user_id: uid },
     });
 
-    if (data?.success) {
-      // ← 아이디 키가 환경마다 다를 수 있어 모두 대비
-      const mappedUserId =
-        data.user_id ?? data.userId ?? data.userid ?? data.id ?? "";
-
+    if (data?.success && data.OtherInfo) {
+      const o = data.OtherInfo;
       return {
-        id: 0,
-        userId: mappedUserId,                 // ★ 핵심
-        name: data.name ?? "",
-        photo: data.image ?? null,
-        birthday: data.birthday ?? "",
-        isFollowing: !!data.followings,       // 내가 그 사람을 팔로우?
-        isFollower: !!data.followers,         // 그 사람이 나를 팔로우?
-        followersCount: Number(data.followers_num ?? 0),
-        followingCount: Number(data.followings_num ?? 0),
+        id: 0, // 서버에서 별도 id를 안 주므로 0으로 고정
+        userId: o.user_id,
+        name: o.name,
+        photo: o.photo ?? null,
+        birthday: o.birthday ?? "",
+        isFollowing: !!o.is_following,   // 내가 그를 팔로우?
+        isFollower: !!o.is_follower,     // 그가 나를 팔로우?
+        followersCount: o.followers_num ?? 0,
+        followingCount: o.following_num ?? 0,
         wishlistPreview: [],
       };
     }
   } catch {
-    // 계속 진행
+    // 계속 진행 (fallback)
   }
 
-  // 2) (옵션) /users/:id 열려있으면 사용
+  // 2) (옵션) 백엔드가 열려 있다면 /users/:id도 시도
   try {
     const { data } = await instance.get<UsersApiEnvelope>(`/users/${uid}`);
     if (data?.resultType === "SUCCESS" && data?.success?.profile) {
       return data.success.profile;
     }
-  } catch {}
+  } catch {
+    // ignore
+  }
 
   return null;
 }
