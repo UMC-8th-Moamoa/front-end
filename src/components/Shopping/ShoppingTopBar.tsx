@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosInstance';
+import MoamoaLogo from "../../assets/MoamoaLogo.svg";
 
 type Props = {
   /** 초기 표시용(로딩 전 폴백). 없으면 0으로 시작 */
@@ -65,7 +66,7 @@ const ShoppingTopBar = ({ userMC = 0 }: Props) => {
     <div className="w-[393px] h-14 relative flex items-center justify-center px-4">
       {/* 중앙 로고 */}
       <img
-        src="/assets/MoamoaLogo.svg"
+        src={MoamoaLogo}
         alt="MOA MOA"
         className="h-[18px] absolute left-1/2 transform -translate-x-1/2"
       />

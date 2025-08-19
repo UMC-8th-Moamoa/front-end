@@ -30,11 +30,11 @@ import RemainMoneySelectPage from "./pages/Home/MoaMoney/RemainMoneySelectPage";
 import DonationSelectPage from "./pages/Home/MoaMoney/DonationSelectPage";
 import ConvertToMongPage from "./pages/Home/MoaMoney/ConvertToMongPage";
 import ConvertToMongCompletePage from "./pages/Home/MoaMoney/ConvertToMongCompletePage";
-import ReturnToFriendPage from "./pages/Home/MoaMoney/ReturnToFriendPage";
-import ReturnToFriendCompletePage from "./pages/Home/MoaMoney/ReturnToFriendCompletePage";
-import ReceiveBalancePage from "./pages/Home/MoaMoney/ReceiveBalancePage";
 import GiftCertificationPage from "./pages/Home/GiftCertificationPage";
 import AlarmPage from "./pages/Home/AlarmPage";
+import SelectRemittancePage from './pages/Home/SelectRemittancePage';
+import DonationCompletePage from './pages/Home/MoaMoney/DonationCompletePage';
+import SelectWishPhotoPage from './pages/Wishlist/SelectWishPhotoPage';
 
 // 쇼핑/결제페이지
 import ShoppingList from "./pages/Shopping/ShoppingList";
@@ -62,9 +62,6 @@ import CustomerServiceDetailPage from './pages/MyPage/CustomerServiceDetailPage'
 import OtherUserFollowListPage from './pages/MyPage/OtherUserFollowListPage';
 import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage'; 
 import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
-import SelectRemittancePage from './pages/Home/SelectRemittancePage';
-import DonationCompletePage from './pages/Home/MoaMoney/DonationCompletePage';
-import SelectWishPhotoPage from './pages/Wishlist/SelectWishPhotoPage';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -121,6 +118,7 @@ function AppRoutes() {
 
     "/wishlist-register",
     "/wishlist/register",
+    "/wishlist/select-photo",
     "/moa-collected",
     "/pick-gift",
     "/participation",
@@ -135,6 +133,9 @@ function AppRoutes() {
     "/donation-complete",
     "/convert-to-mong",
     "/convert-to-mong-complete",
+    "/alarm",
+    "/gift-certification",
+    
     
     "/login",
     "/find-id",
@@ -232,9 +233,6 @@ function AppRoutes() {
           <Route path="/donation-complete" element={<DonationCompletePage />} />
           <Route path="/convert-to-mong" element={<ConvertToMongPage />} />
           <Route path="/convert-to-mong-complete" element={<ConvertToMongCompletePage />} />
-          <Route path="/return-to-friend" element={<ReturnToFriendPage />} />
-          <Route path="/return-to-friend/return-to-friend-complete" element={<ReturnToFriendCompletePage />} />
-          <Route path="/receive-balance" element={<ReceiveBalancePage />} />
           <Route path="/gift-certification" element={<GiftCertificationPage />} />
           <Route path="/alarm" element={<AlarmPage />} />
           <Route path="/select-remittance" element={<SelectRemittancePage />} />

@@ -1,7 +1,6 @@
 // BeforeTransferPage.tsx
 import BackButton from "../../../components/common/BackButton";
 import Button from "../../../components/common/Button";
-import BottomNavigation from "../../../components/common/BottomNavigation";
 
 interface BeforeTransferPageProps {
   amount: number; // 전달받은 금액 (원 단위)
@@ -49,9 +48,6 @@ const BeforeTransferPage = ({ amount }: BeforeTransferPageProps) => {
           </Button>
         </div>
       </main>
-
-      {/* 하단 네비게이션 */}
-      <BottomNavigation />
     </div>
   );
 };
