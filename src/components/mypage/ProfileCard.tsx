@@ -2,8 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileImg from '../../assets/profile.svg';
-import { fetchMySelfInfo } from '../../services/mypage';
-import { fetchMyMerged } from '../../services/mypage';
+import { fetchMySelfInfo, fetchMyMerged } from '../../services/mypage';
 
 // YYYY-MM-DD -> YYYY.MM.DD
 function fmtBirthday(iso?: string | null) {
@@ -17,15 +16,25 @@ function ProfileCard() {
   const navigate = useNavigate();
 
   // 화면 표시용 상태
-  const [name, setName] = useState('');             // 표시명
-  const [userId, setUserId] = useState('');         // @아이디 (읽기 전용)
-  const [birthday, setBirthday] = useState('');     // YYYY.MM.DD
+  const [name, setName] = useState('');
+  const [userId, setUserId] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [loadErr, setLoadErr] = useState('');
+
+  const applyMerged = (m: any, fallbackUid?: string) => {
+    const uid = m?.userId || fallbackUid || '';
+    setUserId(uid);
+    setName(m?.name || '');
+    setBirthday(fmtBirthday(m?.birthday));
+    setFollowers(typeof m?.followers === 'number' ? m.followers : 0);
+    setFollowing(typeof m?.following === 'number' ? m.following : 0);
+    setImageUrl(m?.image || null);
+  };
 
   useEffect(() => {
     const uid = localStorage.getItem('my_user_id');
@@ -41,44 +50,77 @@ function ProfileCard() {
       const cached = localStorage.getItem('cached_profile');
       if (cached) {
         const m = JSON.parse(cached);
-        setUserId(m.userId || uid);
-        setName(m.name || '');
-        setBirthday(fmtBirthday(m.birthday));
-        setFollowers(m.followers ?? 0);
-        setFollowing(m.following ?? 0);
-        setImageUrl(m.image || null);
+        applyMerged(m, uid);
       }
     } catch {}
 
+    // 1) 서버 새로고침 (merged → fallback selfinfo)
     (async () => {
       setLoading(true);
       setLoadErr('');
       try {
-        const res = await fetchMySelfInfo(uid);
-        if (mounted && res.resultType === 'SUCCESS' && res.success) {
-          const p = res.success.profile;
-          setUserId(p.userId || uid);
-          setName(p.name || '');
-          setBirthday(fmtBirthday(p.birthday));
-          setFollowers(p.followers || 0);
-          setFollowing(p.following || 0);
-          setImageUrl(p.image || null);
-        } else if (mounted) {
-          setLoadErr(res.error || '내 정보를 불러오지 못했습니다.');
+        const merged = await fetchMyMerged(uid);
+        if (!mounted) return;
+        applyMerged(merged, uid);
+        localStorage.setItem('cached_profile', JSON.stringify(merged));
+      } catch {
+        try {
+          const res = await fetchMySelfInfo(uid);
+          if (mounted && res.resultType === 'SUCCESS' && res.success) {
+            const p = res.success.profile;
+            const mergedLike = {
+              userId: p.userId,
+              name: p.name,
+              birthday: p.birthday,
+              image: p.image,
+              followers: p.followers,
+              following: p.following,
+            };
+            applyMerged(mergedLike, uid);
+            localStorage.setItem('cached_profile', JSON.stringify(mergedLike));
+          } else if (mounted) {
+            setLoadErr(res.error || '내 정보를 불러오지 못했습니다.');
+          }
+        } catch (err: any) {
+          if (mounted) setLoadErr(err?.message || '내 정보를 불러오지 못했습니다.');
         }
-      } catch (err: any) {
-        if (mounted) setLoadErr(err?.message || '내 정보를 불러오지 못했습니다.');
       } finally {
         if (mounted) setLoading(false);
       }
     })();
 
-    return () => { mounted = false; };
+    // 2) 같은 탭: 편집 페이지 전역 이벤트 구독
+    const onProfileUpdated = (e: Event) => {
+      const detail: any = (e as CustomEvent).detail;
+      if (!detail) return;
+      try {
+        const cachedRaw = localStorage.getItem('cached_profile');
+        const cached = cachedRaw ? JSON.parse(cachedRaw) : {};
+        const merged = { ...cached, ...detail };
+        localStorage.setItem('cached_profile', JSON.stringify(merged));
+        applyMerged(merged, uid);
+      } catch {}
+    };
+    window.addEventListener('my_profile_updated', onProfileUpdated as EventListener);
+
+    // 3) 다른 탭: storage 이벤트로 캐시 변경 추적
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== 'cached_profile' || !e.newValue) return;
+      try {
+        const m = JSON.parse(e.newValue);
+        applyMerged(m, uid);
+      } catch {}
+    };
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener('my_profile_updated', onProfileUpdated as EventListener);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
-  // 전역 ID 변경 이벤트는 더 이상 사용하지 않음(아이디 변경 기능 제거)
-  // 필요 시, 아래 useEffect를 완전히 삭제해도 됨.
-  // 단, 다른 페이지에서 재사용 중이면 남겨두고, 이벤트가 오더라도 읽기용 상태만 갱신하게 둠.
+  // (선택) 기존 ID 변경 이벤트 구독 — 유지
   useEffect(() => {
     const handler = (e: any) => {
       const newId = (e?.detail ?? '').toString().trim();
@@ -88,12 +130,7 @@ function ProfileCard() {
         setLoading(true);
         try {
           const merged = await fetchMyMerged(newId);
-          setUserId(merged.userId || newId);
-          setName(merged.name || '');
-          setBirthday(fmtBirthday(merged.birthday));
-          setFollowers(merged.followers ?? 0);
-          setFollowing(merged.following ?? 0);
-          setImageUrl(merged.image || null);
+          applyMerged(merged, newId);
           localStorage.setItem('cached_profile', JSON.stringify(merged));
         } finally {
           setLoading(false);

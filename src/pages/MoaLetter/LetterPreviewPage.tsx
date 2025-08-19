@@ -1,4 +1,6 @@
 // src/pages/MoaLetter/LetterPreviewPage.tsx
+// 제목: 모아레터 미리보기(봉투 목록) - 박스 제거, 세로/가로 봉투 분리, 클릭 라우팅 고정
+
 import React, { useRef, useState, useEffect } from "react";
 import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
 import MoaLetterLogo from "../../assets/Moaletter.svg";
@@ -7,9 +9,24 @@ import VerticalIcon from "../../assets/vertical.svg";
 import { useNavigate } from "react-router-dom";
 import { getLetters, type LetterListItem } from "../../services/letters";
 
+// 세로(세로로 긴) 봉투 1~4
+import EnvV1 from "../../assets/moaletter/envelop1.svg";
+import EnvV2 from "../../assets/moaletter/envelop2.svg";
+import EnvV3 from "../../assets/moaletter/envelop3.svg";
+import EnvV4 from "../../assets/moaletter/envelop4.svg";
+
+// 가로(가로로 긴) 봉투 5~8
+import EnvH5 from "../../assets/moaletter/envelop5.svg";
+import EnvH6 from "../../assets/moaletter/envelop6.svg";
+import EnvH7 from "../../assets/moaletter/envelop7.svg";
+import EnvH8 from "../../assets/moaletter/envelop8.svg";
+
+const VERTICAL_ENVS = [EnvV1, EnvV2, EnvV3, EnvV4]; // 세로형
+const HORIZONTAL_ENVS = [EnvH5, EnvH6, EnvH7, EnvH8]; // 가로형
+
 export default function MoaLetterPreviewPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isVertical, setIsVertical] = useState(false);
+  const [isVertical, setIsVertical] = useState(false); // false=캐러셀(세로형), true=리스트(가로형)
   const [items, setItems] = useState<LetterListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +49,6 @@ export default function MoaLetterPreviewPage() {
     else if (savedMode === "horizontal") setIsVertical(false);
   }, []);
 
-  // 이벤트 ID는 서비스 레벨에서 pickEventId로 안전 보정됨
   useEffect(() => {
     setLoading(true);
     getLetters(0, 1, 15)
@@ -70,9 +86,10 @@ export default function MoaLetterPreviewPage() {
     touchStartX.current = null;
   };
 
-  const openDetail = (item: LetterListItem | null) => {
+  // 봉투 클릭 → 롤링페이퍼(우표) 그리드
+  const openRollingGrid = (item: LetterListItem | null) => {
     if (!item) return;
-    navigate(`/moaletter/letters/${item.id}`, {
+    navigate(`/moaletter/letters/${item.id}/rolling`, {
       state: { senderName: `보낸이 ${item.senderId}` },
     });
   };
@@ -98,33 +115,45 @@ export default function MoaLetterPreviewPage() {
         {/* 본문 */}
         <div className={`flex-1 px-4 ${isVertical ? "overflow-y-auto" : "overflow-visible pb-[120px]"}`}>
           {isVertical ? (
+            // 리스트 모드: 가로형(5~8) 이미지 사용, 크기 350x161
             <div className="flex flex-col gap-6 pb-4 items-center">
-              {items.map((item) => (
-                <div key={item.id} className="flex flex-col items-center gap-[2px]" onClick={() => openDetail(item)}>
-                  <p className="text-white text-center text-[18px] font-medium leading-none mb-[8px]">
-                    {item.title}
-                  </p>
-                  <div className="relative bg-white rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] w-[350px] h-[161px] mb-[45px]" />
-                </div>
-              ))}
+              {items.map((item, idx) => {
+                const src = HORIZONTAL_ENVS[idx % HORIZONTAL_ENVS.length];
+                return (
+                  <div key={item.id} className="flex flex-col items-center gap-[8px]">
+                    <p className="text-white text-center text-[18px] font-medium leading-none">
+                      {item.title}
+                    </p>
+                    <img
+                      src={src}
+                      alt="편지봉투(가로)"
+                      className="rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] cursor-pointer"
+                      style={{ width: 350, height: 161 }}
+                      onClick={() => openRollingGrid(item)}
+                    />
+                  </div>
+                );
+              })}
               {items.length === 0 && !loading && !error && (
                 <div className="text-white text-center py-6">표시할 편지가 없습니다.</div>
               )}
             </div>
           ) : (
+            // 캐러셀 모드: 세로형(1~4) 이미지 사용, 크기 275x508
             <div
               className="relative flex flex-col items-center justify-center min-h-[560px] py-4"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
-              <div
-                onClick={() => openDetail(currentItem)}
-                className="bg-white rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] relative z-10 mb-[45px] overflow-hidden"
+              <img
+                src={VERTICAL_ENVS[currentIndex % VERTICAL_ENVS.length]}
+                alt="편지봉투(세로)"
+                className="rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] cursor-pointer"
                 style={{ width: 275, height: 508 }}
+                onClick={() => openRollingGrid(currentItem)}
               />
-              {/* 점선/인디케이터 등은 기존 그대로 */}
-              <p className="text-white text-center text-[18px] font-medium leading-none w-[260px] text-ellipsis overflow-hidden whitespace-nowrap">
-                {(!error && currentItem) ? currentItem.title : (items.length === 0 ? "편지 없음" : "")}
+              <p className="text-white text-center text-[18px] font-medium leading-none w-[260px] text-ellipsis overflow-hidden whitespace-nowrap mt-[12px]">
+                {currentItem ? currentItem.title : ""}
               </p>
               <div className="flex justify-center mt-2 gap-2">
                 {items.map((_, i) => (

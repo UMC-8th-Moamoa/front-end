@@ -1,7 +1,5 @@
 // src/services/mypage.ts
-
 import instance from "../api/axiosInstance";
-
 
 // 래퍼/맨바디 모두 대응: {resultType, success} 또는 그냥 {success: true, ...} 혹은 필드 직렬
 function normalizeSuccess<T>(data: any): { ok: boolean; payload?: T; reason?: string } {
@@ -30,7 +28,6 @@ function normalizeSuccess<T>(data: any): { ok: boolean; payload?: T; reason?: st
   return { ok: false, reason: "UNKNOWN_ERROR" };
 }
 
-
 function pick<T = string>(obj: any, ...keys: string[]): T | "" {
   for (const k of keys) {
     const v = obj?.[k];
@@ -53,7 +50,8 @@ const EP_CS_WRITE = "/mypage/customer_service";
 const EP_CHANGE_USER_ID = "/mypage/change_id";
 const EP_UPLOAD_USER_URL = "/upload/user-image/upload-url"; // POST
 const EP_UPLOAD_CONFIRM  = "/upload/confirm";               // POST
-const EP_UPLOAD_DELETE   = "/upload/image";                 // DELETE
+const EP_UPLOAD_AUTO     = "/upload/user-image/auto";       // POST (multipart)
+const EP_UPLOAD_DELETE   = "/upload/image";                 // DELETE  
 
 // ===== 공통 Envelope =====
 export type ResultType = "SUCCESS" | "FAIL";
@@ -232,7 +230,6 @@ function toMyProfileAny(src: any): MyProfile {
   return { userId, name, birthday, followers, following, image };
 }
 
-
 function toMyEditProfileAny(src: any): MyEditProfile {
   const s = src?.MyInfo ?? src; // 서버가 MyInfo로 감싸면 풀기
 
@@ -253,7 +250,6 @@ function toMyEditProfileAny(src: any): MyEditProfile {
 }
 
 const nonEmpty = (v: any) => v !== undefined && v !== null && String(v).trim() !== "";
-
 
 // ====== API 함수 (notifications.ts와 동일한 사용 패턴) ======
 
@@ -304,8 +300,6 @@ export async function fetchMySelfInfo(userId: string): Promise<MySelfInfoRespons
   }
 }
 
-
-
 /** 사용자 수정 페이지 확인(기본값) */
 export async function fetchMySelfEdit(userId: string): Promise<MySelfEditResponse> {
   try {
@@ -347,7 +341,6 @@ export async function fetchMySelfEdit(userId: string): Promise<MySelfEditRespons
   }
 }
 
-
 /** 마이페이지 다른사람 확인 */
 export async function fetchOtherInfo(userId: string): Promise<OtherInfoResponse> {
   try {
@@ -382,7 +375,6 @@ export async function fetchOtherInfo(userId: string): Promise<OtherInfoResponse>
   }
 }
 
-
 /** 팔로우 요청 */
 export async function requestFollow(body: FollowRequestBody): Promise<FollowRequestResponse> {
   try {
@@ -414,7 +406,6 @@ export async function requestFollow(body: FollowRequestBody): Promise<FollowRequ
     };
   }
 }
-
 
 // === [ADD] Info + Edit 합쳐서 한 번에 반환하는 헬퍼 ===
 export type MyMerged = {
@@ -473,7 +464,6 @@ export async function fetchMyMerged(userId: string): Promise<MyMerged> {
   return base;
 }
 
-
 // ==================== 고객센터====================
 
 const EP_CS_LIST   = "/customer-service/list";    // GET, (opt) ?page=&size=
@@ -514,8 +504,6 @@ function mapInquiryFromServer(raw: any): InquiryItem {
     isLocked: typeof raw?.private === "boolean" ? raw.private : undefined,
   };
 }
-
-
 
 // === [목록 조회] GET /api/mypage/customer_service?page=&limit= ===
 export async function fetchCustomerInquiries(
@@ -584,8 +572,6 @@ export async function createCustomerInquiry(
   return { success: true, id };
 }
 
-
-
 // ====== ID 변경 타입 ======
 export interface ChangeUserIdBody {
   newUserId: string;
@@ -644,3 +630,182 @@ export const setMyUserId = (id: string) => {
   // 앱 전역에 변경 알림
   window.dispatchEvent(new CustomEvent("my_user_id_changed", { detail: uid }));
 };
+
+// ==================== 프로필 이미지 업로드/프리셋 유틸 ====================
+
+// Presigned URL 발급 Request/Response (스웨거 매핑)
+export type GetUploadUrlBody = {
+  fileName: string;
+  fileType: string;   // ← 스웨거는 fileType 사용 (contentType 아님)
+  size?: number;
+};
+
+export type GetUploadUrlSuccess = {
+  uploadUrl: string;
+  fileUrl: string;    // ← S3 최종 접근 URL (확정 시 바디로 넣음)
+  key: string;        // ← S3 object key
+  expires?: string;   // ISO
+};
+
+// Confirm Request/Response (스웨거 매핑)
+export type ConfirmUploadBody = {
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+};
+
+export type ConfirmUploadSuccess = {
+  fileUrl: string;    // 서버가 돌려주는 최종 URL (UI에 바로 사용)
+  uploadedAt?: string;
+};
+
+// 1) 업로드 URL 발급 (/api/upload/user-image/upload-url)
+export async function createUserImageUploadUrl(
+  body: GetUploadUrlBody
+): Promise<{ resultType: ResultType; error: string | null; success?: GetUploadUrlSuccess }> {
+  try {
+    const { data } = await instance.post(EP_UPLOAD_USER_URL, body);
+
+    // 스펙: { success: true, data: { uploadUrl, fileUrl, key, expires } }
+    if (data?.success && data?.data) {
+      const d = data.data || {};
+      const uploadUrl = d.uploadUrl || d.url || d.putUrl;
+      const fileUrl   = d.fileUrl   || d.publicUrl || d.imageUrl;
+      const key       = d.key       || d.fileKey   || d.path;
+      const expires   = d.expires   || d.expiresAt;
+
+      if (uploadUrl && fileUrl && key) {
+        return { resultType: "SUCCESS", error: null, success: { uploadUrl, fileUrl, key, expires } };
+      }
+    }
+    return { resultType: "FAIL", error: data?.message || "FAILED_TO_GET_UPLOAD_URL" };
+  } catch (e: any) {
+    const msg = e?.response?.data?.error || e?.response?.data?.message || e?.message || "NETWORK_ERROR";
+    return { resultType: "FAIL", error: msg };
+  }
+}
+
+// 2) S3 Presigned PUT 업로드
+export async function uploadFileToS3Presigned(uploadUrl: string, file: File): Promise<void> {
+  const res = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": file.type || "application/octet-stream" },
+    body: file,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`S3_UPLOAD_FAILED: ${res.status} ${text}`);
+  }
+}
+
+// 3) 확정 호출 (/api/upload/confirm) — 선택적
+export async function confirmUserImageUpload(
+  body: ConfirmUploadBody
+): Promise<{ resultType: ResultType; error: string | null; success?: ConfirmUploadSuccess }> {
+  try {
+    const { data } = await instance.post(EP_UPLOAD_CONFIRM, body);
+
+    // 스펙: { success: true, data: { fileUrl, fileName, fileSize, uploadedAt } }
+    if (data?.success && data?.data) {
+      const d = data.data || {};
+      const fileUrl = d.fileUrl || d.url || d.imageUrl;
+      if (fileUrl) return { resultType: "SUCCESS", error: null, success: { fileUrl, uploadedAt: d.uploadedAt } };
+    }
+    return { resultType: "FAIL", error: data?.message || "FAILED_TO_CONFIRM_UPLOAD" };
+  } catch (e: any) {
+    const msg = e?.response?.data?.error || e?.response?.data?.message || e?.message || "NETWORK_ERROR";
+    return { resultType: "FAIL", error: msg };
+  }
+}
+
+// (옵션) 4) 자동 업로드(멀티파트 한 방에) — 파일 있으면 이걸로도 가능
+// src/services/mypage.ts
+
+export async function uploadUserImageAuto(
+  file: File
+): Promise<{ resultType: ResultType; error: string | null; success?: { fileUrl: string } }> {
+  try {
+    const fd = new FormData();
+    // filename까지 넣어주면 백엔드가 더 안정적으로 처리
+    fd.append("image", file, file.name);
+
+    const { data } = await instance.post(EP_UPLOAD_AUTO, fd, {
+      // ✅ 절대 Content-Type을 직접 지정하지 마!
+      // axios가 브라우저에게 맡겨서 boundary가 들어가게 해야 함.
+      headers: {},
+
+      // 혹시 인터셉터가 JSON으로 바꾸는 경우를 방지
+      transformRequest: [(d, h) => d],
+      withCredentials: true, // 쿠키 쓰면 유지
+    });
+
+    const fileUrl = data?.data?.fileUrl || data?.fileUrl || data?.url || data?.imageUrl;
+    if (data?.success !== false && fileUrl) {
+      return { resultType: "SUCCESS", error: null, success: { fileUrl } };
+    }
+    return { resultType: "FAIL", error: data?.message || "FAILED_TO_AUTO_UPLOAD" };
+  } catch (e: any) {
+    const msg = e?.response?.data?.error || e?.response?.data?.message || e?.message || "NETWORK_ERROR";
+    return { resultType: "FAIL", error: msg };
+  }
+}
+
+/** 고수준: 파일로 프사 한 번에 변경(Presigned 플로우) */
+export async function setMyProfileImageFromFile(
+  file: File,
+  opts?: { refreshUserId?: string; doRefresh?: boolean; strategy?: "presigned" | "auto" }
+): Promise<{ ok: boolean; imageUrl?: string; reason?: string; merged?: MyMerged }> {
+  try {
+    const strategy = opts?.strategy || "presigned";
+
+    if (strategy === "auto") {
+      // 1단계: 멀티파트로 곧장 업로드
+      const au = await uploadUserImageAuto(file);
+      if (au.resultType !== "SUCCESS" || !au.success) {
+        return { ok: false, reason: au.error || "FAILED_TO_AUTO_UPLOAD" };
+      }
+      const imageUrl = au.success.fileUrl;
+
+      // (선택) confirm 호출로 로그/후처리
+      await confirmUserImageUpload({ fileUrl: imageUrl, fileName: file.name, fileSize: file.size });
+
+      if (opts?.doRefresh && opts?.refreshUserId) {
+        const merged = await fetchMyMerged(opts.refreshUserId);
+        return { ok: true, imageUrl, merged };
+      }
+      return { ok: true, imageUrl };
+    }
+
+    // === Presigned 전략 ===
+    // 1) URL 발급 (fileType!)
+    const r1 = await createUserImageUploadUrl({
+      fileName: file.name,
+      fileType: file.type || "application/octet-stream",
+      size: file.size,
+    });
+    if (r1.resultType !== "SUCCESS" || !r1.success) {
+      return { ok: false, reason: r1.error ?? "FAILED_TO_GET_UPLOAD_URL" };
+    }
+
+    // 2) S3 PUT
+    await uploadFileToS3Presigned(r1.success.uploadUrl, file);
+
+    // 3) 확정(선택) — 스펙에 맞는 바디 사용
+    const r3 = await confirmUserImageUpload({
+      fileUrl: r1.success.fileUrl,
+      fileName: file.name,
+      fileSize: file.size,
+    });
+    // confirm은 선택이지만, 성공 시 서버가 최종 URL을 보낼 수 있으므로 우선 사용
+    const imageUrl = (r3.resultType === "SUCCESS" && r3.success?.fileUrl) ? r3.success.fileUrl : r1.success.fileUrl;
+
+    // 4) 리프레시
+    if (opts?.doRefresh && opts?.refreshUserId) {
+      const merged = await fetchMyMerged(opts.refreshUserId);
+      return { ok: true, imageUrl, merged };
+    }
+    return { ok: true, imageUrl };
+  } catch (e: any) {
+    return { ok: false, reason: e?.message || "UNKNOWN_ERROR" };
+  }
+}

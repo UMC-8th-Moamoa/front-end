@@ -5,7 +5,11 @@ import BackButton from '../../components/common/BackButton';
 import ProfilePhotoModal from '../../components/mypage/ProfilePhotoModal';
 import PencilIcon from '../../assets/pencil_line.svg';
 import ProfileIcon from '../../assets/profile.svg';
-import { fetchMyMerged } from '../../services/mypage';
+import {
+  fetchMyMerged,
+  setMyProfileImageFromFile,
+  getMyUserId,
+} from '../../services/mypage';
 
 // YYYY-MM-DD -> YYYY.MM.DD
 function fmtBirthday(iso?: string | null) {
@@ -13,6 +17,21 @@ function fmtBirthday(iso?: string | null) {
   const [y, m, d] = iso.split('-');
   if (!y || !m || !d) return iso;
   return `${y}.${m}.${d}`;
+}
+
+// 로컬 프리셋 파일명에서 presetId 추출: ".../profile3.png" → "profile3"
+function extractPresetIdByUrl(src: string): string | null {
+  try {
+    const m = src.match(/profile(\d)\.(png|jpg|jpeg|webp|svg)$/i) || src.match(/profile(\d)/i);
+    if (!m) return null;
+    const idx = m[1];
+    if (!idx) return null;
+    const n = Number(idx);
+    if (Number.isNaN(n) || n < 1 || n > 9) return null;
+    return `profile${n}`;
+  } catch {
+    return null;
+  }
 }
 
 function ProfileEditPage() {
@@ -85,6 +104,84 @@ function ProfileEditPage() {
 
     return () => { mounted = false; };
   }, []);
+
+  // ===== 모달 선택 처리: 파일 업로드 or 프리셋 선택 =====
+  const handleSelectPhoto = async (imgUrl: string, file?: File) => {
+    // 미리보기 반영
+    setImageUrl(imgUrl);
+
+    // 내 userId
+    const uid = getMyUserId() || userId;
+
+    try {
+      setLoading(true);
+      setLoadErr('');
+
+      if (file) {
+        // 파일 업로드 (멀티파트 자동 업로드 전략)
+        const r = await setMyProfileImageFromFile(file, {
+          doRefresh: true,
+          refreshUserId: uid,
+          strategy: 'auto', // ← 스웨거의 /api/upload/user-image/auto 사용
+        });
+        if (!r.ok) {
+          throw new Error(r.reason || '이미지 업로드에 실패했습니다.');
+        }
+        if (r.merged) {
+          localStorage.setItem('cached_profile', JSON.stringify(r.merged));
+          setImageUrl(r.merged.image || r.imageUrl || imgUrl);
+          setUserId(r.merged.userId || uid);
+          setName(r.merged.name || '');
+          setEmail(r.merged.email || '');
+          setPhone(r.merged.phone || '');
+          setBirthday(fmtBirthday(r.merged.birthday));
+          // ★ 전역 알림
+          window.dispatchEvent(new CustomEvent('my_profile_updated', { detail: r.merged }));
+        } else if (r.imageUrl) {
+          setImageUrl(r.imageUrl);
+          window.dispatchEvent(new CustomEvent('my_profile_updated', { detail: { image: r.imageUrl } }));
+        }
+      } else {
+        // 프리셋 선택 → Blob으로 받아서 파일처럼 업로드 (전략 동일: auto)
+        const presetId = extractPresetIdByUrl(imgUrl) || 'preset';
+        const resp = await fetch(imgUrl);
+        if (!resp.ok) throw new Error('프리셋 이미지를 불러오지 못했습니다.');
+        const blob = await resp.blob();
+        const ext = (blob.type && blob.type.split('/')[1]) || 'png';
+        const presetFile = new File([blob], `${presetId}.${ext}`, { type: blob.type || 'image/png' });
+
+        const r = await setMyProfileImageFromFile(presetFile, {
+          doRefresh: true,
+          refreshUserId: uid,
+          strategy: 'auto',
+        });
+        if (!r.ok) {
+          throw new Error(r.reason || '프리셋 적용에 실패했습니다.');
+        }
+
+        if (r.merged) {
+          localStorage.setItem('cached_profile', JSON.stringify(r.merged));
+          setUserId(r.merged.userId || uid);
+          setName(r.merged.name || '');
+          setEmail(r.merged.email || '');
+          setPhone(r.merged.phone || '');
+          setBirthday(fmtBirthday(r.merged.birthday));
+          setImageUrl(r.merged.image || r.imageUrl || imgUrl);
+          // ★ 전역 알림
+          window.dispatchEvent(new CustomEvent('my_profile_updated', { detail: r.merged }));
+        } else if (r.imageUrl) {
+          setImageUrl(r.imageUrl);
+          window.dispatchEvent(new CustomEvent('my_profile_updated', { detail: { image: r.imageUrl } }));
+        }
+      }
+
+      setIsModalOpen(false);
+    } catch (err: any) {
+      setLoadErr(err?.message || '이미지 변경에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-[350px] mx-auto bg-white text-black pt-[9px] pb-[40px] min-h-screen">
@@ -191,10 +288,7 @@ function ProfileEditPage() {
       {isModalOpen && (
         <ProfilePhotoModal
           onClose={() => setIsModalOpen(false)}
-          onSelect={(imgUrl) => {
-            setImageUrl(imgUrl || imageUrl);
-            setIsModalOpen(false);
-          }}
+          onSelect={handleSelectPhoto}
         />
       )}
     </div>

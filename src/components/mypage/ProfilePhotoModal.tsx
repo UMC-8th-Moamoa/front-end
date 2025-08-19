@@ -1,37 +1,35 @@
-// 수정할 부분과 앞뒤 맥락 포함
-import FrameIcon from '../../assets/Frame.svg';
+// src/components/mypage/ProfilePhotoModal.tsx
 import { useRef } from 'react';
+import FrameIcon from '../../assets/Frame.svg';
+
+// 로컬 프리셋 9종 (png)
+import P1 from '../../assets/profile/profile1.png';
+import P2 from '../../assets/profile/profile2.png';
+import P3 from '../../assets/profile/profile3.png';
+import P4 from '../../assets/profile/profile4.png';
+import P5 from '../../assets/profile/profile5.png';
+import P6 from '../../assets/profile/profile6.png';
+import P7 from '../../assets/profile/profile7.png';
+import P8 from '../../assets/profile/profile8.png';
+import P9 from '../../assets/profile/profile9.png';
 
 function ProfilePhotoModal({
   onClose,
-  // 변경: 파일도 함께 넘기도록 두 번째 인자 허용
   onSelect,
 }: {
   onClose: () => void;
-  onSelect: (imgUrl: string, file?: File) => void; // ← 변경
+  onSelect: (imgUrl: string, file?: File) => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // 파일 선택 시 호출: 미리보기 URL 생성 후 부모로 전달
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
     onSelect(url, file);
-    // 닫을지 여부는 부모에서 결정(여기서는 닫지 않음)
   };
 
-  const images = [
-    'https://via.placeholder.com/80/FFB6C1',
-    'https://via.placeholder.com/80/87CEFA',
-    'https://via.placeholder.com/80/98FB98',
-    'https://via.placeholder.com/80/FFD700',
-    'https://via.placeholder.com/80/FFA07A',
-    'https://via.placeholder.com/80/DDA0DD',
-    'https://via.placeholder.com/80/90EE90',
-    'https://via.placeholder.com/80/ADD8E6',
-    'https://via.placeholder.com/80/FF69B4',
-  ];
+  const presetImages = [P1, P2, P3, P4, P5, P6, P7, P8, P9];
 
   return (
     <div
@@ -59,18 +57,14 @@ function ProfilePhotoModal({
           boxSizing: 'border-box',
         }}
       >
-        {/* 숨겨진 파일 입력 */}
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          // 모바일에서 카메라를 우선 제안하고 싶으면 capture 속성을 사용할 수 있음(브라우저별 동작 상이)
-          // capture="environment"
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />
 
-        {/* 사진 불러오기 버튼 */}
         <button
           onClick={() => fileInputRef.current?.click()}
           style={{
@@ -90,7 +84,6 @@ function ProfilePhotoModal({
           </span>
         </button>
 
-        {/* 사진 선택 목록 */}
         <div
           style={{
             display: 'grid',
@@ -100,7 +93,7 @@ function ProfilePhotoModal({
             justifyItems: 'center',
           }}
         >
-          {images.map((img, idx) => (
+          {presetImages.map((img, idx) => (
             <button
               key={idx}
               onClick={() => onSelect(img)}
@@ -114,9 +107,8 @@ function ProfilePhotoModal({
                 padding: 0,
                 border: 'none',
               }}
-              aria-label="프로필 이미지 선택"
+              aria-label={`프리셋 프로필 ${idx + 1}`}
             >
-              {/* 실제 이미지 표시 */}
               <img
                 src={img}
                 alt=""
