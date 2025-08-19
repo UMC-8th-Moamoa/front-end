@@ -3,20 +3,17 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../common/Button";
 import ShareButton from "../../../assets/ShareButton.svg";
-import type { EventButtonStatus } from "../../../services/user/event";
+import type { EventButtonStatus } from "../../../services/user/event"; // ✅ 타입 전용 import + 경로 수정
 
 interface ParticipationActionBoxProps {
   isMyPage: boolean;
-  /** 서버에서 내려온 버튼 상태 전체 전달 */
-  buttonStatus: EventButtonStatus;
-  /** WRITE/EDIT 등 2차 액션이 페이지마다 다르면 주입 */
-  onPrimaryClick?: () => void;
-  onShareClick?: () => void;
-  /** 라우트 커스터마이즈가 필요하면 오버라이드 */
+  buttonStatus?: EventButtonStatus | null; // 서버 /participation 응답의 buttonStatus
+  onPrimaryClick?: () => void;             // 부모가 직접 라우팅을 처리하고 싶으면 주입
+  onShareClick?: () => void;               // 공유 버튼 콜백(그대로 유지)
   actionRoutes?: {
-    participate?: string;   // 기본: "/select-remittance"
-    writeLetter?: string;   // 기본: "/moaletter/write"
-    editLetter?: string;    // 기본: "/moaletter/edit"
+    participate?: string;  // 기본: /select-remittance
+    writeLetter?: string;  // 기본: /moaletter/write
+    editLetter?: string;   // 기본: /moaletter/edit
   };
 }
 
@@ -29,6 +26,7 @@ const ParticipationActionBox = ({
 }: ParticipationActionBoxProps) => {
   const navigate = useNavigate();
 
+  // 액션별 라우트 기본값
   const routes = useMemo(
     () => ({
       participate: actionRoutes?.participate ?? "/select-remittance",
@@ -38,20 +36,38 @@ const ParticipationActionBox = ({
     [actionRoutes]
   );
 
-  const handlePrimary = () => {
-    if (!buttonStatus.isEnabled) return;
-
-    switch (buttonStatus.buttonAction) {
-      case "PARTICIPATE":
-        navigate(routes.participate);
-        break;
+  // 버튼 라벨: 서버에서 온 buttonText 우선
+  const primaryLabel = useMemo(() => {
+    if (buttonStatus?.buttonText) return buttonStatus.buttonText;
+    switch (buttonStatus?.buttonAction) {
       case "WRITE_LETTER":
-        if (onPrimaryClick) onPrimaryClick();
-        else navigate(routes.writeLetter);
+        return "편지 작성하러 가기";
+      case "EDIT_LETTER":
+        return "편지 수정하기";
+      case "PARTICIPATE":
+      default:
+        return "모아 참여하기";
+    }
+  }, [buttonStatus]);
+
+  const handlePrimary = () => {
+    // 부모에서 직접 처리하겠다고 주입한 경우 우선 실행
+    if (onPrimaryClick) {
+      onPrimaryClick();
+      return;
+    }
+
+    // 서버 액션에 따라 기본 라우팅
+    switch (buttonStatus?.buttonAction) {
+      case "WRITE_LETTER":
+        navigate(routes.writeLetter);
         break;
       case "EDIT_LETTER":
-        if (onPrimaryClick) onPrimaryClick();
-        else navigate(routes.editLetter);
+        navigate(routes.editLetter);
+        break;
+      case "PARTICIPATE":
+      default:
+        navigate(routes.participate);
         break;
     }
   };
@@ -70,17 +86,15 @@ const ParticipationActionBox = ({
             width="fixed"
             size="medium"
             onClick={handlePrimary}
-            disabled={!buttonStatus.isEnabled}
-            className={[
-              "w-[288px] h-[50px] !font-normal text-white",
-              buttonStatus.isEnabled ? "!bg-[#6282E1]" : "!bg-[#C7D5FF]",
-            ].join(" ")}
-            variant={buttonStatus.isEnabled ? "primary" : "gray"}
+            disabled={buttonStatus ? !buttonStatus.isEnabled : false}
+            className="w-[288px] h-[50px] !font-normal text-white !bg-[#6282E1]"
+            variant="primary"
           >
-            {buttonStatus.buttonText}
+            {primaryLabel}
           </Button>
         )}
 
+        {/* 공유 버튼은 그대로 */}
         <button
           className="w-[50px] h-[50px] flex items-center justify-center"
           aria-label="공유하기"

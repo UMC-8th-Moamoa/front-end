@@ -31,13 +31,15 @@ export type CalendarDateDetailResp = {
 
 /** ---------- APIs ---------- */
 // 특정 월의 생일 달력 조회
+// 특정 월의 생일 달력 조회
 export async function getBirthdaysCalendar(params?: { year?: number; month?: number }) {
   const { year, month } = params ?? {};
-  const { data } = await instance.get("/calendar/birthdays", {
-    params: { year, month },
-  });
-  return data.success as CalendarMonthResp["calendar"];
+  const { data } = await instance.get("/calendar/birthdays", { params: { year, month } });
+
+  // ✅ success.calendar 까지 파고 들어가서 반환
+  return (data?.success?.calendar) as CalendarMonthResp["calendar"];
 }
+
 
 // 특정 날짜의 상세 조회
 export async function getBirthdaysByDate(date: string) {

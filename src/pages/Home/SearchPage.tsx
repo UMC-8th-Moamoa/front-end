@@ -1,6 +1,6 @@
 import { useState } from "react";
+import RecentSearchList from "../../components/HomePage/Search/RecentSearchPage";
 import SearchTopBar from "../../components/HomePage/Search/SearchTopBar";
-import RecentSearchList from "../../components/HomePage/Search/RecentSearchList";
 import SearchUserList from "../../components/HomePage/Search/SearchUserList";
 
 const SearchPage = () => {

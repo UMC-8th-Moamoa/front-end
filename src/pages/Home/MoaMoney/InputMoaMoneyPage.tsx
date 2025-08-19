@@ -46,7 +46,7 @@ const InputMoaMoneyPage = () => {
       });
 
       // ✅ 완료 화면으로 이동(원하면 다른 경로로 변경 가능)
-      navigate("/receive-complete", {
+      navigate("/purchase/payment", {
         state: { amount: numberAmount, eventId },
       });
     } catch (e: any) {

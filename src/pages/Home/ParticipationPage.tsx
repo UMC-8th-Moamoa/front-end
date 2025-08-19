@@ -1,6 +1,6 @@
 // src/pages/ParticipationPage.tsx
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 import ClipboardToast from "../../components/HomePage/Participation/ClipboardToast";
 import BackButton from "../../components/common/BackButton";
@@ -8,22 +8,17 @@ import ParticipantList from "../../components/HomePage/Participation/Participant
 import RecipientBanner from "../../components/HomePage/Participation/RecipientBanner";
 import MemberWishList from "../../components/HomePage/Participation/MemberWishList";
 import ParticipationActionBox from "../../components/HomePage/Participation/ParticipationActionBox";
-
-// ⚠️ 현재 사용하는 모달 경로/props에 맞춰 import (isOpen 지원)
 import ShareModal from "../../components/mypage/ShareModal";
-
-import {
-  getRecipientWishlistUi,
-  type WishlistUi,
-} from "../../services/wishlist/list";
 
 import {
   getBirthdayEventDetail,
   getEventParticipationMeta,
+  mapRecipientWishlistUiFromDetail,
   type EventButtonStatus,
-} from "../../services/user/event"; // ← 폴더 확인!
+  type WishlistUi,
+  type ParticipationScreenDTO,
+} from "../../services/user/event"; // ✅ 경로 통일
 
-// ParticipantList가 요구하는 최소 형태로 로컬 타입 정의
 type SimpleParticipant = {
   id: number;
   name: string;
@@ -33,21 +28,21 @@ type SimpleParticipant = {
 
 const ParticipationPage = () => {
   const [search] = useSearchParams();
-  const eventIdParam = search.get("eventId");
-  const eventId = eventIdParam ? Number(eventIdParam) : undefined;
+  const navigate = useNavigate();
+
+  const raw = (search.get("eventId") ?? "").trim();
+  const eventId = /^\d+$/.test(raw) ? Number(raw) : undefined;
 
   const [copied, setCopied] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 참여자/배너/위시리스트 상태
   const [participants, setParticipants] = useState<SimpleParticipant[]>([]);
   const [recipientName, setRecipientName] = useState<string>("");
   const [recipientPhoto, setRecipientPhoto] = useState<string | null>(null);
   const [daysRemaining, setDaysRemaining] = useState<number>(0);
   const [wishlist, setWishlist] = useState<WishlistUi[]>([]);
-
-  // 서버 버튼 상태
   const [buttonStatus, setButtonStatus] = useState<EventButtonStatus | null>(null);
+  const [meta, setMeta] = useState<ParticipationScreenDTO | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -60,8 +55,7 @@ const ParticipationPage = () => {
         setLoading(true);
         setErr(null);
 
-        // eventId 없으면 요청 막기
-        if (!eventId || Number.isNaN(eventId)) {
+        if (!eventId) {
           setErr("잘못된 접근이에요. 공유 링크의 eventId가 필요해요.");
           setParticipants([]);
           setRecipientName("");
@@ -72,20 +66,12 @@ const ParticipationPage = () => {
           return;
         }
 
-        // 상세 + 위시리스트 + 참여메타 병렬 조회
-        const [detail, wish, meta] = await Promise.all([
+        const [detail, metaRes] = await Promise.all([
           getBirthdayEventDetail(eventId),
-          getRecipientWishlistUi(eventId, 1, 10).catch(() => ({
-            recipientName: "",
-            items: [] as WishlistUi[],
-            pagination: { currentPage: 1, totalPages: 0, totalItems: 0 },
-          })),
           getEventParticipationMeta(eventId),
         ]);
-
         if (cancelled) return;
 
-        // 참여자/배너
         setParticipants(
           (detail.participants.list ?? []).map((p) => ({
             id: p.userId,
@@ -94,15 +80,15 @@ const ParticipationPage = () => {
             participatedAt: p.participatedAt ?? "",
           }))
         );
-        setRecipientName(detail.birthdayPerson.name || wish.recipientName || "");
+        setRecipientName(detail.birthdayPerson.name || "");
         setRecipientPhoto(detail.birthdayPerson.photo ?? null);
         setDaysRemaining(detail.countdown?.daysRemaining ?? 0);
 
-        // 위시리스트(참가자용 API 결과 사용)
+        const wish = mapRecipientWishlistUiFromDetail(detail, 1, 10);
         setWishlist(wish.items ?? []);
 
-        // 버튼 상태
-        setButtonStatus(meta.buttonStatus);
+        setButtonStatus(metaRes.buttonStatus);
+        setMeta(metaRes);
       } catch (e: any) {
         if (cancelled) return;
         const status = e?.response?.status;
@@ -126,7 +112,25 @@ const ParticipationPage = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } finally {
-      setIsModalOpen(false); // 복사 후 모달 닫기
+      setIsModalOpen(false);
+    }
+  };
+
+  // ✅ buttonAction에 따라 라우팅 분기
+  const handlePrimaryByAction = () => {
+    if (!eventId || !buttonStatus) return;
+    const action = buttonStatus.buttonAction;
+
+    if (action === "PARTICIPATE") {
+      navigate(`/select-remittance?eventId=${eventId}`);
+    } else if (action === "WRITE_LETTER") {
+      navigate(`/moaletter/write?eventId=${eventId}`);
+    } else if (action === "EDIT_LETTER") {
+      // 편지 id를 내려주지 않는다면 eventId 기반 edit 진입(페이지에서 eventId로 조회)
+      navigate(`/moaletter/edit?eventId=${eventId}`);
+    } else {
+      // 알 수 없는 액션은 참여 플로우로 폴백
+      navigate(`/select-remittance?eventId=${eventId}`);
     }
   };
 
@@ -180,14 +184,13 @@ const ParticipationPage = () => {
             <ParticipationActionBox
               isMyPage={false}
               buttonStatus={buttonStatus}
-              onPrimaryClick={() => {}}
+              onPrimaryClick={handlePrimaryByAction}   // ✅ 액션 분기 적용
               onShareClick={() => setIsModalOpen(true)}
-              // actionRoutes={{ participate: "/select-remittance", writeLetter: "/moaletter/write", editLetter: "/moaletter/edit" }}
             />
           )}
         </div>
 
-        {/* ✅ isOpen prop 있는 버전이라 조건부 렌더링로 제어 */}
+        {/* 공유 모달 */}
         {isModalOpen && (
           <ShareModal
             isOpen={isModalOpen}

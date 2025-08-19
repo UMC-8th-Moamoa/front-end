@@ -10,6 +10,7 @@ type Props = {
   imageUrl?: string; // 미리보기용
 };
 
+
 const AutoInputSection = ({ url, onUrlChange, imageUrl }: Props) => {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -25,11 +26,13 @@ const AutoInputSection = ({ url, onUrlChange, imageUrl }: Props) => {
         isOpen={isLinkModalOpen}
         onClose={() => setIsLinkModalOpen(false)}
         defaultValue={url}
+        // LinkInputModal onConfirm 안의 alert 문구만 변경
         onConfirm={(newUrl) => {
           onUrlChange(newUrl.trim());
           setIsLinkModalOpen(false);
-          alert("링크가 입력되었습니다. (데모 모드: API 미연결)");
+          // 실제 등록은 상단 '등록하기' 버튼에서 진행됨
         }}
+
       />
 
       <div className="w-[350px] h-[201px] bg-[#F2F2F2] border border-[#C7D5FF] rounded-[20px] flex mt-3 items-center justify-center overflow-hidden">
