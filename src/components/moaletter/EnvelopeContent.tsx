@@ -1,30 +1,29 @@
+// 역할: 우표 선택 + 중앙 이미지(갤러리) 크롭/미리보기
+// 변경 요약:
+// 1) 데이터 소스: getUserItems → fetchUserItems 로 통일
+// 2) 0원 우표 자동 지급: ensureFreeItems("seal", meUserId) 선호출
+// 3) 안정 ID: holditem_id 그대로 사용 (음수 합성 제거)
+
 import { useNavigate, useLocation } from "react-router-dom";
 import ItemCard from "./ItemCard";
 import Frame from "../../assets/Frame.svg";
 import { useEffect, useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import Cropper from "react-easy-crop";
-import { getUserItems, type UserItem, isStamp } from "../../services/userItems";
+import { fetchUserItems, type UserItem } from "../../api/shopping";
+import { ensureFreeItems } from "../../services/freeItems";
+import { getMyUserId } from "../../services/mypage";
 
 type Area = { x: number; y: number; width: number; height: number };
 
 type Props = {
   selectedId?: number | null;
-  // id: 우표 안정 ID(구매: 양수, 기본: 음수)
-  // centerImageUrl: 중앙 사진(DataURL) — 갤러리에서 고른 경우
-  // stampUrl: 우표 이미지 URL(미리보기/저장확인용)
+  // onSelect: id(보관함 안정 ID), centerImageUrl(중앙 사진 DataURL), stampUrl(우표 URL)
   onSelect: (id: number | null, centerImageUrl?: string, stampUrl?: string) => void;
 };
 
 export type EnvelopeHandle = {
   finalizeCrop: () => Promise<string | null>;
 };
-
-// 구매/기본 아이템 모두 커버하는 안정 ID
-function stableIdOf(it: UserItem): number {
-  if (typeof it.holditem_no === "number" && !Number.isNaN(it.holditem_no)) return it.holditem_no;
-  const n = Number(String(it.item_no).replace(/\D/g, "").slice(-6)) || String(it.item_no).length;
-  return -Math.abs(n);
-}
 
 const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeContent(
   { selectedId, onSelect },
@@ -45,32 +44,38 @@ const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeConte
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isCropping, setIsCropping] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isGalleryImage, setIsGalleryImage] = useState(false); // 갤러리에서 고른 경우만 크롭
+  const [isGalleryImage, setIsGalleryImage] = useState(false);
 
-  // 우표(STAMP) 목록 로드 + 기본 선택
+  // 0원 아이템 자동 지급 → 보관함 로드 → 기본 선택
   useEffect(() => {
     (async () => {
       try {
-        const page = await getUserItems("STAMP", 1, 20, { includeDefault: true });
-        const list = (page.content || []).filter((x) => isStamp(x.category));
-        setItems(list);
+        setIsLoading(true);
 
-        //  초기 진입 시 기본(또는 첫 번째) 우표 자동 선택
-        if (selectedEnvelopeId == null && list.length > 0) {
-          const def = (list as any[]).find((x: any) => x.isDefault) ?? list[0];
-          const sid = stableIdOf(def);
-          setSelectedEnvelopeId(sid);
-          setSelectedStampUrl(def.image);
-          onSelect(sid, selectedImage ?? undefined, def.image);
+        // 1) 무료 우표 자동 지급
+        const meUserId = getMyUserId();
+        await ensureFreeItems("seal", meUserId);
+
+        // 2) 보관함 로드(우표만 필터)
+        const res = await fetchUserItems(200);
+        const seals = res.itemListEntry.filter((x) => x.category === "seal");
+        setItems(seals);
+
+        // 3) 초기 자동 선택 (부모에도 통지)
+        if (selectedEnvelopeId == null && seals.length > 0) {
+          const first = seals[0];
+          setSelectedEnvelopeId(first.holditem_id);
+          setSelectedStampUrl(first.image ?? null);
+          onSelect(first.holditem_id, selectedImage ?? undefined, first.image ?? undefined);
         }
       } finally {
         setIsLoading(false);
       }
     })();
-    // selectedImage가 바뀌면 부모로 함께 알려주기 위해 deps 포함
+    // selectedImage가 바뀌면 부모에게도 최신 프리뷰를 넘겨주기 위해 deps 포함
   }, [selectedEnvelopeId, onSelect, selectedImage]);
 
-  // 갤러리에서 돌아온 경우에만 크롭 활성화
+  // 갤러리 사진으로 돌아온 경우 크롭 활성화
   useEffect(() => {
     const url = (location.state as any)?.imageUrl as string | undefined;
     if (url) {
@@ -105,15 +110,14 @@ const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeConte
     canvas.height = TARGET;
     ctx.drawImage(
       image,
-      pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, // 원본에서 자를 영역
-      0, 0, TARGET, TARGET                                       // 캔버스(저장)의 최종 크기
+      pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height,
+      0, 0, TARGET, TARGET
     );
     return canvas.toDataURL("image/jpeg");
   };
 
   useImperativeHandle(ref, () => ({
     finalizeCrop: async () => {
-      // 갤러리 사진일 때만 실제 크롭 수행
       if (isGalleryImage && isCropping && selectedImage && croppedAreaPixels) {
         const dataUrl = await getCroppedImg(selectedImage, croppedAreaPixels);
         setSelectedImage(dataUrl);
@@ -126,16 +130,16 @@ const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeConte
     },
   }));
 
-  // 우표 선택 → 안정 ID/이미지 모두 반영
-  const handlePickEnvelope = (sid: number, stampUrl: string) => {
-    setSelectedEnvelopeId(sid);
-    setSelectedStampUrl(stampUrl);
-    onSelect(sid, selectedImage ?? undefined, stampUrl);
+  // 우표 선택
+  const handlePickEnvelope = (id: number, stampUrl?: string) => {
+    setSelectedEnvelopeId(id);
+    setSelectedStampUrl(stampUrl ?? null);
+    onSelect(id, selectedImage ?? undefined, stampUrl ?? undefined);
   };
 
   return (
     <div className="flex flex-col items-center w-full">
-      {/* 중앙 이미지 + 우표 오버레이 미리보기 */}
+      {/* 중앙 이미지 + 우표 오버레이 */}
       <div className="relative w-[350px] h-[347px] mt-[22px] rounded-[20px] bg-[#F2F2F2] flex justify-center items-center overflow-hidden">
         {selectedImage ? (
           isCropping ? (
@@ -158,7 +162,6 @@ const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeConte
           <div className="w-full h-full bg-[#F2F2F2]" />
         )}
 
-        {/* 선택 우표 오버레이 */}
         {selectedStampUrl && (
           <img
             src={selectedStampUrl}
@@ -187,20 +190,17 @@ const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeConte
         <div className="grid grid-cols-2 gap-[10px] w-full max-w-[350px]">
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <ItemCard key={i} isLoading label="" />)
-            : items.map((it) => {
-                const sid = stableIdOf(it);
-                return (
-                  <button
-                    key={(sid > 0 ? "o" : "d") + "-" + sid}
-                    onClick={() => handlePickEnvelope(sid, it.image)}
-                    className={`rounded-[12px] overflow-hidden border ${
-                      selectedEnvelopeId === sid ? "border-[#6282E1]" : "border-transparent"
-                    }`}
-                  >
-                    <ItemCard imageSrc={it.image} label={it.name ?? it.item_no} />
-                  </button>
-                );
-              })}
+            : items.map((it) => (
+                <button
+                  key={it.holditem_id}
+                  onClick={() => handlePickEnvelope(it.holditem_id, it.image)}
+                  className={`rounded-[12px] overflow-hidden border ${
+                    selectedEnvelopeId === it.holditem_id ? "border-[#6282E1]" : "border-transparent"
+                  }`}
+                >
+                  <ItemCard imageSrc={it.image} label={it.name || String(it.item_no ?? "")} />
+                </button>
+              ))}
         </div>
       </div>
     </div>

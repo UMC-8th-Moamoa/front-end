@@ -1,75 +1,95 @@
 import ItemCard from "./ItemCard";
 import React, { useEffect, useState } from "react";
-import { getUserItems, type UserItem, isFont } from "../../services/userItems";
-import { syncFreeItemsOnceOrFallback } from "../../services/shopping-bridge";
-import { getMyUserId } from "../../services/mypage";                    // 사용
+import { fetchUserItems, type UserItem } from "../../api/shopping";
+import { ensureFreeItems } from "../../services/freeitems";
+import { getMyUserId } from "../../services/mypage";
 
 type Props = {
-  selectedFontId?: number | null;                   // 선택된 폰트 아이템 ID (보관함 holditem_no 기준)
-  selectedFont?: string | null;                     // UI 표시용 폰트명
-  onSelect?: (data: { id: number; family?: string }) => void; // id + family 함께 전달
+  selectedFontId?: number | null;                     // 부모가 보관하는 폰트 안정 ID(holditem_id)
+  selectedFont?: string | null;                       // 부모가 보관하는 폰트명(이름 매칭)
+  onSelect?: (data: { id: number; family?: string }) => void;
 };
-
-// 기본아이템은 holditem_no가 null일 수 있으므로, 안정적인 선택/키 생성을 위한 유틸
-function stableIdOf(it: UserItem): number {
-  // 구매 아이템: 양수 id
-  if (typeof it.holditem_no === "number" && !Number.isNaN(it.holditem_no)) {
-    return it.holditem_no;
-  }
-  // 기본 아이템: 음수 id로 합성 (충돌 방지)
-  // item_no가 문자열이므로 간단한 해시 대체: 숫자만 추출 or 길이 사용
-  const n = Number(String(it.item_no).replace(/\D/g, "").slice(-6)) || String(it.item_no).length;
-  return -Math.abs(n);
-}
 
 export default function FontItemList({ selectedFontId, selectedFont, onSelect }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<UserItem[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
+      setLoadError(null);
+
       try {
-        setIsLoading(true);
+        // 1) 무료 폰트 자동 지급: 로그인 유저만 시도
+        const meUserId = getMyUserId();
+        if (meUserId) {
+          // ensureFreeItems는 0원만 buyItem 호출. 이미 보유하면 skip.
+          await ensureFreeItems("font", meUserId);
+        }
 
-        // 1) shopping.ts가 있으면 무료(0원) 폰트를 자동 수령 (없으면 조용히 스킵)
-       // 무료(0원) 폰트 자동 수령 (shopping.ts 없어도 폴백으로 동작)
-       const meUserId = getMyUserId();
-       await syncFreeItemsOnceOrFallback({ category: "font", meUserId, limit: 200 });
+        // 2) 보관함 로드(폰트만 필터)
+        const res = await fetchUserItems(200);
+        const fonts = res.itemListEntry.filter((x) => x.category === "font");
 
-        // 2) 보관함 불러오기 (기본아이템 포함)
-        const page = await getUserItems("FONT", 1, 50, { includeDefault: true });
-        setItems((page.content || []).filter((x) => isFont(x.category)));
+        setItems(fonts);
+
+        // 3) 초기 자동 선택: 부모가 아직 선택 안 했으면 첫 번째를 선택해 동기화
+        if ((selectedFontId == null && !selectedFont) && fonts.length > 0) {
+          const first = fonts[0];
+          onSelect?.({ id: first.holditem_id, family: first.name || String(first.item_no ?? "") });
+        }
+      } catch (e: any) {
+        console.error("[FontItemList] load error:", e);
+        setLoadError("폰트 목록을 불러오지 못했습니다.");
       } finally {
         setIsLoading(false);
       }
     })();
+    // 부모 선택값이 바뀌었다고 목록을 재호출할 필요는 없으므로 deps는 비움
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="flex justify-center pt-2 max-h-[320px] overflow-y-auto">
-      {/* 오타 수정: w/full -> w-full */}
       <div className="grid grid-cols-2 gap-[10px] w-full max-w-[350px]">
-        {isLoading
-          ? Array.from({ length: 6 }).map((_, i) => <ItemCard key={i} isLoading label="로딩중" />)
-          : items.map((it) => {
-              const label = it.name ?? it.item_no;
-              const sid = stableIdOf(it); // 안정 id(구매: 양수, 기본: 음수)
-              const isSelected =
-                (selectedFontId != null && selectedFontId === sid) ||
-                (selectedFont != null && selectedFont === label);
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, i) => <ItemCard key={i} isLoading label="로딩중" />)
+        ) : loadError ? (
+          <div className="col-span-2 text-center text-[14px] text-[#B7B7B7] py-6">
+            {loadError}
+          </div>
+        ) : items.length === 0 ? (
+          <div className="col-span-2 text-center text-[14px] text-[#B7B7B7] py-6">
+            보관함에 폰트가 없습니다.
+          </div>
+        ) : (
+          items.map((it) => {
+            // 라벨은 name 우선, 없으면 item_no로 대체
+            const label = it.name || String(it.item_no ?? "");
 
-              return (
-                <button
-                  key={(sid > 0 ? "o" : "d") + "-" + sid} // 구매/기본을 구분한 키
-                  onClick={() => onSelect?.({ id: sid, family: label })}
-                  className={`rounded-[12px] overflow-hidden border ${
-                    isSelected ? "border-[#6282E1]" : "border-transparent"
-                  }`}
-                >
-                  <ItemCard imageSrc={it.image} label={label} />
-                </button>
-              );
-            })}
+            // 선택 기준:
+            // 1) id가 넘어오면 id 우선
+            // 2) 아니면 family(이름)으로도 선택 유지
+            const isSelected =
+              (selectedFontId != null && selectedFontId === it.holditem_id) ||
+              (!!selectedFont && selectedFont === label);
+
+            return (
+              <button
+                key={it.holditem_id}
+                onClick={() => onSelect?.({ id: it.holditem_id, family: label })}
+                className={`rounded-[12px] overflow-hidden border ${
+                  isSelected ? "border-[#6282E1]" : "border-transparent"
+                }`}
+                aria-pressed={isSelected}
+                aria-label={`폰트 선택: ${label}`}
+              >
+                <ItemCard imageSrc={it.image} label={label} />
+              </button>
+            );
+          })
+        )}
       </div>
     </div>
   );

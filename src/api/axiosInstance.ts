@@ -14,6 +14,7 @@ const instance = axios.create({
 if (typeof window !== "undefined") {
   const bootAT = window.localStorage.getItem("accessToken");
   if (bootAT) {
+    // defaults는 any 캐스팅으로 공용 처리
     (instance.defaults.headers as any).common = {
       ...(instance.defaults.headers as any).common,
       Authorization: `Bearer ${bootAT}`,
@@ -33,7 +34,10 @@ const AUTH_FREE_PREFIXES = [
 /** 요청 인터셉터: AccessToken 자동 첨부 */
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   try {
-    const url = config.url || "";
+    const rawUrl = config.url || "";
+    // baseURL=/api 를 고려해 '/api/...' 형태면 '...'만 떼서 비교
+    const url = rawUrl.startsWith("/api/") ? rawUrl.slice(4) : rawUrl;
+
     // 특정 경로는 토큰 미첨부
     if (AUTH_FREE_PREFIXES.some((p) => url.startsWith(p))) return config;
 
@@ -41,14 +45,15 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const at = window.localStorage.getItem("accessToken");
     if (!at) return config;
 
-    // Axios v1: AxiosHeaders 또는 POJO 모두 대응
-    const headers = (config.headers ?? {}) as AxiosHeaders | Record<string, any>;
-    if (headers instanceof AxiosHeaders) {
-      headers.set("Authorization", `Bearer ${at}`);
-    } else {
-      headers["Authorization"] = `Bearer ${at}`;
-    }
-    config.headers = headers;
+    // ✅ 항상 AxiosHeaders 인스턴스로 일원화 후 set 사용 (타입 에러 제거 포인트)
+    const headers =
+      config.headers instanceof AxiosHeaders
+        ? config.headers
+        : new AxiosHeaders(config.headers);
+
+    headers.set("Authorization", `Bearer ${at}`);
+    config.headers = headers; // ← 이제 정확히 AxiosRequestHeaders 타입
+
     return config;
   } catch {
     return config;
@@ -76,6 +81,7 @@ export function saveTokens(accessToken?: string | null, refreshToken?: string | 
     if (refreshToken) window.localStorage.setItem("refreshToken", refreshToken);
   }
   if (accessToken) {
+    // defaults 조작은 any로 공용 처리
     (instance.defaults.headers as any).common = {
       ...(instance.defaults.headers as any).common,
       Authorization: `Bearer ${accessToken}`,
