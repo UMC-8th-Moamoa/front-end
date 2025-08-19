@@ -18,98 +18,92 @@ function ProfileCard() {
 
   // 화면 표시용 상태
   const [name, setName] = useState('');             // 표시명
-  const [userId, setUserId] = useState('');         // @아이디
+  const [userId, setUserId] = useState('');         // @아이디 (읽기 전용)
   const [birthday, setBirthday] = useState('');     // YYYY.MM.DD
   const [followers, setFollowers] = useState(0);
-  const [following, setFollowing] = useState(0);    // followings → following
+  const [following, setFollowing] = useState(0);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadErr, setLoadErr] = useState('');
 
- useEffect(() => {
-  const uid = localStorage.getItem('my_user_id');
-  if (!uid) {
-    setLoadErr('로그인 정보가 없습니다. 다시 로그인해 주세요.');
-    return;
-  }
-
-  let mounted = true;
-
-  // 0) 캐시 선반영
-  try {
-    const cached = localStorage.getItem('cached_profile');
-    if (cached) {
-      const m = JSON.parse(cached);
-      setUserId(m.userId || uid);
-      setName(m.name || '');
-      setBirthday(fmtBirthday(m.birthday));
-      setFollowers(m.followers ?? 0);
-      setFollowing(m.following ?? 0);
-      setImageUrl(m.image || null);
+  useEffect(() => {
+    const uid = localStorage.getItem('my_user_id');
+    if (!uid) {
+      setLoadErr('로그인 정보가 없습니다. 다시 로그인해 주세요.');
+      return;
     }
-  } catch {}
 
-  (async () => {
-    setLoading(true);
-    setLoadErr('');
+    let mounted = true;
+
+    // 0) 캐시 선반영
     try {
-      const res = await fetchMySelfInfo(uid);
-      if (mounted && res.resultType === 'SUCCESS' && res.success) {
-        const p = res.success.profile;
-        setUserId(p.userId || uid);
-        setName(p.name || '');
-        setBirthday(fmtBirthday(p.birthday));
-        setFollowers(p.followers || 0);
-        setFollowing(p.following || 0);
-        setImageUrl(p.image || null);
-      } else if (mounted) {
-        setLoadErr(res.error || '내 정보를 불러오지 못했습니다.');
+      const cached = localStorage.getItem('cached_profile');
+      if (cached) {
+        const m = JSON.parse(cached);
+        setUserId(m.userId || uid);
+        setName(m.name || '');
+        setBirthday(fmtBirthday(m.birthday));
+        setFollowers(m.followers ?? 0);
+        setFollowing(m.following ?? 0);
+        setImageUrl(m.image || null);
       }
-    } catch (err: any) {
-      if (mounted) setLoadErr(err?.message || '내 정보를 불러오지 못했습니다.');
-    } finally {
-      if (mounted) setLoading(false);
-    }
-  })();
-
-  return () => { mounted = false; };
-}, []);
-
-// ✅ 전역 ID 변경 이벤트 구독 — 반드시 별도 useEffect!
-useEffect(() => {
-  const handler = (e: any) => {
-    const newId = (e?.detail ?? '').toString().trim();
-    if (!newId) return;
+    } catch {}
 
     (async () => {
       setLoading(true);
+      setLoadErr('');
       try {
-        const merged = await fetchMyMerged(newId);
-        setUserId(merged.userId || newId);
-        setName(merged.name || '');
-        setBirthday(fmtBirthday(merged.birthday));
-        setFollowers(merged.followers ?? 0);
-        setFollowing(merged.following ?? 0);
-        setImageUrl(merged.image || null);
-        localStorage.setItem('cached_profile', JSON.stringify(merged));
+        const res = await fetchMySelfInfo(uid);
+        if (mounted && res.resultType === 'SUCCESS' && res.success) {
+          const p = res.success.profile;
+          setUserId(p.userId || uid);
+          setName(p.name || '');
+          setBirthday(fmtBirthday(p.birthday));
+          setFollowers(p.followers || 0);
+          setFollowing(p.following || 0);
+          setImageUrl(p.image || null);
+        } else if (mounted) {
+          setLoadErr(res.error || '내 정보를 불러오지 못했습니다.');
+        }
+      } catch (err: any) {
+        if (mounted) setLoadErr(err?.message || '내 정보를 불러오지 못했습니다.');
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
-  };
 
-  window.addEventListener('my_user_id_changed', handler as EventListener);
-  return () => window.removeEventListener('my_user_id_changed', handler as EventListener);
-}, []);
+    return () => { mounted = false; };
+  }, []);
 
+  // 전역 ID 변경 이벤트는 더 이상 사용하지 않음(아이디 변경 기능 제거)
+  // 필요 시, 아래 useEffect를 완전히 삭제해도 됨.
+  // 단, 다른 페이지에서 재사용 중이면 남겨두고, 이벤트가 오더라도 읽기용 상태만 갱신하게 둠.
+  useEffect(() => {
+    const handler = (e: any) => {
+      const newId = (e?.detail ?? '').toString().trim();
+      if (!newId) return;
 
+      (async () => {
+        setLoading(true);
+        try {
+          const merged = await fetchMyMerged(newId);
+          setUserId(merged.userId || newId);
+          setName(merged.name || '');
+          setBirthday(fmtBirthday(merged.birthday));
+          setFollowers(merged.followers ?? 0);
+          setFollowing(merged.following ?? 0);
+          setImageUrl(merged.image || null);
+          localStorage.setItem('cached_profile', JSON.stringify(merged));
+        } finally {
+          setLoading(false);
+        }
+      })();
+    };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserId(e.target.value);
-  };
-  const handleSave = () => setIsEditing(false);
+    window.addEventListener('my_user_id_changed', handler as EventListener);
+    return () => window.removeEventListener('my_user_id_changed', handler as EventListener);
+  }, []);
 
   const goToFollowList = (tab: 'follower' | 'followings') => {
     navigate(`/mypage/follow-list?tab=${tab}`);
@@ -145,20 +139,12 @@ useEffect(() => {
             </span>
           </div>
 
+          {/* 아이디는 읽기 전용으로만 노출 */}
           <div
             className="mt-[4px] text-[16px] font-medium text-[#1F1F1F] font-pretendard"
             style={{ fontWeight: 600 }}
           >
-            {isEditing ? (
-              <input
-                value={userId}
-                onChange={handleChange}
-                onBlur={handleSave}
-                className="text-[14px] border border-[#ddd] rounded px-2 py-1 font-pretendard"
-              />
-            ) : (
-              <span>{userId || '—'}</span>
-            )}
+            <span>{userId || '—'}</span>
           </div>
 
           <div className="flex gap-[20px] mt-[8px]">

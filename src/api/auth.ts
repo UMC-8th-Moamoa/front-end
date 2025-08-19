@@ -1,6 +1,6 @@
 // src/api/auth.ts
 import api, { saveTokens, clearTokens } from "./axiosInstance";
-import { fetchMySelfInfo } from "../services/mypage"; // ⬅️ 프로필 조회
+import { fetchMySelfInfo, setMyUserId } from "../services/mypage";
 
 /** 공통 응답 래퍼 */
 type ApiEnvelope<T> = {
@@ -103,7 +103,9 @@ export async function registerUser(payload: {
   return normalized;
 }
 
-/** 5) 로그인 (성공 시 토큰 저장) — 항상 ApiEnvelope로 반환 */
+/** 5) 로그인 (성공 시 토큰 저장) — 항상 ApiEnvelope로 반환
+ *  - ✅ 가능하면 이 단계에서 my_user_id를 먼저 저장 (이후 화면에서 즉시 사용)
+ */
 export async function loginUser(
   payload:
     | { user_id: string; password: string } // ID 로그인
@@ -115,13 +117,19 @@ export async function loginUser(
     { withCredentials: true } // RT를 쿠키로 운용한다면 필요
   );
 
-  const normalized = normalizeEnvelope<LoginSuccess>(res.data);
+const normalized = normalizeEnvelope<LoginSuccess>(res.data);
 
-  // 토큰 저장 (성공 시)
-  if (normalized.resultType === "SUCCESS" && normalized.success) {
-    const { accessToken, refreshToken } = extractTokens(normalized);
-    if (accessToken) saveTokens(accessToken, refreshToken ?? null);
-  }
+// 토큰 저장 (성공 시)
+if (normalized.resultType === "SUCCESS" && normalized.success) {
+  const { accessToken, refreshToken } = extractTokens(normalized);
+  if (accessToken) saveTokens(accessToken, refreshToken ?? null);
+
+  //  user_id 저장
+  const uidFromRes = normalized.success.user?.user_id;
+  const uidFromPayload = "user_id" in payload ? (payload as any).user_id : "";
+  const resolvedUid = (uidFromRes || uidFromPayload || "").trim();
+  if (resolvedUid) setMyUserId(resolvedUid);
+}
 
   return normalized;
 }
@@ -153,69 +161,69 @@ export async function resetPassword(payload: {
   );
   return res.data;
 }
- // =========================
- // 9) 로그인 + 프로필 부트스트랩 (핵심 추가)
- // =========================
- export type BootstrapResult = {
-   accessToken?: string;
-   refreshToken?: string;
-   user_id: string;
-   profile?: {
-     userId: string;
-     name: string;
-     birthday: string;
-     followers: number;
-     following: number;
-     image: string;
-   };
- };
 
- export async function loginAndBootstrapProfile(
-   payload:
-     | { user_id: string; password: string }
-     | { email: string; password: string }
- ): Promise<BootstrapResult> {
-   // 1) 로그인
-   const loginRes = await loginUser(payload);
-   if (loginRes.resultType !== "SUCCESS" || !loginRes.success) {
-     throw new Error(
-       (loginRes as any)?.error?.reason ??
-       "LOGIN_FAILED"
-     );
-   }
+// =========================
+// 9) 로그인 + 프로필 부트스트랩
+// =========================
+export type BootstrapResult = {
+  accessToken?: string;
+  refreshToken?: string;
+  user_id: string;
+  profile?: {
+    userId: string;
+    name: string;
+    birthday: string;
+    followers: number;
+    following: number;
+    image: string;
+  };
+};
 
-   // 2) 토큰 추출 (이미 saveTokens에서 저장했지만 반환도 함께)
-   const { accessToken, refreshToken } = extractTokens(loginRes);
+/** 로그인 → 토큰 저장 → user_id 확정 → my_user_id 저장 → 프로필 즉시 조회 */
+export async function loginAndBootstrapProfile(
+  payload:
+    | { user_id: string; password: string }
+    | { email: string; password: string }
+): Promise<BootstrapResult> {
+  // 1) 로그인
+  const loginRes = await loginUser(payload);
+  if (loginRes.resultType !== "SUCCESS" || !loginRes.success) {
+    throw new Error(
+      (loginRes as any)?.error?.reason ?? "LOGIN_FAILED"
+    );
+  }
 
-   // 3) user_id 확정 전략
-   //    - 응답에 user?.user_id 있으면 그거 사용
-   //    - payload가 ID 로그인이라면 payload.user_id
-   //    - payload가 이메일 로그인이라면 findUserId(email)
-   let uid =
-     loginRes.success.user?.user_id ||
-     (("user_id" in payload) ? (payload as any).user_id : "");
+  // 2) 토큰 추출 (saveTokens에서 이미 저장했지만 반환도 함께)
+  const { accessToken, refreshToken } = extractTokens(loginRes);
 
-   if (!uid && "email" in payload) {
-     const found = await findUserId(payload.email);
-     uid = found?.success?.user_id || "";
-   }
+  // 3) user_id 확정 전략
+  //    - 응답에 user?.user_id 있으면 그거 사용
+  //    - payload가 ID 로그인이라면 payload.user_id
+  //    - (선택) 이메일 로그인 케이스는 별도 아이디 조회 API가 있다면 호출
+  let uid =
+    loginRes.success.user?.user_id ||
+    (("user_id" in payload) ? (payload as any).user_id : "");
 
-   if (!uid) {
-     // 마지막 방어: 백엔드가 user_id를 절대 안 내려주는 경우
-     throw new Error("CANNOT_RESOLVE_USER_ID");
-   }
+  // 이메일 로그인인데 서버가 user_id를 안 내려준 경우에만 보조 API 사용
+  if (!uid && "email" in payload) {
+    const found = await findUserId(payload.email);
+    uid = found?.success?.user_id || "";
+  }
+  if (!uid) {
+    throw new Error("CANNOT_RESOLVE_USER_ID");
+  }
 
-   // 4) 로컬 저장: 이후 화면에서 공통 사용
-   localStorage.setItem("my_user_id", uid);
+  // 4) 로컬 저장: 이후 화면에서 공통 사용
+  setMyUserId(uid);
 
-   // 5) 마이페이지 프로필 즉시 조회
-   const me = await fetchMySelfInfo(uid);
-   const profile = me?.success?.profile;
+  // 5) 마이페이지 프로필 즉시 조회
+  const me = await fetchMySelfInfo(uid);
+  const profile = me?.success?.profile;
 
-   return {
-     accessToken,
-     refreshToken,
-     user_id: uid,
-     profile,
-   };
- }
+  return {
+    accessToken,
+    refreshToken,
+    user_id: uid,
+    profile,
+  };
+}

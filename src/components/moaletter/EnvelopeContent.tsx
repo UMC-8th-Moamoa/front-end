@@ -10,7 +10,7 @@ import Frame from "../../assets/Frame.svg";
 import { useEffect, useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import Cropper from "react-easy-crop";
 import { fetchUserItems, type UserItem } from "../../api/shopping";
-import { ensureFreeItems } from "../../services/freeItems";
+import { ensureFreeItems } from "../../services/freeitems";
 import { getMyUserId } from "../../services/mypage";
 
 type Area = { x: number; y: number; width: number; height: number };
