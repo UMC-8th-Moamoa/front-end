@@ -1,6 +1,5 @@
-// src/services/user/profile.ts
+// src/services/profile.ts
 import instance from "../api/axiosInstance";
-import { fetchOtherInfo } from "./mypage"; // ← fallback
 
 export type OtherUserProfile = {
   id: number;
@@ -15,38 +14,52 @@ export type OtherUserProfile = {
   wishlistPreview?: Array<{ id: number; title: string; imageUrl: string | null }>;
 };
 
-type ProfileEnvelope = {
+type UsersApiEnvelope = {
   resultType: "SUCCESS" | "FAIL";
   error: string | null;
   success?: { profile: OtherUserProfile };
 };
 
-export async function fetchOtherUserProfile(targetId: string | number): Promise<OtherUserProfile | null> {
+export async function fetchOtherUserProfile(
+  targetId: string | number
+): Promise<OtherUserProfile | null> {
+  const uid = String(targetId);
+
+  // 1) 문서화된 otherpage_info 먼저
   try {
-    const { data } = await instance.get<ProfileEnvelope>(`/users/${targetId}`);
-    if (data.resultType === "SUCCESS" && data.success?.profile) {
-      return data.success.profile;
+    const { data } = await instance.get("/mypage/otherpage_info", {
+      params: { user_id: uid },
+    });
+
+    if (data?.success) {
+      // ← 아이디 키가 환경마다 다를 수 있어 모두 대비
+      const mappedUserId =
+        data.user_id ?? data.userId ?? data.userid ?? data.id ?? "";
+
+      return {
+        id: 0,
+        userId: mappedUserId,                 // ★ 핵심
+        name: data.name ?? "",
+        photo: data.image ?? null,
+        birthday: data.birthday ?? "",
+        isFollowing: !!data.followings,       // 내가 그 사람을 팔로우?
+        isFollower: !!data.followers,         // 그 사람이 나를 팔로우?
+        followersCount: Number(data.followers_num ?? 0),
+        followingCount: Number(data.followings_num ?? 0),
+        wishlistPreview: [],
+      };
     }
-  } catch (_) {
-    // 무시하고 fallback 진행
+  } catch {
+    // 계속 진행
   }
 
-  // 🔁 Fallback: /mypage/otherpage_info 로 조회 후 동일 형태로 매핑
-  const fb = await fetchOtherInfo(String(targetId));
-  if (fb.resultType === "SUCCESS" && fb.success?.profile) {
-    const p = fb.success.profile;
-    return {
-      id: 0,
-      userId: p.userId,
-      name: p.name,
-      photo: p.image || null,
-      birthday: p.birthday,
-      isFollowing: p.iFollowHim,
-      isFollower: p.heFollowsMe,
-      followersCount: p.followers,
-      followingCount: p.following,
-      wishlistPreview: [],
-    };
-  }
+  // 2) (옵션) /users/:id 열려있으면 사용
+  try {
+    const { data } = await instance.get<UsersApiEnvelope>(`/users/${uid}`);
+    if (data?.resultType === "SUCCESS" && data?.success?.profile) {
+      return data.success.profile;
+    }
+  } catch {}
+
   return null;
 }

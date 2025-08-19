@@ -254,32 +254,34 @@ export default function OtherUserFollowListPage() {
   return (
     <div className="max-w-[393px] mx-auto min-h-screen bg-[#FFF] text-black">
       {/* 언팔로우 모달 */}
-      {showUnfollowModal && (
-        <div
-          className="w-[393px] h-[844px] fixed inset-0 z-[9999] bg-[rgba(0,0,0,0.25)] flex justify-center items-center"
-          onClick={() => setShowUnfollowModal(false)}
-        >
-          <div
-            className="bg-[#FFF] rounded-[20px] px-[40px] flex flex-col items-center"
-            onClick={(e) => e.stopPropagation()}
-          >
+{showUnfollowModal && (
+  <div
+    className="fixed inset-0 z-[9999] bg-[rgba(0,0,0,0.25)] flex justify-center items-center"
+    onClick={() => setShowUnfollowModal(false)}
+  >
+    <div
+      className="bg-[#FFF] rounded-[20px] px-[40px] py-[20px] w-[350px] max-w-[90vw] flex flex-col items-center"
+      onClick={(e) => e.stopPropagation()}
+    >
             <p className="font-semibold text-[17px] mb-[20px] mt-[31px]">
               팔로우를 취소하시겠습니까?
             </p>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowUnfollowModal(false)}
-                className="flex justify-center mb-[31px] items-center mr-[12px] h-[40px] px-[50px] rounded-[10px] border border-[#6282E1] bg-[#FFF] text-[#6282E1] text-[18px] font-pretendard font-medium"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleConfirmUnfollow}
-                className="flex justify-center items-center h-[40px] px-[50px] rounded-[10px] bg-[#6282E1] text-[#FFF] text-[18px] font-pretendard font-medium"
-              >
-                확인
-              </button>
-            </div>
+<div className="flex w-full items-center gap-[12px] mb-[31px]">
+  <button
+    onClick={() => setShowUnfollowModal(false)}
+    className="flex-1 h-[40px] rounded-[10px] border border-[#6282E1] bg-[#FFF] text-[#6282E1] text-[18px] font-pretendard font-medium text-center whitespace-nowrap"
+    style={{ wordBreak: 'keep-all', writingMode: 'horizontal-tb' }}
+  >
+    취소
+  </button>
+  <button
+    onClick={handleConfirmUnfollow}
+    className="flex-1 h-[40px] rounded-[10px] bg-[#6282E1] text-[#FFF] text-[18px] font-pretendard font-medium text-center whitespace-nowrap"
+    style={{ wordBreak: 'keep-all', writingMode: 'horizontal-tb' }}
+  >
+    확인
+  </button>
+</div>
           </div>
         </div>
       )}
