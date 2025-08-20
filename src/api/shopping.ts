@@ -133,13 +133,15 @@ export async function fetchItemDetail(opts: {
     params: { category: opts.category, id: opts.id, _t: Date.now() },
     headers: { 'Cache-Control': 'no-cache' },
   });
+
   const payload = (data as any)?.success ?? (data as any);
   const arr = Array.isArray(payload?.item) ? payload.item : [];
   const first: any = arr[0] ?? {};
+
   return {
     name: first?.name,
     image: first?.image ?? first?.imageUrl ?? first?.img ?? null,
-    detail: first?.detail,
+    detail: first?.detail ?? first?.description ?? '',
     price: first?.price,
   };
 }
