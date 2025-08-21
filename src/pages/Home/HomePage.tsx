@@ -9,7 +9,6 @@ import FriendLetterList from "../../components/HomePage/List/Birthday/FriendLett
 import UpcomingFriendList from "../../components/HomePage/List/Birthday/UpcomingFriendList";
 import PopularList from "../../components/HomePage/List/Popular/PopularList";
 import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
-import { dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
 import Calendar from "../../components/HomePage/Calendar/Calendar";
 import { Modal } from "../../components/common/Modal";
 
@@ -83,7 +82,7 @@ const HomePage = () => {
 
         {/* 스크롤 가능한 콘텐츠 */}
         <div className="flex flex-col items-center flex-1 overflow-y-auto pb-[30px]">
-          <MainBanner {...dummyMainBanner} onClick={() => navigate("/moa-collected")} />
+          <MainBanner onClick={() => navigate("/moa-collected")} />
           <SubBannerCarousel />
           <FriendLetterList />
           {/* ✅ 등록 성공 시 HomePage 배너를 띄우는 콜백 전달 */}

@@ -35,11 +35,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
     >
       {/* 카드 본체 (이미지 + 이름) */}
       <div className="bg-white rounded-xl shadow-sm p-2 flex flex-col items-center w-43">
-<<<<<<< HEAD
         <div className="w-full h-28 bg-gray-100 rounded-xl overflow-hidden mb-2 flex items-center justify-center">
-=======
-        <div className="w-full h-28 bg-white rounded-xl overflow-hidden mb-2 flex items-center justify-center">
->>>>>>> feat/shopping
           {imageUrl ? (
             <img
               src={imageUrl}

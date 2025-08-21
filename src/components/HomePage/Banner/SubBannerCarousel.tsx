@@ -1,7 +1,6 @@
 // src/components/HomePage/Banner/SubBannerCarousel.tsx
 import { useEffect, useState } from 'react';
 import SubBanner from './SubBanner';
-import { dummySubBanners } from './BannerDummy';
 
 const SubBannerCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
