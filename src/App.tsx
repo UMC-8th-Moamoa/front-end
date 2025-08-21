@@ -8,7 +8,7 @@ import OAuthCallback from './pages/Login/OAuthCallback';
 // 로그인/회원가입 관련 페이지
 import Login from "./pages/Login/Login";
 import FindIdPage from "./pages/Login/FindIdPage";
-// 
+// import ResetPasswordPage from "./pages/Login/ResetPasswordPage";
 import SignUpPage from "./pages/Login/SignUpPage";
 import SignupNamePage from "./pages/Login/SignUpNamePage";
 import SignupBirthdayPage from "./pages/Login/SignUpBirthdayPage";
