@@ -8,7 +8,7 @@ import OAuthCallback from './pages/Login/OAuthCallback';
 // 로그인/회원가입 관련 페이지
 import Login from "./pages/Login/Login";
 import FindIdPage from "./pages/Login/FindIdPage";
-import ResetPasswordPage from "./pages/Login/ResetPasswordPage";
+// import ResetPasswordPage from "./pages/Login/ResetPasswordPage";
 import SignUpPage from "./pages/Login/SignUpPage";
 import SignupNamePage from "./pages/Login/SignUpNamePage";
 import SignupBirthdayPage from "./pages/Login/SignUpBirthdayPage";
@@ -152,7 +152,7 @@ function AppRoutes() {
           {/* 로그인/회원가입 */}
           <Route path="/login" element={<Login />} />
           <Route path="/find-id" element={<FindIdPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          {/* <Route path="/reset-password" element={<ResetPasswordPage />} /> */}
           <Route path="/oauth/callback" element={<OAuthCallback />} />
 
           {/* 회원가입(스텝) */}

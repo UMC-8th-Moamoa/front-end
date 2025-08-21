@@ -90,39 +90,40 @@ export default function ShoppingList() {
   const [userLoading, setUserLoading] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
 
-  // UI 상태
-  // const userMC = 20; // 예시
-  const [userMC, setUserMC] = useState<number | null>(null);
+  // 잔액/탭/선택 상태
+  const [userMC, setUserMC] = useState<number | null>(null); // 🔸 null = 아직 모름
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<UiTab>('폰트');
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [purchasing, setPurchasing] = useState(false); // 이중 클릭 방지
+  const [purchasing, setPurchasing] = useState(false);
 
+  /** 잔액 조회 */
   const fetchBalance = async () => {
-  try {
-    setBalanceError(null);
-    const { data } = await api.get('/payment/balance', {
-      headers: { 'Cache-Control': 'no-cache' },
-      params: { _t: Date.now() }, // 캐시 버스터
-      withCredentials: true,       // RT를 쿠키에 둘 때
-    });
+    try {
+      setBalanceError(null);
+      const { data } = await api.get('/payment/balance', {
+        headers: { 'Cache-Control': 'no-cache' },
+        params: { _t: Date.now() },
+        withCredentials: true,
+      });
 
-    // 래퍼/비래퍼 모두 흡수
-    const s = data?.success ?? data;
-    const core = s?.data ?? s;
-    const bal = Number(core?.balance);
-    if (!Number.isFinite(bal)) throw new Error('잔액 값을 파싱할 수 없습니다.');
-    setUserMC(bal);
-  } catch (e: any) {
-    setUserMC(0);
-    if (e?.response?.status === 401) {
-      setBalanceError('로그인이 필요합니다.');
-    } else {
-      setBalanceError(e?.message || '잔액 조회에 실패했습니다.');
+      const s = data?.success ?? data;
+      const core = s?.data ?? s;
+      const bal = Number(core?.balance);
+      if (!Number.isFinite(bal)) throw new Error('잔액 값을 파싱할 수 없습니다.');
+      setUserMC(bal);
+    } catch (e: any) {
+      setUserMC(0);
+      if (e?.response?.status === 401) setBalanceError('로그인이 필요합니다.');
+      else setBalanceError(e?.message || '잔액 조회에 실패했습니다.');
     }
-  }
-};
+  };
+
+  // ✅ 마운트 시 잔액 불러오기
+  useEffect(() => {
+    fetchBalance();
+  }, []);
 
   // API 카테고리 (envelope 제거, seal 사용)
   const apiCategory = useMemo<ApiCategory | null>(() => {
@@ -170,10 +171,8 @@ export default function ShoppingList() {
       const res = await fetchUserItems(20); // JWT 필요
       const base = res.success ? (res.itemListEntry ?? []) : [];
 
-      // name이 비거나 공백인 항목만 상세 API로 보강
       const needLookup = base.filter(u => !u.name || !u.name.trim());
       if (needLookup.length) {
-        // (category,item_no) 단위 중복 제거
         const keys = new Map<string, UserItem>();
         needLookup.forEach(u => {
           if (u.item_no == null) return;
@@ -226,9 +225,15 @@ export default function ShoppingList() {
     }
   }, [selectedTab]);
 
+  /** 구매 버튼 클릭 시: 잔액 로딩 중/부족 가드 */
   const handleBuy = (item: any) => {
-    const balance = userMC ?? 0;
-      if (balance < (item.price ?? 0)) {
+    if (userMC === null) {
+      toast.loading('잔액 확인 중입니다…', { id: 'bal-check' });
+      setTimeout(() => toast.dismiss('bal-check'), 600);
+      return;
+    }
+    const balance = userMC;
+    if (balance < (item.price ?? 0)) {
       toast.custom((t) => (
         <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} bg-white rounded-xl shadow-md px-6 py-4 w-[330px] text-center`}>
           <p className="text-base font-base text-black mb-2">몽코인이 부족합니다</p>
@@ -249,7 +254,7 @@ export default function ShoppingList() {
     setIsModalOpen(true);
   };
 
-  /** 구매 확정 → /api/shopping/item_buy, 성공/중복 모두 보관함 갱신 */
+  /** 구매 확정 → /api/shopping/item_buy, 성공/중복 모두 보관함 + 잔액 갱신 */
   const handleConfirmBuy = async () => {
     if (!selectedItem || !apiCategory || purchasing) return;
 
@@ -267,7 +272,7 @@ export default function ShoppingList() {
       const event = Number(selectedItem.price ?? 0) === 0;
       const body = {
         category: apiCategory as ApiCategory,
-        user_id: userId,             
+        user_id: userId,
         item_no: Number(selectedItem.id),
         price: Number(selectedItem.price ?? 0),
         event,
@@ -291,8 +296,9 @@ export default function ShoppingList() {
         }
       }
 
-      // 보관함 갱신 + 탭 전환
+      // 보관함 갱신 + 탭 전환 + ✅ 잔액 재조회
       await loadUserItems();
+      await fetchBalance();
       setSelectedTab('보관함');
     } catch (err: any) {
       const reason =
@@ -305,6 +311,7 @@ export default function ShoppingList() {
       } else if (/Unique constraint|이미 보유/i.test(String(reason))) {
         toast.success('이미 보유중인 아이템입니다.');
         await loadUserItems();
+        await fetchBalance(); // ✅ 중복 보유여도 잔액 변동 가능성 고려 시 갱신
         setSelectedTab('보관함');
       } else {
         toast.error(reason);
@@ -385,8 +392,8 @@ export default function ShoppingList() {
                 image: it.image,
                 category: it.category,           // 'font' | 'paper' | 'seal'
                 price: undefined,
-            })
-          }
+              })
+            }
           />
         ))}
       </div>
@@ -394,7 +401,7 @@ export default function ShoppingList() {
   };
 
   return (
-    <div className="min-h-screen max-w-[393px] mx-auto flex flex_col justify-between bg-white">
+    <div className="min-h-screen max-w-[393px] mx-auto flex flex-col justify-between bg-white">
       <div className="w-full flex flex-col relative">
         <ShoppingTopBar userMC={userMC ?? 0} />
         <TopMenu selected={selectedTab} onChange={setSelectedTab} />

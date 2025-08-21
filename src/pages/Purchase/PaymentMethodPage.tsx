@@ -1,16 +1,20 @@
 // PaymentMethodPage.tsx
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import PaymentSelector from '../../components/Purchase/PaymentSelector';
 import Button from '../../components/common/Button';
 import KakaoIcon from '../../assets/payment_kakao.svg';
 import BackButton from '../../components/common/BackButton';
 import BankTransferSection from '../../components/Purchase/BankTransferSection';
 import { Toaster, toast } from 'react-hot-toast';
+import { chargePackage } from '../../api/payment';
 
 const PaymentMethodPage = () => {
   const location = useLocation();
-  const { price: priceFromState } = (location.state as { price?: number }) || {};
+  const navigate = useNavigate();
+
+  const { price: priceFromState, quantity = 1, packageId } =
+    (location.state as { price?: number; quantity?: number; packageId?: string }) || {};
 
   const [selectedMethod, setSelectedMethod] = useState<'kakao' | 'bank'>('kakao');
   const [depositName, setDepositName] = useState('');
@@ -21,26 +25,20 @@ const PaymentMethodPage = () => {
 
   const handleKakaoPay = async () => {
     try {
-      // 여기에 실제 결제 API 연동
-      // 예시: POST /api/payments
-      const res = await fetch('/api/payments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: price,          // ✅ 선택한 금액 전달
-          method: 'kakao',
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast.success('카카오페이 결제 요청 성공');
-        // 필요 시 결제 페이지로 이동
-        window.location.href = data.redirectUrl;
-      } else {
-        toast.error(data.error?.reason || '결제 요청 실패');
+      if (!packageId) {
+        toast.error('선택된 충전 상품이 없습니다.');
+        return;
       }
-    } catch (err) {
-      toast.error('결제 요청 중 오류 발생');
+
+      // 🔹 실제 충전 API 호출 (백엔드가 내부 결제로 처리)
+      const res = await chargePackage(packageId);
+
+      // 성공 처리
+      toast.success(res?.message || '충전이 완료되었습니다!');
+      // 필요 시 잔액 갱신을 위해 이전 화면 재로딩 or 특정 페이지로 이동
+      navigate('/shopping', { replace: true });
+    } catch (err: any) {
+      toast.error(err?.message || '결제 요청 중 오류 발생');
       console.error(err);
     }
   };
@@ -76,7 +74,7 @@ const PaymentMethodPage = () => {
               size="md"
               width="full"
               className="flex items-center justify-center gap-3 mt-3"
-              onClick={handleKakaoPay} // ✅ 결제 요청 실행
+              onClick={handleKakaoPay} 
             >
               <img src={KakaoIcon} alt="Kakao Icon" className="w-5 h-5" />
               카카오페이로 결제하기
