@@ -9,7 +9,7 @@ import EmailInputWithSelect from "../../components/signUp/EmailInputWithSelect";
 import TermsAgreement from "../../components/signUp/TermsAgreement";
 import { Modal } from "../../components/common/Modal";
 import { useNavigate } from "react-router-dom";
-import { checkNicknameDuplicate, sendEmailCode, verifyEmailCode } from "../../api/auth";
+import { checkUserIdDuplicate, sendEmailCode, verifyEmailCode } from "../../api/auth";
 
 // 숫자만 남기기
 const onlyDigits = (v: string) => v.replace(/\D/g, "");
@@ -86,7 +86,7 @@ const handleCheckDuplicate = async () => {
   const queriedId = id;
 
   try {
-    const res = await checkNicknameDuplicate(queriedId, ctrl.signal);
+   const res = await checkUserIdDuplicate(queriedId, ctrl.signal);
 
     // 응답이 왔을 때 입력값이 바뀌었으면 무시
     if (sanitizeUserId(nickname.trim()) !== queriedId) return;

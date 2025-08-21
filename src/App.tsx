@@ -153,7 +153,7 @@ function AppRoutes() {
 
   return (
     <div className="w-full flex flex-col items-center bg-white min-h-svh">
-      <div className="w-full max-w-mobile mx-auto pb-[calc(4rem+env(safe-area-inset-bottom))]">
+      
         <Routes>
           {/* 루트 리다이렉트 */}
           <Route path="/" element={isLoggedIn ? <Navigate to="/home" /> : <Navigate to="/login" />} />
@@ -162,7 +162,7 @@ function AppRoutes() {
           <Route path="/login" element={<Login />} />
           <Route path="/find-id" element={<FindIdPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/oauth/callback" element={<OAuthCallback />} />
+          <Route path="/auth/callback" element={<OAuthCallback />} />
 
           {/* 회원가입(스텝) */}
           <Route
@@ -234,7 +234,7 @@ function AppRoutes() {
           <Route path="/purchase" element={<PurchasePage />} />
           <Route path="/purchase/payment" element={<PaymentMethodPage />} />
         </Routes>
-      </div>
+      
 
       {shouldShowBottomNav && (
         <div className="fixed bottom-0 w-full max-w-[393px] z-50">
