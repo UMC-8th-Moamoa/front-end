@@ -90,7 +90,7 @@ const SubBannerDefault = ({
         "w-[350px] h-[81px] rounded-2xl px-4 py-4 flex items-center justify-between relative",
         highlight
           ? "bg-gray-300 text-white"
-          : "bg-white border border-[1px] border-gray-200 text-gray-400"
+          : "bg-white border border-[1px] border-[gray-200] text-gray-400"
       )}
     >
       <div className="flex items-center space-x-4">

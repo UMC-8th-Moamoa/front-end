@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 interface FriendLetterItemProps {
   name: string;
-  birthday: string | number;
+  birthday: string | number;   // 문자열 또는 타임스탬프 지원
   daysLeft: number;
   hasLetter: boolean;
   letterId?: number | null;
@@ -53,6 +53,18 @@ function parseMonthDay(input: unknown): { month: number; day: number } | null {
   return null;
 }
 
+/** 오늘(로컬) 0시 기준, 다음 생일까지 남은 ‘정수 일수’ 계산 */
+function calcDaysUntilNextBirthday(md: {month:number; day:number}): number {
+  const now = new Date();
+  const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  let target = new Date(now.getFullYear(), md.month - 1, md.day, 0, 0, 0, 0);
+  if (target < today0) {
+    target = new Date(now.getFullYear() + 1, md.month - 1, md.day, 0, 0, 0, 0);
+  }
+  const diffMs = target.getTime() - today0.getTime();
+  return Math.max(0, Math.floor(diffMs / 86400000)); // 86,400,000ms = 1day
+}
+
 const FriendLetterItem = ({
   name,
   birthday,
@@ -68,7 +80,13 @@ const FriendLetterItem = ({
     return md ? `${md.month}월 ${md.day}일` : "날짜 미정";
   }, [birthday]);
 
-  const dText = daysLeft === 0 ? "D-DAY" : `D-${daysLeft}`;
+  // ✅ 표시용 D-day(오프바이원 보정)
+  const displayDaysLeft = useMemo(() => {
+    const md = parseMonthDay(birthday);
+    return md ? calcDaysUntilNextBirthday(md) : Math.max(0, Math.floor(daysLeft ?? 0));
+  }, [birthday, daysLeft]);
+
+  const dText = displayDaysLeft === 0 ? "D-DAY" : `D-${displayDaysLeft}`;
 
   const handleClick = () => {
     if (hasLetter && letterId) {

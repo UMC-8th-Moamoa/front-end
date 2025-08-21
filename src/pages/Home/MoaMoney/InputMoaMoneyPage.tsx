@@ -1,19 +1,29 @@
 // src/pages/Purchase/InputMoaMoneyPage.tsx
 import { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import BackButton from "../../../components/common/BackButton";
 import InputBox from "../../../components/common/InputBox";
 import Button from "../../../components/common/Button";
 import { participateInEvent } from "../../../services/user/event";
 
+type LocationState = { receiverName?: string };
+
 const InputMoaMoneyPage = () => {
   const [sp] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation() as { state?: LocationState };
 
   const eventId = useMemo(() => {
     const v = Number(sp.get("eventId"));
     return Number.isNaN(v) ? undefined : v;
   }, [sp]);
+
+  // 이름은 우선 state에서, 없으면 쿼리스트링 name으로 폴백
+  const receiverName =
+    (location.state?.receiverName?.trim?.() as string | undefined) ||
+    (sp.get("name") ?? undefined);
+
+  const displayName = receiverName && receiverName.length > 0 ? receiverName : "친구";
 
   const [amount, setAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -26,6 +36,19 @@ const InputMoaMoneyPage = () => {
 
   const numberAmount = amount ? parseInt(amount, 10) : 0;
   const formattedAmount = amount ? numberAmount.toLocaleString() : "";
+
+  const goPayment = (amt: number) => {
+    // 쿼리스트링 + state 모두 사용 → 새로고침에도 안전
+    const qs = new URLSearchParams({
+      eventId: String(eventId!),
+      amount: String(amt),
+    }).toString();
+
+    navigate(`/bank-transfer?${qs}`, {
+      state: { amount: amt, eventId, receiverName },
+      replace: false,
+    });
+  };
 
   const handleConfirm = async () => {
     if (!eventId) {
@@ -40,15 +63,13 @@ const InputMoaMoneyPage = () => {
     try {
       setSubmitting(true);
       setErr(null);
+
       await participateInEvent(eventId, {
         participationType: "WITH_MONEY",
         amount: numberAmount,
       });
 
-      // ✅ 완료 화면으로 이동(원하면 다른 경로로 변경 가능)
-      navigate("/purchase/payment", {
-        state: { amount: numberAmount, eventId },
-      });
+      goPayment(numberAmount);
     } catch (e: any) {
       const s = e?.response?.status;
       const code = e?.response?.data?.error?.errorCode;
@@ -66,6 +87,13 @@ const InputMoaMoneyPage = () => {
     }
   };
 
+  // Enter로도 제출되게
+  const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === "Enter" && !submitting) {
+      void handleConfirm();
+    }
+  };
+
   return (
     <div className="w-full min-h-screen flex flex-col items-center bg-white pb-[84px]">
       <div className="w-full max-w-[393px] px-4 pt-4">
@@ -76,8 +104,7 @@ const InputMoaMoneyPage = () => {
         <div className="w-full max-w-[393px] px-6 flex flex-col items-center gap-5">
           <div className="w-full text-left">
             <h1 className="text-[32px] font-bold text-[#6282E1] leading-snug">
-              {/* 수신자 이름은 추후 이벤트 메타에서 가져와 바꿔도 돼요 */}
-              친구님의 <span className="font-normal text-black">모아모아에</span>
+              {displayName}님의 <span className="font-normal text-black">모아모아에</span>
             </h1>
             <h1 className="text-[32px] leading-snug">보탤 금액을 입력해주세요</h1>
             <p className="text-[20px] text-gray-500 mt-7">
@@ -91,6 +118,7 @@ const InputMoaMoneyPage = () => {
             placeholder="보탤 금액을 입력해 주세요"
             value={formattedAmount}
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             hasBorder={false}
             className={`bg-[#E7EDFF] h-[50px] mt-15 px-5 w-[350px]
               ${amount ? "text-[24px] font-bold text-black" : "text-[16px]"}`}

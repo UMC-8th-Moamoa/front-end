@@ -19,25 +19,29 @@ function secondsToHMS(s: number) {
   return `${hh}:${mm}:${ss}`;
 }
 
-// ✅ 생일(ISO, 연도 무시) -> 마감시각(올해 기준, 이미 지났으면 내년의 전날 23:59)
 function calcDeadlineFromBirthday(birthdayISO: string) {
   const now = new Date();
-  const b = new Date(birthdayISO); // 월/일만 사용
-  const month = b.getMonth();      // 0~11
-  const date = b.getDate();        // 1~31
+  const m = /^\s*(\d{4})-(\d{2})-(\d{2})/.exec(birthdayISO);
+  let month: number | null = null;
+  let day: number | null = null;
 
-  // 올해 생일 00:00
-  let targetYear = now.getFullYear();
-  let startOfBirthday = new Date(targetYear, month, date, 0, 0, 0);
-
-  // 이미 그 시각을 지난 경우 → 내년으로
-  if (now >= startOfBirthday) {
-    targetYear += 1;
-    startOfBirthday = new Date(targetYear, month, date, 0, 0, 0);
+  if (m) {
+    month = Math.min(12, Math.max(1, Number(m[2])));
+    day = Math.min(31, Math.max(1, Number(m[3])));
+  } else {
+    const d = new Date(birthdayISO);
+    if (!Number.isNaN(d.getTime())) {
+      month = d.getMonth() + 1;
+      day = d.getDate();
+    }
   }
+  if (!month || !day) return new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-  // “00:00 1분 전” = 전날 23:59:00
-  const deadline = new Date(startOfBirthday.getTime() - 60 * 1000);
+  let targetYear = now.getFullYear();
+  let deadline = new Date(targetYear, month - 1, day, 21, 0, 0, 0);
+  if (now >= deadline) {
+    deadline = new Date(targetYear + 1, month - 1, day, 21, 0, 0, 0);
+  }
   return deadline;
 }
 
@@ -61,12 +65,13 @@ const SelectRemittancePage = () => {
   const [buttonInfo, setButtonInfo] = useState<EventButtonStatus | null>(null);
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [remainSec, setRemainSec] = useState(0);
+  const [receiverName, setReceiverName] = useState<string | undefined>(undefined);
 
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // ✅ 상세 조회해서 생일 → 마감시각 계산
+  // 상세 조회해서 마감/수신자 이름 계산
   useEffect(() => {
     if (!eventId) {
       setErr("eventId가 없어요.");
@@ -81,12 +86,19 @@ const SelectRemittancePage = () => {
         const detail = await getBirthdayEventDetail(eventId);
         setButtonInfo(detail.buttonInfo);
 
-        // 생일 기반 마감시각 계산
+        // 수신자 이름 확보(필드명 변화에 대비해 안전하게)
+        const name =
+          (detail as any)?.birthdayPerson?.name ??
+          (detail as any)?.birthdayPerson?.nickname ??
+          (detail as any)?.birthdayPerson?.displayName ??
+          (detail as any)?.birthdayPersonName ??
+          undefined;
+        setReceiverName(name);
+
         const d = calcDeadlineFromBirthday(detail.birthdayPerson.birthday);
         setDeadline(d);
-
         const now = Date.now();
-        setRemainSec(Math.floor((d.getTime() - now) / 1000));
+        setRemainSec(Math.max(0, Math.floor((d.getTime() - now) / 1000)));
       } catch (e: any) {
         const s = e?.response?.status;
         if (s === 401) setErr("로그인이 필요해요.");
@@ -99,7 +111,6 @@ const SelectRemittancePage = () => {
     })();
   }, [eventId]);
 
-  // 1초마다 카운트다운
   useEffect(() => {
     if (!deadline) return;
     const timer = setInterval(() => {
@@ -111,7 +122,6 @@ const SelectRemittancePage = () => {
     return () => clearInterval(timer);
   }, [deadline]);
 
-  // ✅ “마감시간이 0초 초과”일 때만 참여 가능
   const isExpired = remainSec <= 0;
 
   const moaImageSrc = isRemit
@@ -122,7 +132,10 @@ const SelectRemittancePage = () => {
     if (!eventId || isExpired || submitting) return;
 
     if (isRemit) {
-      navigate(`/input-moa-money?eventId=${eventId}`);
+      // 이름을 state로 함께 전달
+      navigate(`/input-moa-money?eventId=${eventId}`, {
+        state: { receiverName: receiverName },
+      });
       return;
     }
 
@@ -161,7 +174,6 @@ const SelectRemittancePage = () => {
       </main>
     );
 
-  // 표시용 포맷 (예: 08-16 23:59 → 연도 제외!)
   const deadlineText =
     deadline
       ? `${String(deadline.getMonth() + 1).padStart(2, "0")}-${String(
@@ -207,7 +219,7 @@ const SelectRemittancePage = () => {
           />
         </div>
 
-        <div className="absolute bottom-10 w-full px-4 flex flex-col items-stretch gap-3">
+        <div className="absolute bottom-10 w-full px-4 flex flex-col items-center gap-3">
           <div className="w-full text-lg text-black text-left">
             마감 시간 {secondsToHMS(remainSec)}
             {deadlineText ? ` ( ${deadlineText} )` : ""}
@@ -219,6 +231,7 @@ const SelectRemittancePage = () => {
             size="md"
             onClick={handleConfirm}
             disabled={isExpired || submitting}
+            className="w-[350px]"
           >
             {isExpired ? "마감됨" : submitting ? "처리 중…" : "확인"}
           </Button>

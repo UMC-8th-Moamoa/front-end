@@ -1,14 +1,10 @@
+// src/components/HomePage/Banner/SubBannerCarousel.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import SubBanner from "./SubBanner";
 import { fetchMoasAndBanners } from "../../../services/banner/banner";
 import { SUB_NEEDS_NAME, SubBannerImage, fillName } from "../../../services/banner/bannerassets";
 import type { SubBannerPayload } from "../../../services/banner/banner";
 
-/**
- * 서버 subBanners를 가져와서 1개씩 자동 슬라이드
- * - 페이지네이션 인디케이터 포함
- * - items 프롭 없이 자체 fetch (필요하면 props로도 확장 가능)
- */
 const SubBannerCarousel = ({ userName }: { userName?: string }) => {
   const [items, setItems] = useState<SubBannerPayload[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,7 +18,7 @@ const SubBannerCarousel = ({ userName }: { userName?: string }) => {
 
   useEffect(() => {
     if (items.length <= 1) return;
-    timerRef.current && window.clearInterval(timerRef.current);
+    if (timerRef.current) window.clearInterval(timerRef.current);
     timerRef.current = window.setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % items.length);
     }, 4000);
@@ -37,33 +33,33 @@ const SubBannerCarousel = ({ userName }: { userName?: string }) => {
     if (!current) return null;
 
     const needsName = SUB_NEEDS_NAME.includes(current.type);
-    const content = needsName
-      ? fillName(current.title, userName)
-      : current.title;
+    const content = needsName ? fillName(current.title, userName) : current.title;
 
-    // 이미지형(기본): certification 등
     const imageSrc =
       current.type in SubBannerImage
         ? SubBannerImage[current.type]
         : SubBannerImage.default;
 
-    // participating 은 이름 치환 강조형으로 보여주고,
-    // certification 등은 이미지 전용으로
-    const variant =
-      current.type === "participating" ? "default" : "imageOnly";
+    const variant = current.type === "participating" ? "default" : "imageOnly";
 
     const buttonText =
-      current.type === "participating" ? "진행도 보러 가기" :
-      current.actionText || undefined;
+      current.type === "participating"
+        ? "진행도 보러 가기"
+        : current.actionText || undefined;
 
     const onClick = () => {
-      // 타입별 라우팅은 여기서 처리(원하면 교체)
       if (current.type === "certification") {
         // 선물 인증하기
         window.location.href = "/gift-certification";
       } else {
-        // 참여/진행 보기
-        window.location.href = `/moa/${current.moaId}`;
+        // 참여/진행 보기: eventId(moaId) 전달
+        const id =
+          Number(current.moaId ?? (current as any).eventId ?? NaN);
+        if (Number.isFinite(id) && id > 0) {
+          window.location.href = `/participation?eventId=${id}`;
+        } else {
+          window.location.href = `/participation`;
+        }
       }
     };
 

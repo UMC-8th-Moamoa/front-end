@@ -1,4 +1,4 @@
-// src/pages/ParticipationPage.tsx
+// src/pages/MyParticipationPage.tsx
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
@@ -7,7 +7,6 @@ import BackButton from "../../components/common/BackButton";
 import ParticipantList from "../../components/HomePage/Participation/ParticipantList";
 import RecipientBanner from "../../components/HomePage/Participation/RecipientBanner";
 import MemberWishList from "../../components/HomePage/Participation/MemberWishList";
-import ParticipationActionBox from "../../components/HomePage/Participation/ParticipationActionBox";
 
 import {
   getBirthdayEventDetail,
@@ -17,7 +16,6 @@ import {
   type WishlistUi,
   type ParticipationScreenDTO,
 } from "../../services/user/event"; // ✅ 경로 통일
-import ShareModal from "../../components/HomePage/Participation/ShareModal";
 
 type SimpleParticipant = {
   id: number;
@@ -26,7 +24,7 @@ type SimpleParticipant = {
   participatedAt: string;
 };
 
-const ParticipationPage = () => {
+const MyParticipationPage = () => {
   const [search] = useSearchParams();
   const navigate = useNavigate();
 
@@ -149,15 +147,15 @@ const ParticipationPage = () => {
         {/* 참여자 리스트 */}
         <div className="px-4">
           {loading ? (
-            <div className="text-sm text-[#97B1FF]">불러오는 중…</div>
+            <div className="text-sm text-[#97B1FF] py-2">불러오는 중…</div>
           ) : err ? (
-            <div className="text-sm text-red-600">{err}</div>
+            <div className="text-sm text-red-600 py-2">{err}</div>
           ) : (
             <ParticipantList participants={participants} />
           )}
         </div>
 
-        <div className="w-[345px] h-px bg-[#D3D3D3] mx-auto mb-5" />
+        <div className="w-[350px] h-px bg-[#D3D3D3] mx-auto mt-1 mb-5" />
 
         {/* 수신자/디데이 배너 */}
         <div className="px-4">
@@ -177,31 +175,9 @@ const ParticipationPage = () => {
             eventId={eventId}
           />
         </div>
-
-        {/* 하단 액션/공유 */}
-        <div className="fixed bottom-[40px] left-1/2 transform -translate-x-1/2 w-full max-w-[393px] px-4 z-50">
-          {!err && buttonStatus && (
-            <ParticipationActionBox
-              isMyPage={false}
-              buttonStatus={buttonStatus}
-              onPrimaryClick={handlePrimaryByAction}   // ✅ 액션 분기 적용
-              onShareClick={() => setIsModalOpen(true)}
-            />
-          )}
-        </div>
-
-        {/* 공유 모달 */}
-        {isModalOpen && (
-          <ShareModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onCopy={handleCopy}
-            eventId={eventId}
-          />
-        )}
       </div>
     </main>
   );
 };
 
-export default ParticipationPage;
+export default MyParticipationPage;

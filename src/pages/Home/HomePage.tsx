@@ -15,6 +15,7 @@ import { Modal } from "../../components/common/Modal";
 // ✅ 추가
 import { fetchMoasAndBanners } from "../../services/banner/banner";
 import type { MainBannerPayload } from "../../services/banner/banner";
+import { navigateByMainBanner } from "../../services/banner/route";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -31,13 +32,15 @@ const HomePage = () => {
   // ✅ 유저 이름 (localStorage에서 추출, 있으면 사용)
   const userName = useMemo(() => {
     try {
-      const direct = localStorage.getItem("userName")
-        || localStorage.getItem("username")
-        || localStorage.getItem("name");
+      const direct =
+        localStorage.getItem("userName") ||
+        localStorage.getItem("username") ||
+        localStorage.getItem("name");
       if (direct) return direct;
-      const raw = localStorage.getItem("profile")
-        || localStorage.getItem("user")
-        || localStorage.getItem("me");
+      const raw =
+        localStorage.getItem("profile") ||
+        localStorage.getItem("user") ||
+        localStorage.getItem("me");
       if (raw) {
         const o = JSON.parse(raw);
         return o?.name ?? o?.userName ?? o?.username ?? undefined;
@@ -78,16 +81,50 @@ const HomePage = () => {
         setMainBanner(null);
       })
       .finally(() => mounted && setLoadingMain(false));
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
+
+  // ✅ 배너 클릭 시 라우팅
+  const handleMainBannerClick = (moaId: number | null, type: any) => {
+    navigateByMainBanner(navigate, { type, moaId });
+  };
+
+  // ✅ participating: 홈 진입 시 UpcomingList로 스크롤
+  useEffect(() => {
+    if (location.state?.scrollTo === "upcoming") {
+      // 렌더 완료 이후 스크롤
+      const t = setTimeout(() => {
+        const el = document.getElementById("upcoming-list");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 0);
+      // state 제거(뒤로가기 등에서 반복 스크롤 방지)
+      // react-router로 깔끔히 비우기
+      navigate(".", { replace: true, state: {} });
+      return () => clearTimeout(t);
+    }
+  }, [location.state, navigate]);
 
   const handleNavigate = (menu: MenuType) => {
     switch (menu) {
-      case "shopping": navigate("/shopping"); break;
-      case "heart": navigate("/wishlist"); break;
-      case "home": navigate("/home"); break;
-      case "letter": navigate("/moaletter/preview"); break;
-      case "mypage": navigate("/mypage"); break;
+      case "shopping":
+        navigate("/shopping");
+        break;
+      case "heart":
+        navigate("/wishlist");
+        break;
+      case "home":
+        navigate("/home");
+        break;
+      case "letter":
+        navigate("/moaletter/preview");
+        break;
+      case "mypage":
+        navigate("/mypage");
+        break;
     }
   };
 
@@ -121,10 +158,7 @@ const HomePage = () => {
             <MainBanner
               payload={mainBanner}
               userName={userName}
-              onClick={(moaId, type) => {
-                if (type === "balance") return navigate("/balance");
-                if (moaId) navigate(`/moa/${moaId}`);
-              }}
+              onClick={handleMainBannerClick}
             />
           ) : null}
 
@@ -133,9 +167,17 @@ const HomePage = () => {
 
           <FriendLetterList />
           <PopularList onAdded={handleShowWishBanner} />
-          <UpcomingFriendList />
+
+          {/* ✅ 여기 id로 앵커 지정 */}
+          <div id="upcoming-list">
+            <UpcomingFriendList />
+          </div>
+
           <BirthdayBanner />
-          <Calendar />
+          {/* 캘린더 아래 20px */}
+          <div className="mb-10">
+            <Calendar />
+          </div>
         </div>
 
         {/* BottomNavigation 고정 */}

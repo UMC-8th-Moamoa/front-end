@@ -64,6 +64,8 @@ import OtherUserFollowListPage from './pages/MyPage/OtherUserFollowListPage';
 import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage'; 
 import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
 import KakaoBridge from './pages/Login/KakaoBridge';
+import MyParticipationPage from './pages/Home/MyParticipationPage';
+import BankTransferPage from './pages/Home/MoaMoney/BankTransferPage';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -126,6 +128,9 @@ function AppRoutes() {
     "/convert-to-mong-complete",
     "/alarm",
     "/gift-certification",
+    "/myparticipation",
+    "/bank-transfer",
+    "/signup",
 
     "/login",
     "/find-id",
@@ -206,6 +211,7 @@ function AppRoutes() {
           <Route path="/wishlist/select-photo" element={<SelectWishPhotoPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/participation" element={<ParticipationPage />} />
+          <Route path="/myparticipation" element={<MyParticipationPage/>} />
           <Route path="/vote-wish" element={<VoteWishPage />} />
           <Route path="/moa-collected" element={<MoaCollectedPage/>} />
           <Route path="/pick-gift" element={<PickGiftPage />} />
@@ -216,6 +222,7 @@ function AppRoutes() {
           <Route path="/donation-select" element={<DonationSelectPage />} />
           <Route path="/donation-complete" element={<DonationCompletePage />} />
           <Route path="/convert-to-mong" element={<ConvertToMongPage />} />
+          <Route path="/bank-transfer" element={<BankTransferPage />} />
           <Route path="/convert-to-mong-complete" element={<ConvertToMongCompletePage />} />
           <Route path="/select-remittance" element={<SelectRemittancePage />} />
           <Route path="/alarm" element={<AlarmPage />} />
