@@ -1,5 +1,4 @@
-// components/HomePage/List/Birthday/FriendLetterList.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import FriendLetterItem from "./FriendLetterItem";
 import { getLetterHome, type LetterHomeItem } from "../../../../services/user/friendbirthday";
 
@@ -9,52 +8,84 @@ const FriendLetterList = () => {
   const [items, setItems] = useState<LetterHomeItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [prevCursor, setPrevCursor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
 
   const [pageIndex, setPageIndex] = useState(0);
-  const [totalPages, setTotalPages] = useState(1); // 최소 1페이지
+  const [totalPages, setTotalPages] = useState(1);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
 
-  const load = async (cursor?: string | null, direction: "next" | "prev" = "next") => {
+  const intervalRef = useRef<number | null>(null);
+  const pagesSeenRef = useRef<number>(1);
+
+  const load = async ({
+    cursor = null,
+    direction = "next" as "next" | "prev",
+    showSkeleton = false,
+  } = {}) => {
     try {
-      setLoading(true);
-      const res = await getLetterHome({ limit: LIMIT, cursor: cursor ?? null, direction });
+      if (showSkeleton) setInitialLoading(true);
+      const res = await getLetterHome({ limit: LIMIT, cursor, direction });
+
+      let newIndex = pageIndex;
+      if (cursor) newIndex = direction === "next" ? pageIndex + 1 : Math.max(0, pageIndex - 1);
+      else newIndex = 0;
 
       setItems(res.letters);
       setNextCursor(res.pagination.nextCursor);
       setPrevCursor(res.pagination.prevCursor);
+      setPageIndex(newIndex);
 
-      // (1) 페이지 인덱스: 처음 로드는 0 고정, cursor가 있을 때만 이동
-      if (cursor) {
-        if (direction === "next") setPageIndex((p) => p + 1);
-        else if (direction === "prev") setPageIndex((p) => Math.max(0, p - 1));
-      } else {
-        setPageIndex(0);
-      }
-
-      // (2) 전체 페이지 수 계산
       const totalCount = res.pagination.totalCount;
-      if (typeof totalCount === "number") {
-        setTotalPages(Math.max(1, Math.ceil(totalCount / LIMIT)));
+      if (typeof totalCount === "number" && totalCount >= 0) {
+        const pages = Math.max(1, Math.ceil(totalCount / LIMIT));
+        setTotalPages(pages);
+        pagesSeenRef.current = Math.max(pagesSeenRef.current, pages);
       } else {
-        // totalCount가 없으면 최소 1페이지로
-        setTotalPages(1);
+        const atLeast = newIndex + 1 + (res.pagination.nextCursor ? 1 : 0);
+        pagesSeenRef.current = Math.max(pagesSeenRef.current, atLeast, 1);
+        setTotalPages(pagesSeenRef.current);
       }
 
       setErr(null);
-    } catch (e: any) {
+    } catch {
       setErr("편지 목록을 불러오지 못했어요.");
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
     }
   };
 
   useEffect(() => {
-    load(); // 초기 로드 (cursor 없음)
+    load({ showSkeleton: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) return <section className="mt-[30px] px-4">불러오는 중…</section>;
-  if (err) return <section className="mt-[30px] px-4 text-red-600">{err}</section>;
+  useEffect(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    intervalRef.current = window.setInterval(() => {
+      if (nextCursor) load({ cursor: nextCursor, direction: "next" });
+      else load({ cursor: null, direction: "next" });
+    }, 5000);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nextCursor]);
+
+  // 로딩/에러 처리
+  if (initialLoading) {
+    return <section className="mt-[30px] px-4">불러오는 중…</section>;
+  }
+  if (err) {
+    return <section className="mt-[30px] px-4 text-red-600">{err}</section>;
+  }
+  // ✅ 아이템이 하나도 없으면 섹션 자체를 숨김
+  if (items.length === 0) return null;
+
+  const dotCount = Math.max(1, totalPages);
 
   return (
     <section className="mt-[30px] px-4">
@@ -76,9 +107,9 @@ const FriendLetterList = () => {
         ))}
       </div>
 
-      {/* dot 인디케이터: 최소 1개 */}
+      {/* 인디케이터 */}
       <div className="flex justify-center space-x-[6px] mt-3">
-        {Array.from({ length: Math.max(1, totalPages) }).map((_, idx) => (
+        {Array.from({ length: dotCount }).map((_, idx) => (
           <div
             key={idx}
             className={`w-2 h-2 rounded-full transition-all duration-300 ${

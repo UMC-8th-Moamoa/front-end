@@ -6,7 +6,7 @@ import {
   markAllNotificationsRead,
   type NotificationItem,
   type Pagination,
-} from "../../../services/notification/notifications";
+} from "./AlarmDummy";
 
 const toDate = (iso: string) => {
   const d = new Date(iso);
@@ -29,6 +29,7 @@ const AlarmList = () => {
     try {
       setLoading(true);
       setErr(null);
+      // ✅ 더미에서 읽어오기
       const [{ items: list, pagination }, unread] = await Promise.all([
         fetchNotifications(1, 10),
         getUnreadStatus(),
@@ -39,7 +40,7 @@ const AlarmList = () => {
       setHasUnread(unread);
     } catch (e: any) {
       if (!mounted.current) return;
-      setErr(e?.response?.data?.message || e?.message || "요청 실패");
+      setErr(e?.message || "요청 실패");
     } finally {
       if (mounted.current) setLoading(false);
     }
@@ -75,17 +76,6 @@ const AlarmList = () => {
   return (
     <div className="w-full">
       <div className="px-4 py-2 text-xs text-gray-500 flex items-center justify-between">
-        <span>
-          page {pageInfo.page ?? 1}/{pageInfo.totalPages ?? 0} · total {pageInfo.totalElements ?? 0} ·
-          {hasUnread ? " 🔔 미읽음 있음" : " 모두 읽음"}
-        </span>
-        <button
-          onClick={handleReadAll}
-          className="text-[12px] underline disabled:opacity-40"
-          disabled={!hasUnread}
-        >
-          모두 읽음 처리
-        </button>
       </div>
 
       {items.map((n) => (

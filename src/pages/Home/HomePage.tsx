@@ -1,5 +1,5 @@
 // src/pages/HomePage.tsx
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TopBar from "../../components/common/TopBar";
 import BirthdayBanner from "../../components/HomePage/Banner/BirthdayBanner";
@@ -12,6 +12,10 @@ import BottomNavigation, { type MenuType } from "../../components/common/BottomN
 import Calendar from "../../components/HomePage/Calendar/Calendar";
 import { Modal } from "../../components/common/Modal";
 
+// ✅ 추가
+import { fetchMoasAndBanners } from "../../services/banner/banner";
+import type { MainBannerPayload } from "../../services/banner/banner";
+
 const HomePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +23,28 @@ const HomePage = () => {
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [showWishBanner, setShowWishBanner] = useState(false);
   const bannerTimer = useRef<number | null>(null);
+
+  // ✅ 메인배너 상태
+  const [mainBanner, setMainBanner] = useState<MainBannerPayload | null>(null);
+  const [loadingMain, setLoadingMain] = useState(true);
+
+  // ✅ 유저 이름 (localStorage에서 추출, 있으면 사용)
+  const userName = useMemo(() => {
+    try {
+      const direct = localStorage.getItem("userName")
+        || localStorage.getItem("username")
+        || localStorage.getItem("name");
+      if (direct) return direct;
+      const raw = localStorage.getItem("profile")
+        || localStorage.getItem("user")
+        || localStorage.getItem("me");
+      if (raw) {
+        const o = JSON.parse(raw);
+        return o?.name ?? o?.userName ?? o?.username ?? undefined;
+      }
+    } catch {}
+    return undefined;
+  }, []);
 
   useEffect(() => {
     if (location.state?.showTransferPendingModal) {
@@ -39,23 +65,29 @@ const HomePage = () => {
     };
   }, []);
 
+  // ✅ 메인배너 API 호출
+  useEffect(() => {
+    let mounted = true;
+    fetchMoasAndBanners({ limit: 10 })
+      .then((s) => {
+        if (!mounted) return;
+        setMainBanner(s.mainBanner ?? null);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setMainBanner(null);
+      })
+      .finally(() => mounted && setLoadingMain(false));
+    return () => { mounted = false; };
+  }, []);
+
   const handleNavigate = (menu: MenuType) => {
     switch (menu) {
-      case "shopping":
-        navigate("/shopping");
-        break;
-      case "heart":
-        navigate("/wishlist");
-        break;
-      case "home":
-        navigate("/home");
-        break;
-      case "letter":
-        navigate("/moaletter/preview");
-        break;
-      case "mypage":
-        navigate("/mypage");
-        break;
+      case "shopping": navigate("/shopping"); break;
+      case "heart": navigate("/wishlist"); break;
+      case "home": navigate("/home"); break;
+      case "letter": navigate("/moaletter/preview"); break;
+      case "mypage": navigate("/mypage"); break;
     }
   };
 
@@ -82,13 +114,27 @@ const HomePage = () => {
 
         {/* 스크롤 가능한 콘텐츠 */}
         <div className="flex flex-col items-center flex-1 overflow-y-auto pb-[30px]">
-          <MainBanner onClick={() => navigate("/moa-collected")} />
-          <SubBannerCarousel />
+          {/* ✅ 메인배너 영역: 로딩 스켈레톤 -> 실제 배너 */}
+          {loadingMain ? (
+            <div className="w-[350px] h-[120px] rounded-[20px] bg-gray-100 animate-pulse mt-2" />
+          ) : mainBanner ? (
+            <MainBanner
+              payload={mainBanner}
+              userName={userName}
+              onClick={(moaId, type) => {
+                if (type === "balance") return navigate("/balance");
+                if (moaId) navigate(`/moa/${moaId}`);
+              }}
+            />
+          ) : null}
+
+          {/* ✅ 서브배너: userName 전달 */}
+          <SubBannerCarousel userName={userName} />
+
           <FriendLetterList />
-          {/* ✅ 등록 성공 시 HomePage 배너를 띄우는 콜백 전달 */}
           <PopularList onAdded={handleShowWishBanner} />
           <UpcomingFriendList />
-          <BirthdayBanner/>
+          <BirthdayBanner />
           <Calendar />
         </div>
 

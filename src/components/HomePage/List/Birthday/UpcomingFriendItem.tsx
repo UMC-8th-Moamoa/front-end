@@ -18,7 +18,9 @@ const UpcomingFriendItem = ({
   eventId,
 }: UpcomingFriendItemProps) => {
   const navigate = useNavigate();
-  const isUrgent = dday <= 7;
+
+  const isUrgent = dday <= 7;                // 당일 포함
+  const dText = dday === 0 ? "D-DAY" : `D-${dday}`;
 
   const handleClick = () => {
     const n = Number(eventId);
@@ -26,7 +28,6 @@ const UpcomingFriendItem = ({
     else navigate(`/participation`);
   };
 
-  // 프로필 이미지: 없으면 기본 이미지로 표시
   const src = (image ?? "").trim() || DEFAULT_PROFILE;
 
   return (
@@ -38,7 +39,6 @@ const UpcomingFriendItem = ({
         className="w-[64px] h-[64px] rounded-full object-cover bg-gray-300"
         onError={(e) => {
           const img = e.currentTarget as HTMLImageElement;
-          // 깨진 링크일 때 기본 이미지로 폴백 (무한 루프 방지)
           if (!img.src.endsWith("profile.svg")) {
             img.src = DEFAULT_PROFILE;
           }
@@ -51,7 +51,7 @@ const UpcomingFriendItem = ({
           {displayDate}
           <span className={isUrgent ? "text-red-500" : "text-[#B7B7B7]"}>
             {" "}
-            (D-{dday})
+            ({dText})
           </span>
         </p>
       </div>
