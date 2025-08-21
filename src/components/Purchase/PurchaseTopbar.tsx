@@ -40,9 +40,10 @@ const PurchaseTopBar = ({ userMC = 0 }: Props) => {
     (async () => {
       try {
         setLoading(true);
-        const { data } = await api.get<Envelope<PointsSuccess>>('/points', {
-          params: { _t: Date.now() },
+        const { data } = await api.get('/payment/balance', {
           headers: { 'Cache-Control': 'no-cache' },
+          params: { _t: Date.now() },
+          withCredentials: true,           // RT 쿠키 쓰면 유지
         });
         if (!ignore) {
           const p = extractPoints(data, userMC);

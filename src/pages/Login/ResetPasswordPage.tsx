@@ -4,7 +4,12 @@ import Button from "../../components/common/Button";
 import InputBox from "../../components/common/InputBox";
 import BackButton from "../../components/common/BackButton";
 import VisibilityToggle from "../../components/common/VisibilityToggle";
+<<<<<<< HEAD
 import { Link, useNavigate, useLocation } from "react-router-dom";
+=======
+import { Link, useNavigate } from "react-router-dom";
+import { resetPassword } from '../../api/auth'; 
+>>>>>>> feat/shopping
 
 function ResetPasswordPage() {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
@@ -119,8 +124,13 @@ function ResetPasswordPage() {
     }
   };
 
+<<<<<<< HEAD
   // STEP 3: 새 비밀번호 설정 (POST /api/auth/reset-password)
   const handleStep3 = async () => {
+=======
+  // STEP 3: 비밀번호 변경
+    const handleStep3 = async () => {
+>>>>>>> feat/shopping
     if (!newPw || !confirmPw) {
       setError("• 비밀번호를 입력해 주세요");
       return;
@@ -140,6 +150,7 @@ function ResetPasswordPage() {
 
     try {
       setError("");
+<<<<<<< HEAD
       const res = await fetch("/api/auth/reset-password", {
         method: "POST", // 스펙상 POST
         headers: { "Content-Type": "application/json" },
@@ -156,19 +167,35 @@ function ResetPasswordPage() {
         (data?.resultType === "SUCCESS" ||
           data?.success?.success === true ||
           data?.success === true);
+=======
+      const res = await resetPassword({
+        currentPassword: "",
+        newPassword: newPw,
+        confirmPassword: confirmPw,
+      });
+
+      const ok =
+        res?.resultType === "SUCCESS" ||
+        res?.success === true ||
+        res?.success?.success === true;
+>>>>>>> feat/shopping
 
       if (ok) {
         setStep(4);
       } else {
         const reason =
-          data?.error?.reason ||
-          data?.message ||
+          res?.error?.reason ||
+          res?.message ||
           "비밀번호 변경에 실패했습니다";
         setError(reason);
       }
-    } catch (e) {
+    } catch (e: any) {
+      const msg =
+        e?.response?.data?.error?.reason ||
+        e?.message ||
+        "서버 오류로 비밀번호 변경에 실패했습니다";
       console.error(e);
-      setError("서버 오류로 비밀번호 변경에 실패했습니다");
+      setError(msg);
     }
   };
 
@@ -201,7 +228,11 @@ function ResetPasswordPage() {
             <InputBox
               type="text"
               placeholder="이메일을 입력해 주세요"
+<<<<<<< HEAD
               value={email}
+=======
+              value={phone}
+>>>>>>> feat/shopping
               hasBorder={false}
               onChange={(e) => {
                 setEmail(e.target.value);

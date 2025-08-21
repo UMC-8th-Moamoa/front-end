@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosInstance';
 import MoamoaLogo from "../../assets/MoamoaLogo.svg";
 
+
 type Props = {
   /** 초기 표시용(로딩 전 폴백). 없으면 0으로 시작 */
   userMC?: number;
@@ -42,9 +43,10 @@ const ShoppingTopBar = ({ userMC = 0 }: Props) => {
       try {
         setLoading(true);
         // axiosInstance가 baseURL=/api 이므로 여기서는 '/points'만 적음
-        const { data } = await api.get<Envelope<PointsSuccess>>('/points', {
-          params: { _t: Date.now() },
+        const { data } = await api.get('/payment/balance', {
           headers: { 'Cache-Control': 'no-cache' },
+          params: { _t: Date.now() },
+          withCredentials: true,           // RT 쿠키 쓰면 유지
         });
         if (!ignore) {
           const p = extractPoints(data, userMC);

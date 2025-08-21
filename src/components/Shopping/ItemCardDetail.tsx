@@ -15,11 +15,9 @@ type Item = {
 interface ShoppingItemCardProps {
   item: Item;
   onBuy: (item: Item) => void;
-  /** 상세 API 호출에 필요 (envelope X, seal만 사용) */
   category?: 'font' | 'paper' | 'seal';
 }
 
-/** 상세 응답 타입 (배열로 내려옴) */
 type DetailItem = {
   item_no: number;
   name: string;
@@ -28,57 +26,101 @@ type DetailItem = {
   image?: string;
 };
 
-/** 서버가 래퍼로 주거나(Envelope) 평문으로 줄 수 있어 둘 다 수용 */
-type DetailEnvelope = {
-  resultType?: 'SUCCESS' | 'FAIL';
-  success?: { success?: boolean; item?: DetailItem[] } | null;
-  error?: unknown;
-};
-type DetailResponse = DetailEnvelope | { success: boolean; item?: DetailItem[] };
+// 서버가 래퍼/평문/배열/객체 등 다양한 형태로 줄 수 있으므로 포괄 타입
+type DetailEnvelope =
+  | {
+      resultType?: 'SUCCESS' | 'FAIL';
+      success?: any;     // { success?: boolean; item?: DetailItem[] | DetailItem } 등
+      error?: unknown;
+    }
+  | {
+      success?: boolean;
+      item?: DetailItem[] | DetailItem;
+      // 혹은 루트 직렬 형식으로 직접 반환될 수도 있음
+      item_no?: number;
+      name?: string;
+      detail?: string;
+      price?: number;
+      image?: string;
+      imageUrl?: string;
+      img?: string;
+    };
 
-const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy, category }) => {
+const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy }) => {
   const [imageError, setImageError] = useState(false);
   const [detail, setDetail] = useState<string>(item.description ?? '');
   const [price, setPrice] = useState<number | undefined>(item.price);
   const [image, setImage] = useState<string | undefined>(item.image);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // 응답 래퍼 벗기기 + 배열 추출
-  const extractItems = (data: DetailResponse): DetailItem[] => {
+  // 응답 정규화: 어떤 형태로 와도 DetailItem 하나로 통일
+  const extractDetail = (data: DetailEnvelope): DetailItem | undefined => {
     const payload: any = (data as any)?.success ?? data;
-    const arr: DetailItem[] = Array.isArray(payload?.item) ? payload.item : [];
-    return arr;
+
+    if (payload?.itemDetailEntry && typeof payload.itemDetailEntry === 'object') {
+    const v = payload.itemDetailEntry;
+    return {
+      item_no: Number(v.item_no),
+      name: v.name,
+      detail: v.detail,
+      price: typeof v.price === 'number' ? v.price : undefined,
+      image: v.image ?? v.imageUrl ?? v.img,
+    };
+  }
+
+    // 1) payload.item 이 배열인 경우
+    if (Array.isArray(payload?.item)) return payload.item[0];
+
+    // 2) payload.item 이 객체인 경우
+    if (payload?.item && typeof payload.item === 'object') return payload.item as DetailItem;
+
+    // 3) 루트 직렬로 들어온 경우
+    if (payload && (payload.item_no || payload.name || payload.detail || payload.price || payload.image)) {
+      return {
+        item_no: Number(payload.item_no ?? item.id),
+        name: payload.name,
+        detail: payload.detail,
+        price: typeof payload.price === 'number' ? payload.price : undefined,
+        image: payload.image ?? payload.imageUrl ?? payload.img,
+      };
+    }
+
+    return undefined;
   };
 
-  // 상세 정보 불러오기 (seal만 사용, envelope 폴백 없음)
   useEffect(() => {
     let ignore = false;
 
-    async function load() {
-      if (!category || item.id == null) return;
-      if (!['font', 'paper', 'seal'].includes(category)) return;
+    async function load(retry = false) {
+      if (item.id == null) return;
 
-      setLoading(true);
       try {
-        const { data } = await api.get<DetailResponse>('/shopping/item_list', {
-          params: { category, id: item.id, _t: Date.now() },
+        setLoading(true);
+        const { data } = await api.get<DetailEnvelope>('/shopping/item_detail', {
+          params: { id: Number(item.id), _t: Date.now() },
           headers: { 'Cache-Control': 'no-cache' },
         });
 
-        const list = extractItems(data);
-        const first = list?.[0];
+        const first = extractDetail(data);
 
         if (!ignore && first) {
           if (typeof first.detail === 'string') setDetail(first.detail);
           if (typeof first.price === 'number') setPrice(first.price);
-          if (typeof first.image === 'string') {
-            setImage(first.image);
+
+          const img = first.image as string | undefined;
+          if (img) {
+            setImage(img);
             setImageError(false);
           }
         }
       } catch (e) {
-        console.warn('[ITEM DETAIL] failed', e);
-        // 실패 시 기존 값 유지
+        // 간헐적 502 대비 1회 재시도
+        if (!retry) {
+          await new Promise((r) => setTimeout(r, 200));
+          if (!ignore) await load(true);
+        } else {
+          console.warn('[ITEM DETAIL] failed', e);
+        }
       } finally {
         if (!ignore) setLoading(false);
       }
@@ -88,7 +130,9 @@ const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy, category
     return () => {
       ignore = true;
     };
-  }, [category, item.id]);
+
+  }, [item.id]);
+
 
   const showFallback = !image || imageError;
 
@@ -111,10 +155,10 @@ const ItemCardDetail: React.FC<ShoppingItemCardProps> = ({ item, onBuy, category
       {/* 텍스트 영역 */}
       <div className="mt-3 text-left w-full px-4">
         <p className="text-[17px] font-semibold text-[#1F1F1F] mb-1">{item.name}</p>
-        <p className="text-sm text-[#666666] mb-7">
+        <p className="text-sm text-[#666666] mb-3">
           {loading ? '불러오는 중…' : (detail || '설명이 없습니다.')}
         </p>
-        <p className="text-xl font-bold text-[#597EF7]">
+        <p className="text-xl font-bold text-[#597EF7] mb-2">
           {typeof price === 'number' ? `${price.toLocaleString()}MC` : '가격 정보 없음'}
         </p>
       </div>
