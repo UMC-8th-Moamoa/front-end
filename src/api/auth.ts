@@ -148,11 +148,12 @@ export async function loginUser(
 
     // ==================== SOLUTION ====================
     // CHANGED: 숫자 ID를 별도로 localStorage에 저장 (API 호출용)
-    const numericId = normalized.success.user?.id;
-    if (numericId) {
-      console.log("[DEBUG] Auth: Setting my_numeric_id (number) to:", numericId);
-      localStorage.setItem('my_numeric_id', String(numericId));
-    }
+ const numericId = normalized.success.user?.id;   // 👈 로그인 응답의 숫자 PK
+if (numericId) {
+  localStorage.setItem("my_numeric_id", String(numericId));
+  console.log('[DEBUG] user from login', normalized.success?.user);
+
+}
     // ================================================
   }
 

@@ -1,7 +1,7 @@
 // src/services/shopping-bridge.ts
 import instance from "../api/axiosInstance";
 
-export type ShopCategory = "font" | "paper" | "envelope";
+export type ShopCategory = "font" | "paper" | "seal";
 
 export type ShoppingAPI = {
   getShopItems: (params: { category: ShopCategory; num?: number }) => Promise<any[]>;
@@ -15,19 +15,18 @@ export type ShoppingAPI = {
   syncFreeItemsOnce?: (opts: { category: ShopCategory; meUserId: string; limit?: number }) => Promise<void>;
 };
 
-/** 안전한 동적 로드: 파일이 존재할 때만 import 수행 */
+/** 존재 시에만 동적 import */
 export async function loadShopping(): Promise<Partial<ShoppingAPI>> {
-  // Vite는 존재하는 파일만 매핑에 넣어줌 → 없으면 빈 객체
   const candidates = import.meta.glob<true, string, any>("/src/services/shopping.{ts,tsx}");
   const loaders = Object.values(candidates);
   if (loaders.length > 0) {
-    const mod = await loaders[0](); // 첫 번째 매칭 파일 로드
+    const mod = await loaders[0]();
     return (mod || {}) as Partial<ShoppingAPI>;
   }
   return {};
 }
 
-// ★ 폴백 내장: shopping.ts 없어도 무료템 자동 수령
+// 폴백 내장: shopping.ts 없어도 무료템 자동 수령
 export async function syncFreeItemsOnceOrFallback(opts: {
   category: ShopCategory;
   meUserId: string;
@@ -35,7 +34,7 @@ export async function syncFreeItemsOnceOrFallback(opts: {
 }) {
   const { category, meUserId, limit = 200 } = opts;
 
-  // 1) 팀 구현 있으면 그걸 사용
+  // 팀 구현 우선
   try {
     const mod = await loadShopping();
     if (mod.syncFreeItemsOnce) {
@@ -45,7 +44,7 @@ export async function syncFreeItemsOnceOrFallback(opts: {
     // 동적 로드 실패는 조용히 폴백으로
   }
 
-  // 2) 폴백: item_list → price=0만 구매 시도
+  // 폴백: item_list에서 price=0만 구매 시도(1회)
   const gateKey = `free_sync_done_${meUserId}_${category}`;
   if (localStorage.getItem(gateKey) === "1") return;
 

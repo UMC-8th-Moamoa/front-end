@@ -19,9 +19,9 @@ export type ItemListResponse = {
 export type UserItem = {
   holditem_id: number;                 // 표준화된 보관함 아이템 고유번호
   category: 'font' | 'paper' | 'seal';
-  name: string;                        // 서버가 주면 사용, 없으면 빈 문자열
+  name: string;
   image?: string;
-  item_no?: number;                    // 원본 아이템 번호(있으면 유지)
+  item_no?: number;
 };
 
 export type UserItemsResponse = {
@@ -50,7 +50,7 @@ type RawUserItem = {
   holditem_id?: number;
   holditem_no?: number;
   item_no?: number;
-  category: 'font' | 'paper' | 'seal'; // envelope 제거
+  category: 'font' | 'paper' | 'seal';
   name?: string;
   image?: string;
   user_id?: string;
@@ -120,24 +120,22 @@ export async function fetchUserItems(num: number): Promise<UserItemsResponse> {
   return normalizeUserItems((data as any)?.success ?? (data as any));
 }
 
-/** 상세 보기 */
+/** 상세 보기 — 스웨거 준수: /shopping/item_detail?id= */
 export async function fetchItemDetail(opts: {
-  category: 'font' | 'paper' | 'seal';
   id: number;
 }): Promise<{ name?: string; image?: string; detail?: string; price?: number }> {
-  const { data } = await api.get('/shopping/item_list', {
-    params: { category: opts.category, id: opts.id, _t: Date.now() },
+  const { data } = await api.get('/shopping/item_detail', {
+    params: { id: opts.id, _t: Date.now() },
     headers: { 'Cache-Control': 'no-cache' },
   });
 
-  const payload = (data as any)?.success ?? (data as any);
-  const arr = Array.isArray(payload?.item) ? payload.item : [];
-  const first = arr[0] ?? {};
+  // 예시: { success: true, itemDetailEntry: {...} }
+  const entry = (data as any)?.itemDetailEntry ?? {};
   return {
-    name: first?.name,
-    image: first?.image,
-    detail: first?.detail,
-    price: first?.price,
+    name: entry?.name,
+    image: entry?.image,
+    detail: entry?.detail,
+    price: entry?.price,
   };
 }
 
@@ -145,11 +143,9 @@ export async function fetchItemDetail(opts: {
 export async function buyItem(payload: {
   category: 'font' | 'paper' | 'seal';
   user_id: string;
-
   item_no: number;
   price: number;
   event: boolean;
 }) {
-
   return api.post('/shopping/item_buy', payload);
 }
