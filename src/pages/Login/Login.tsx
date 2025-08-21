@@ -7,37 +7,31 @@ import { Modal } from "../../components/common/Modal";
 import KakaoIcon from "../../assets/Kakao.svg";
 import Logo from "../../assets/Logo_white.svg";
 import moa from "../../assets/moa_character.svg";
-import api from "../../api/axiosInstance"; // 단일 인스턴스
-import { fetchMySelfInfo, fetchMyMerged, setMyUserId } from "../../services/mypage";
+import api from "../../api/axiosInstance";
+import { setMyUserId } from "../../services/mypage";
 
-
-type SuccessEnvelope<T> = {
+/** ---- 공통 타입 (느슨하게) ---- */
+type Envelope<T> = {
   resultType: "SUCCESS" | "FAIL";
   error: null | { errorCode: string; reason?: string | null; data?: unknown };
   success: T | null;
 };
-
-// 로그인 성공 시 내려올 수 있는 토큰/유저정보 형태(유연 파싱)
+type Tokens = { accessToken?: string; refreshToken?: string };
 type LoginSuccess = {
   accessToken?: string;
   refreshToken?: string;
-  tokens?: { accessToken: string; refreshToken?: string };
-  user?: {
-    id: number;
-    user_id: string;
-    name: string;
-    
-  };
+  tokens?: Tokens;
+  user?: { id?: number; user_id?: string; name?: string; email?: string };
 };
 
 function Login() {
   const navigate = useNavigate();
   const location = useLocation() as { state?: { user_id?: string } };
 
-  // 가입 완료 화면에서 넘어올 때 아이디 프리필
-  const prefilledId = (location.state?.user_id ?? "").trim();
+  // 가입 후 넘어오면 아이디 프리필
+  const prefilled = (location.state?.user_id ?? "").trim();
 
-  const [id, setId] = useState(prefilledId);
+  const [id, setId] = useState(prefilled);
   const [password, setPassword] = useState("");
   const [idError, setIdError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -45,98 +39,74 @@ function Login() {
   const [modalMsg, setModalMsg] = useState("존재하지 않는 아이디입니다");
   const [loading, setLoading] = useState(false);
 
-  // 공백 제거
+  /** 공백 제거 */
   const handleChangeId = (v: string) => setId(v.replace(/\s+/g, ""));
 
-  // 응답에서 토큰 안전 추출
-  const extractTokens = (data: any) => {
-    const s = data?.success ?? data; // 래퍼/비래퍼 대응
-    const at = s?.tokens?.accessToken ?? s?.accessToken ?? null;
-    const rt = s?.tokens?.refreshToken ?? s?.refreshToken ?? null;
-    return { at, rt };
+  /** 응답에서 토큰 안전 추출 (래퍼/비래퍼 모두 수용) */
+  const extractTokens = (data: any): Tokens => {
+    const s = data?.success ?? data;
+    return {
+      accessToken: s?.tokens?.accessToken ?? s?.accessToken ?? undefined,
+      refreshToken: s?.tokens?.refreshToken ?? s?.refreshToken ?? undefined,
+    };
   };
 
-  // 토큰 저장 + 즉시 헤더 반영
-  const saveTokens = (at?: string | null, rt?: string | null) => {
-    if (at) localStorage.setItem("accessToken", at);
-    if (rt) localStorage.setItem("refreshToken", rt);
-    if (at) {
-      // 다음 요청부터 바로 사용되도록 기본 헤더 갱신
+  /** 토큰 저장 + axios 기본 헤더 반영 */
+  const saveTokens = (t: Tokens) => {
+    if (t.accessToken) localStorage.setItem("accessToken", t.accessToken);
+    if (t.refreshToken) localStorage.setItem("refreshToken", t.refreshToken);
+    if (t.accessToken) {
       (api.defaults.headers as any).common = {
         ...(api.defaults.headers as any).common,
-        Authorization: `Bearer ${at}`,
+        Authorization: `Bearer ${t.accessToken}`,
       };
     }
   };
-// 응답에서 user_id 추출 (래퍼/비래퍼 모두 대응)
-const extractUserIdFromResponse = (data: any): string => {
-  const s = data?.success ?? data;
-  const uid = s?.user?.user_id;
-  return typeof uid === "string" ? uid.trim() : "";
-};
 
-// 이메일 → user_id 조회 API (스웨거: POST /auth/find-id { email })
-const findUserIdByEmail = async (email: string): Promise<string> => {
-  const { data } = await api.post<SuccessEnvelope<{ user_id?: string }>>(
-    "/auth/find-id",
-    { email }
-  );
-  const body = (data as any)?.success ?? data;
-  const uid = body?.user_id ?? "";
-  return typeof uid === "string" ? uid.trim() : "";
-};
-
+  /** 로그인 실행 */
   const handleLogin = async () => {
     setIdError("");
     setPasswordError("");
 
-    const trimmedId = id.trim();
-    const trimmedPw = password.trim();
-    if (!trimmedId || !trimmedPw) {
+    const uid = id.trim();
+    const pw = password.trim();
+    if (!uid || !pw) {
       setIdError("• 아이디와 비밀번호를 입력해 주세요");
       return;
     }
 
     try {
       setLoading(true);
-      const { data } = await api.post<SuccessEnvelope<LoginSuccess> | LoginSuccess>(
+      const { data } = await api.post<Envelope<LoginSuccess> | LoginSuccess>(
         "/auth/login",
-        { user_id: trimmedId, password: trimmedPw },
-        { withCredentials: true } // RT를 쿠키로 받는 경우 유지
+        { user_id: uid, password: pw },
+        { withCredentials: true } // RT 쿠키 운용 시 필요
       );
 
-      // 성공/실패 분기 (래퍼/비래퍼 모두 대응)
+      // 래퍼/비래퍼 모두 수용
       const resultType = (data as any)?.resultType;
-      if (!resultType || resultType === "SUCCESS") {
-        const { at, rt } = extractTokens(data);
-        if (at) saveTokens(at, rt);
+      const ok = !resultType || resultType === "SUCCESS";
+      if (ok) {
+        const tokens = extractTokens(data);
+        saveTokens(tokens);
 
-        // ✅ 로그인한 사용자의 user_id(문자열) 로컬스토리지에 저장
         const s = (data as any)?.success ?? data;
-        if (s?.user?.user_id) {
-          // 기존 user_id 키 유지해도 되지만, 반드시 my_user_id 로도 저장해야 함
-          localStorage.setItem("user_id", s.user.user_id);
-
-          // 핵심: 앱 전역에서 쓰는 my_user_id를 세팅
-          setMyUserId(s.user.user_id);
-          
+        const myUid: string | undefined = s?.user?.user_id;
+        if (myUid) {
+          localStorage.setItem("user_id", myUid);
+          setMyUserId(myUid);
         }
-
 
         navigate("/home", { replace: true });
         return;
       }
 
-      // FAIL 케이스
+      // FAIL
       const reason =
-        (data as SuccessEnvelope<LoginSuccess>).error?.reason ||
+        (data as Envelope<LoginSuccess>).error?.reason ||
         "아이디 또는 비밀번호가 올바르지 않습니다.";
-      if (/비밀번호/i.test(reason)) {
-        setPasswordError(`• ${reason}`);
-      } else if (/아이디|사용자/i.test(reason)) {
-        setModalMsg(reason);
-        setShowModal(true);
-      } else {
+      if (/비밀번호/i.test(reason)) setPasswordError(`• ${reason}`);
+      else {
         setModalMsg(reason);
         setShowModal(true);
       }
@@ -153,19 +123,25 @@ const findUserIdByEmail = async (email: string): Promise<string> => {
     }
   };
 
+  /** Enter로 로그인 */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !loading) handleLogin();
   };
 
-  // 카카오 로그인: env 기반으로 안전하게 구성 (/api 중복 방지)
+  /** 카카오 로그인 시작
+   * 백엔드가 카카오와 통신 → 완료 후 프론트의 /auth/callback 으로 리다이렉트(쿼리에 토큰 포함)
+   */
   const handleKakaoLogin = () => {
-    const base = import.meta.env.VITE_API_BASE_URL || "/api"; // dev: '/api'
-    const url = `${String(base).replace(/\/$/, "")}/auth/kakao`;
-    window.location.href = url;
+    const apiBase = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
+    const returnTo = encodeURIComponent(`${window.location.origin}/auth/callback`);
+    // returnTo 파라미터를 백엔드가 받도록 합의되어 있으면 포함, 아니면 제거
+    window.location.href = `${apiBase}/auth/kakao?returnTo=${returnTo}`;
+    // 합의가 없다면 ↓
+    // window.location.href = `${apiBase}/auth/kakao`;
   };
 
   useEffect(() => {
-    // 필요 시, 로그인 페이지 진입 시 기존 토큰 제거 등 초기화 로직
+    // 필요 시 로그인 페이지 진입 시 토큰 초기화
     // localStorage.removeItem("accessToken");
     // localStorage.removeItem("refreshToken");
   }, []);
@@ -173,17 +149,13 @@ const findUserIdByEmail = async (email: string): Promise<string> => {
   return (
     <div
       className="min-h-screen max-w-[393px] mx-auto flex flex-col justify-between"
-      style={{
-        background: "linear-gradient(169.25deg, #6282E1 1.53%, #FEC3FF 105.97%)",
-      }}
+      style={{ background: "linear-gradient(169.25deg, #6282E1 1.53%, #FEC3FF 105.97%)" }}
     >
       {/* 상단: 로고 및 입력창 */}
       <div className="px-4 pt-20 flex flex-col items-center">
         <img src={Logo} alt="Logo" className="w-40 h-40 mb-6" />
 
-        {idError && (
-          <p className="text-[#FF0000] text-sm mb-2 self-start px-1">{idError}</p>
-        )}
+        {idError && <p className="text-[#FF0000] text-sm mb-2 self-start px-1">{idError}</p>}
         {passwordError && (
           <p className="text-[#FF0000] text-sm mb-2 self-start px-1">{passwordError}</p>
         )}

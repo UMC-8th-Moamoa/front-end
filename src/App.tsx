@@ -163,6 +163,7 @@ function AppRoutes() {
           <Route path="/find-id" element={<FindIdPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/auth/callback" element={<OAuthCallback />} />
+          <Route path="/auth/success"  element={<OAuthCallback />} />
 
           {/* 회원가입(스텝) */}
           <Route
