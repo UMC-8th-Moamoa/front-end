@@ -154,7 +154,7 @@ const CreateMoaLinkButton = () => {
 
           <div className="flex-1">
             <p className="text-[16px] text-black">친구들에게 편지를 받아보세요!</p>
-            <p className="text-[14px] text-[#B7B7B7]">링크를 공유하면 편지를 받을 수 있어요</p>
+            <p className="text-[12px] text-[#B7B7B7] pt-1">링크를 공유하면 편지를 받을 수 있어요</p>
           </div>
         </div>
       </div>
