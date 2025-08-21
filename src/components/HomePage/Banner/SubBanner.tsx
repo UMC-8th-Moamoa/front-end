@@ -41,7 +41,7 @@ const SubBanner = ({
         "w-[350px] h-[81px] rounded-2xl px-4 py-4 flex items-center justify-between relative",
         isHighlight
           ? "bg-gray-300 text-white"
-          : "bg-white border border-[1px] border-gray-200 text-gray-400"
+          : "bg-white border border-[1px] border-[#6282E1] text-[#6282E1]"
       )}
     >
       <div className="flex items-center space-x-4">
@@ -55,8 +55,8 @@ const SubBanner = ({
 
         <p
           className={clsx(
-            "absolute left-[99px] flex items-center text-[18px] font-medium leading-tight whitespace-pre-line",
-            isHighlight ? "text-white" : "text-gray-400"
+            "absolute left-[99px] flex items-center text-[18px] pb-4 font-medium leading-tight whitespace-pre-line",
+            isHighlight ? "text-white" : "text-[#6282E1]"
           )}
         >
           {content}
@@ -65,7 +65,7 @@ const SubBanner = ({
 
       {buttonText && (
         <span
-          className="absolute bottom-3 top-[53px] text-gray-400 right-4 text-[12px] cursor-pointer hover:opacity-75 transition-colors"
+          className="absolute bottom-3 top-[53px] text-[#6282E1] right-4 text-[12px] cursor-pointer hover:opacity-75 transition-colors"
           onClick={go}
         >
           {buttonText} &gt;

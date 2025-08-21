@@ -1,5 +1,6 @@
 // src/components/HomePage/Banner/MainBannerActive.tsx
 import { useEffect, useMemo, useState } from "react";
+import { getMyBirthdayCountdown } from "../../../services/user/friendbirthday";
 
 type Props = {
   userName?: string;            // 우선 사용
@@ -36,14 +37,35 @@ const MainBannerActive = ({
   fallbackName = "사용자",
 }: Props) => {
   const [storedName, setStoredName] = useState<string | null>(null);
+  const [apiName, setApiName] = useState<string | null>(null);
 
+  // 1) 프롭이 없으면 localStorage에서 시도
   useEffect(() => {
     if (!userName) setStoredName(readNameFromStorage());
   }, [userName]);
 
+  // 2) 프롭/스토리지 둘 다 없으면 API 폴백
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchName() {
+      if (userName || storedName) return;
+      try {
+        const res = await getMyBirthdayCountdown();
+        if (!cancelled) {
+          const n = res?.user?.name;
+          if (typeof n === "string" && n.trim()) setApiName(n.trim());
+        }
+      } catch {
+        // 실패 시 조용히 fallbackName 사용
+      }
+    }
+    fetchName();
+    return () => { cancelled = true; };
+  }, [userName, storedName]);
+
   const displayName = useMemo(
-    () => userName || storedName || fallbackName,
-    [userName, storedName, fallbackName]
+    () => userName || storedName || apiName || fallbackName,
+    [userName, storedName, apiName, fallbackName]
   );
 
   return (
@@ -55,27 +77,26 @@ const MainBannerActive = ({
                    bg-gradient-to-br from-[#6282E1] to-[#FEC3FF] shadow"
         onClick={onClick}
       >
-        {/* 좌측 모아 캐릭터 (피그마 좌표 반영) */}
+        {/* 좌측 모아 캐릭터 */}
         <img
           src={imageSrc}
           alt="모아 캐릭터"
           className="pointer-events-none select-none absolute
-                     left-[-50px] top-[0px] w-[238.55px] h-[238.55px] rotate-[30deg]"
+                     left-[-55px] top-[-10px] w-[238.55px] h-[238.55px] rotate-[30deg]"
         />
 
-        {/* 타이틀 (20/Bold, 2줄) — 좌표: left 150, top 24 */}
+        {/* 타이틀 */}
         <h2
           className="absolute left-[155px] top-[20px] text-white text-[20px] leading-[1.25]"
-          // leading-100% == 1
         >
           <span className="font-bold">{displayName}님</span>을 위한
           <br />
           모아가 진행 중이에요!
         </h2>
 
-        {/* CTA (12/Medium) — 우하단 */}
+        {/* CTA */}
         <div className="absolute right-[18px] bottom-[18px]">
-          <span className="text-[13px] font- text-white pr-2">
+          <span className="text-[13px] text-white pr-2">
             {buttonText} &gt;
           </span>
         </div>

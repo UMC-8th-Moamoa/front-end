@@ -106,7 +106,7 @@ const SubBannerDefault = ({
 
         <p
           className={clsx(
-            "absolute left-[99px] flex items-center text-[18px] font-medium leading-tight whitespace-pre-line",
+            "absolute left-[99px] flex items-center text-[17px] font-medium leading-tight whitespace-pre-line",
             highlight ? "text-white" : "text-gray-400"
           )}
         >
