@@ -7,6 +7,7 @@ import MainBanner from "../../components/HomePage/Banner/MainBanner";
 import SubBannerCarousel from "../../components/HomePage/Banner/SubBannerCarousel";
 import FriendLetterList from "../../components/HomePage/List/Birthday/FriendLetterList";
 import UpcomingFriendList from "../../components/HomePage/List/Birthday/UpcomingFriendList";
+import CreateMoaLinkButton from "../../components/HomePage/List/Birthday/CreateMoaLinkButton";
 import PopularList from "../../components/HomePage/List/Popular/PopularList";
 import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
 import { dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
@@ -85,6 +86,7 @@ const HomePage = () => {
         <div className="flex flex-col items-center flex-1 overflow-y-auto pb-[30px]">
           <MainBanner {...dummyMainBanner} onClick={() => navigate("/moa-collected")} />
           <SubBannerCarousel />
+          <CreateMoaLinkButton />
           <FriendLetterList />
           {/* ✅ 등록 성공 시 HomePage 배너를 띄우는 콜백 전달 */}
           <PopularList onAdded={handleShowWishBanner} />

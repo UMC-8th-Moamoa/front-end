@@ -51,6 +51,11 @@ import RollingPaperGridPage from "./pages/MoaLetter/RollingPaperPage";
 import ReceiptPage from "./pages/MoaLetter/ReceiptPage";
 import LetterDetailPage from './pages/MoaLetter/LetterDetailPage';
 
+// 데모 페이지
+import DemoLetterPage from './pages/Demo/DemoLetterPage';
+import MyDemoLettersPage from './pages/Demo/MyDemoLettersPage';
+import DemoLetterDetailPage from './pages/Demo/DemoLetterDetailPage';
+
 // 마이페이지 관련 페이지
 import MyPage from './pages/MyPage/MyPage';
 import ProfileEditPage from './pages/MyPage/ProfileEditPage';
@@ -89,6 +94,7 @@ function AppRoutes() {
 
   // 바텀 네비 숨길 페이지 (동적 경로 포함)
   const excludedPaths = [
+    "/demo",
     "/moaletter/write",
     "/moaletter/select-photo",
     "/moaletter/letter-saved",
@@ -234,6 +240,11 @@ function AppRoutes() {
           <Route path="/shopping" element={<ShoppingList />} />
           <Route path="/purchase" element={<PurchasePage />} />
           <Route path="/purchase/payment" element={<PaymentMethodPage />} />
+
+          {/* 데모 페이지 (비회원 접근 가능) */}
+          <Route path="/demo/:shareLink" element={<DemoLetterPage />} />
+          <Route path="/demo/my-letters" element={<MyDemoLettersPage />} />
+          <Route path="/demo/letters/:letterId" element={<DemoLetterDetailPage />} />
         </Routes>
       
 
