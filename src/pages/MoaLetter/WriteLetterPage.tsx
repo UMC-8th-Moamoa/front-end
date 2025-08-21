@@ -8,6 +8,7 @@ import LetterThemeList from "../../components/moaletter/LetterThemeList";
 import LetterContent from "../../components/moaletter/LetterContent";
 import EnvelopeContent, { type EnvelopeHandle } from "../../components/moaletter/EnvelopeContent";
 import { createLetter, updateLetter, getLetterById } from "../../services/letters";
+// ✅ 실제 파일 위치로 경로 바로잡음 (빌드 에러 방지)
 import { uploadEnvelopeImage, dataURLtoBlob } from "../../services/envelope";
 import { getMyNumericId } from "../../services/mypage";
 import { getBirthdayEventDetail } from "../../services/user/event";
@@ -16,16 +17,6 @@ import { fetchUserItems } from "../../api/shopping";
 type ToolType = "none" | "keyboard" | "font" | "theme";
 
 /** -------------------- 유틸 -------------------- */
-function dataURLtoFile(dataUrl: string, fileName = "envelope-center.png"): File {
-  const [meta, b64] = dataUrl.split(",");
-  const mime = /data:(.*?);base64/.exec(meta)?.[1] || "image/png";
-  const bin = atob(b64);
-  const len = bin.length;
-  const u8 = new Uint8Array(len);
-  for (let i = 0; i < len; i++) u8[i] = bin.charCodeAt(i);
-  return new File([u8], fileName, { type: mime });
-}
-
 async function uploadDataUrlAndGetUrl(dataUrl: string): Promise<string> {
   const blob = dataURLtoBlob(dataUrl, "image/jpeg");
   const { fileUrl } = await uploadEnvelopeImage(blob, `envelope-crop-${Date.now()}.jpeg`);
@@ -93,7 +84,7 @@ export default function WriteLetterPage() {
 
   // ✅ 아래 3개는 모두 holditem_id (보관함 아이템 고유번호) 로만 관리한다.
   const [letterPaperId, setLetterPaperId] = useState<number | null>(null); // paper holditem_id
-  const [envelopeId, setEnvelopeId] = useState<number | null>(null);       // seal  holditem_id (서버 기대치 불명 → 실패 시 보정)
+  const [envelopeId, setEnvelopeId] = useState<number | null>(null);       // seal  holditem_id (서버 검증 케이스에 따라 폴백)
   const [fontId, setFontId] = useState<number | null>(null);               // font  holditem_id
 
   const [letterPaperImageUrl, setLetterPaperImageUrl] = useState<string | null>(null);
@@ -188,7 +179,7 @@ export default function WriteLetterPage() {
           console.log("[DEBUG] Fetched previous letter data:", prev);
           setLetterText(prev.content ?? "");
           setLetterPaperId(prev.letterPaperId ?? null); // holditem_id
-          setEnvelopeId(prev.envelopeId ?? null);       // holditem_id (서버 의미 불명)
+          setEnvelopeId(prev.envelopeId ?? null);       // holditem_id
           setEnvelopeImageUrl(prev.envelopeImageUrl ?? null);
           setFontId(prev.fontId ?? null);               // holditem_id
         } catch {
@@ -250,7 +241,7 @@ export default function WriteLetterPage() {
 
       if (!letterPaperId || !paperSet.has(letterPaperId)) {
         console.error("❌ letterPaperId not owned or wrong category", { letterPaperId });
-        setSaveError("편지봉투(종이)를 보유/선택해 주세요.");
+        setSaveError("편지지(배경)를 보유/선택해 주세요.");
         setSaving(false);
         return;
       }
@@ -272,22 +263,22 @@ export default function WriteLetterPage() {
         if (url) finalImageUrl = url; // dataURL 일 수 있음
       }
 
-      // 3) dataURL이면 업로드 → URL 획득
+      // 3) dataURL이면 업로드 → URL 획득 (서버에 dataURL 금지)
       if (finalImageUrl?.startsWith("data:")) {
         try {
           finalImageUrl = await uploadDataUrlAndGetUrl(finalImageUrl);
         } catch (e) {
           console.error("[DEBUG] Center image upload failed:", e);
-          // 업로드 실패 시 스탬프 이미지라도 사용(선택)
+          // 업로드 실패 시 스탬프 이미지라도 사용(정책 선택)
           if (envelopeStampUrl && !envelopeStampUrl.startsWith("data:")) {
             finalImageUrl = envelopeStampUrl;
           } else {
-            finalImageUrl = ""; // 서버엔 dataURL 금지
+            finalImageUrl = "";
           }
         }
       }
       if (!finalImageUrl && envelopeStampUrl) {
-        // 센터 이미지가 없으면 스탬프 이미지라도 세팅(선택 정책)
+        // 센터 이미지가 없으면 스탬프 이미지라도 세팅(정책 선택)
         finalImageUrl = envelopeStampUrl;
       }
 
@@ -330,7 +321,7 @@ export default function WriteLetterPage() {
         const data = err?.response?.data ?? err?.data;
         console.warn("[DEBUG] Save attempt #1 failed", { status, data });
 
-        // 400 & "편지봉투" 메시지인 경우 → 서버가 envelopeId도 paper를 기대할 확률 높음
+        // 400 & "편지봉투" 메시지인 경우 → 서버가 envelopeId도 paper(편지지) 보유품을 기대할 확률 높음
         const msg: string = data?.message || data?.error || data?.reason || "";
         const maybePaperExpected =
           status === 400 &&
@@ -465,7 +456,7 @@ export default function WriteLetterPage() {
           </div>
 
           {activeTab === "letter" && (
-            <div className="z-30 bg-white w-full flex flex-col items-center">
+            <div className="z-30 bg-white w-full flex flex-col itemscenter">
               <Toolbar
                 activeTool={activeTool}
                 onKeyboardClick={handleKeyboardClick}

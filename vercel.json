@@ -1,8 +1,11 @@
 {
-  "version": 2,
   "rewrites": [
+    { "source": "/api/auth/kakao/success", "destination": "/index.html" },
+    { "source": "/api/auth/kakao/complete-profile", "destination": "/index.html" },
+
     { "source": "/api/(.*)", "destination": "https://www.moamoas.com/api/$1" },
-    { "source": "/auth/callback", "destination": "/index.html" },
+
+    { "source": "/auth/(.*)", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

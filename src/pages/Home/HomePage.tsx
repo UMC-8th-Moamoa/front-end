@@ -1,5 +1,5 @@
 // src/pages/HomePage.tsx
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TopBar from "../../components/common/TopBar";
 import BirthdayBanner from "../../components/HomePage/Banner/BirthdayBanner";
@@ -10,9 +10,13 @@ import UpcomingFriendList from "../../components/HomePage/List/Birthday/Upcoming
 import CreateMoaLinkButton from "../../components/HomePage/List/Birthday/CreateMoaLinkButton";
 import PopularList from "../../components/HomePage/List/Popular/PopularList";
 import BottomNavigation, { type MenuType } from "../../components/common/BottomNavigation";
-import { dummyMainBanner } from "../../components/HomePage/Banner/BannerDummy";
 import Calendar from "../../components/HomePage/Calendar/Calendar";
 import { Modal } from "../../components/common/Modal";
+
+// ✅ 추가
+import { fetchMoasAndBanners } from "../../services/banner/banner";
+import type { MainBannerPayload } from "../../services/banner/banner";
+import { navigateByMainBanner } from "../../services/banner/route";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -21,6 +25,30 @@ const HomePage = () => {
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [showWishBanner, setShowWishBanner] = useState(false);
   const bannerTimer = useRef<number | null>(null);
+
+  // ✅ 메인배너 상태
+  const [mainBanner, setMainBanner] = useState<MainBannerPayload | null>(null);
+  const [loadingMain, setLoadingMain] = useState(true);
+
+  // ✅ 유저 이름 (localStorage에서 추출, 있으면 사용)
+  const userName = useMemo(() => {
+    try {
+      const direct =
+        localStorage.getItem("userName") ||
+        localStorage.getItem("username") ||
+        localStorage.getItem("name");
+      if (direct) return direct;
+      const raw =
+        localStorage.getItem("profile") ||
+        localStorage.getItem("user") ||
+        localStorage.getItem("me");
+      if (raw) {
+        const o = JSON.parse(raw);
+        return o?.name ?? o?.userName ?? o?.username ?? undefined;
+      }
+    } catch {}
+    return undefined;
+  }, []);
 
   useEffect(() => {
     if (location.state?.showTransferPendingModal) {
@@ -40,6 +68,46 @@ const HomePage = () => {
       if (bannerTimer.current) window.clearTimeout(bannerTimer.current);
     };
   }, []);
+
+  // ✅ 메인배너 API 호출
+  useEffect(() => {
+    let mounted = true;
+    fetchMoasAndBanners({ limit: 10 })
+      .then((s) => {
+        if (!mounted) return;
+        setMainBanner(s.mainBanner ?? null);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setMainBanner(null);
+      })
+      .finally(() => mounted && setLoadingMain(false));
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // ✅ 배너 클릭 시 라우팅
+  const handleMainBannerClick = (moaId: number | null, type: any) => {
+    navigateByMainBanner(navigate, { type, moaId });
+  };
+
+  // ✅ participating: 홈 진입 시 UpcomingList로 스크롤
+  useEffect(() => {
+    if (location.state?.scrollTo === "upcoming") {
+      // 렌더 완료 이후 스크롤
+      const t = setTimeout(() => {
+        const el = document.getElementById("upcoming-list");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 0);
+      // state 제거(뒤로가기 등에서 반복 스크롤 방지)
+      // react-router로 깔끔히 비우기
+      navigate(".", { replace: true, state: {} });
+      return () => clearTimeout(t);
+    }
+  }, [location.state, navigate]);
 
   const handleNavigate = (menu: MenuType) => {
     switch (menu) {
@@ -84,15 +152,34 @@ const HomePage = () => {
 
         {/* 스크롤 가능한 콘텐츠 */}
         <div className="flex flex-col items-center flex-1 overflow-y-auto pb-[30px]">
-          <MainBanner {...dummyMainBanner} onClick={() => navigate("/moa-collected")} />
-          <SubBannerCarousel />
+          {/* ✅ 메인배너 영역: 로딩 스켈레톤 -> 실제 배너 */}
+          {loadingMain ? (
+            <div className="w-[350px] h-[120px] rounded-[20px] bg-gray-100 animate-pulse mt-2" />
+          ) : mainBanner ? (
+            <MainBanner
+              payload={mainBanner}
+              userName={userName}
+              onClick={handleMainBannerClick}
+            />
+          ) : null}
+
+          {/* ✅ 서브배너: userName 전달 */}
+          <SubBannerCarousel userName={userName} />
           <CreateMoaLinkButton />
+
           <FriendLetterList />
-          {/* ✅ 등록 성공 시 HomePage 배너를 띄우는 콜백 전달 */}
           <PopularList onAdded={handleShowWishBanner} />
-          <UpcomingFriendList />
-          <BirthdayBanner/>
-          <Calendar />
+
+          {/* ✅ 여기 id로 앵커 지정 */}
+          <div id="upcoming-list">
+            <UpcomingFriendList />
+          </div>
+
+          <BirthdayBanner />
+          {/* 캘린더 아래 20px */}
+          <div className="mb-10">
+            <Calendar />
+          </div>
         </div>
 
         {/* BottomNavigation 고정 */}

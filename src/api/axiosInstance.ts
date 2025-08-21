@@ -28,26 +28,23 @@ const AUTH_FREE_PREFIXES = [
   "/auth/kakao/callback",
 ];
 
-/** 요청 인터셉터 */
+/** 요청 인터셉터: 중복 /api 제거 + AT 자동 첨부 + 헤더 정리 */
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   try {
     // 0) URL에 /api 가 두 번 붙는 실수 방지
-    // baseURL = "/api" 이므로, config.url이 "/api/..."로 오면 "/..."로 바꿈
-    if (config.url?.startsWith("/api/")) {
-      config.url = config.url.slice(4); // "/api" 제거
-    } else if (config.url === "/api") {
-      config.url = "/";
-    }
+    if (config.url?.startsWith("/api/")) config.url = config.url.slice(4);
+    else if (config.url === "/api") config.url = "/";
 
-    // 1) 헤더 래핑
+    // 1) 헤더 래핑 (AxiosHeaders/POJO 모두 대응)
     const headers =
       config.headers instanceof AxiosHeaders
         ? config.headers
         : new AxiosHeaders(config.headers);
 
-    // 2) 토큰 (화이트리스트 제외)
+    // 2) AccessToken (화이트리스트 제외)
     const rawUrl = config.url || "";
     const logicalUrl = rawUrl.startsWith("/api/") ? rawUrl.slice(4) : rawUrl;
+
     if (!AUTH_FREE_PREFIXES.some((p) => logicalUrl.startsWith(p))) {
       if (typeof window !== "undefined") {
         const at = window.localStorage.getItem("accessToken");
@@ -64,7 +61,6 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
       headers.delete("Content-Type");
       headers.delete("content-type");
     } else {
-      // JSON 바디일 때만 Content-Type 지정
       const method = (config.method || "get").toLowerCase();
       const hasBody = method === "post" || method === "put" || method === "patch";
       const isJsonLike =
@@ -122,11 +118,12 @@ export function clearTokens() {
     window.localStorage.removeItem("accessToken");
     window.localStorage.removeItem("refreshToken");
   }
+  // 다양한 케이스 대비해서 둘 다 제거
   delete (instance.defaults.headers as any).common?.Authorization;
   delete (instance.defaults.headers as any).common?.authorization;
 }
 
-// GET 캐시 비활성화
+/** GET 캐시 비활성화(ETag/If-Modified-Since 무시) */
 const getDefaults = (instance.defaults.headers as any).get || {};
 (getDefaults as any)["If-Modified-Since"] = "0";
 (getDefaults as any)["Cache-Control"] = "no-cache";

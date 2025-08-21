@@ -1,15 +1,14 @@
 // src/pages/Shopping/ShoppingList.tsx
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-
 import {
   fetchItemList,
   fetchUserItems,
   buyItem,
-  fetchItemDetail, // 이름/이미지 보강용
+  fetchItemDetail,        // 상세 정보 보강용
   type ShopItem,
   type UserItem,
 } from '../../api/shopping';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import ShoppingTopBar from '../../components/Shopping/ShoppingTopBar';
 import BottomNavigation, { type MenuType } from '../../components/common/BottomNavigation';
@@ -20,9 +19,6 @@ import { Modal } from '../../components/common/Modal';
 import toast, { Toaster } from 'react-hot-toast';
 import ItemCard from '../../components/Shopping/ItemCard';
 import api from '../../api/axiosInstance';
-
-// 필요 시 배너 쓰려면 주석 해제
-// import { AdBanner } from '../../components/Shopping/AdBanner';
 
 type UiTab = '폰트' | '편지지' | '우표' | '보관함';
 type ApiCategory = 'font' | 'paper' | 'seal';
@@ -45,7 +41,7 @@ function parseJwt<T = any>(token?: string | null): T | null {
   }
 }
 
-/** /auth/me 로 사용자 정보 조회 */
+/** /auth/me 로 사용자 정보 조회 (필요 시) */
 async function fetchMe(): Promise<{ user_id?: string } | null> {
   try {
     const { data } = await api.get('/auth/me', {
@@ -100,16 +96,11 @@ export default function ShoppingList() {
       shopping: '/shopping',
       heart: '/wishlist',
       home: '/home',
-      letter: '/messages',
+      letter: '/moaletter/preview',
       mypage: '/mypage',
     };
     navigate(menuToPathMap[menu]);
   };
-
-  // TODO: /api/points 연동해서 실제 MC 반영
-  const userMC = 20;
-
-  const [selectedTab, setSelectedTab] = useState<UiTab>('폰트');
 
   // 상점 목록
   const [items, setItems] = useState<ShopItem[]>([]);
@@ -121,29 +112,52 @@ export default function ShoppingList() {
   const [userLoading, setUserLoading] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
 
-  // 상세/구매 관련 UI
+  // UI 상태
+  const [userMC, setUserMC] = useState<number | null>(null);
+  const [balanceError, setBalanceError] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<UiTab>('폰트');
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [purchasing, setPurchasing] = useState(false); // 이중 클릭 방지
+  const [purchasing, setPurchasing] = useState(false);
 
-  // 배너 이미지 (필요 시)
-  const bannerImages: Record<'폰트' | '편지지' | '우표', string> = {
-    폰트: '/banners/font-banner.png',
-    편지지: '/banners/paper-banner.png',
-    우표: '/banners/stamp-banner.png',
+
+  // 몽코인 잔액 조회
+
+  const fetchBalance = async () => {
+    try {
+      setBalanceError(null);
+      const { data } = await api.get('/payment/balance', {
+        headers: { 'Cache-Control': 'no-cache' },
+
+        params: { _t: Date.now() },  // 캐시 버스터
+        withCredentials: true,
+      });
+
+      const s = data?.success ?? data;
+      const core = s?.data ?? s;
+      const bal = Number(core?.balance);
+      if (!Number.isFinite(bal)) throw new Error('잔액 값을 파싱할 수 없습니다.');
+      setUserMC(bal);
+    } catch (e: any) {
+      setUserMC(0);
+      if (e?.response?.status === 401) setBalanceError('로그인이 필요합니다.');
+      else setBalanceError(e?.message || '잔액 조회에 실패했습니다.');
+    }
   };
 
-  // API 카테고리 (seal 사용)
+  // ✅ 마운트 시 잔액 불러오기
+  useEffect(() => {
+    fetchBalance();
+
+  }, []);
+
+  // API 카테고리 (envelope 제거, seal 사용)
   const apiCategory = useMemo<ApiCategory | null>(() => {
     switch (selectedTab) {
-      case '폰트':
-        return 'font';
-      case '편지지':
-        return 'paper';
-      case '우표':
-        return 'seal';
-      default:
-        return null;
+      case '폰트': return 'font';
+      case '편지지': return 'paper';
+      case '우표': return 'seal';
+      default: return null;
     }
   }, [selectedTab]);
 
@@ -185,8 +199,8 @@ export default function ShoppingList() {
 
       // name이 비거나 공백인 항목만 상세 API로 보강
       const needLookup = base.filter((u) => !u.name || !u.name.trim());
+
       if (needLookup.length) {
-        // (category,item_no) 단위 중복 제거
         const keys = new Map<string, UserItem>();
         needLookup.forEach((u) => {
           if (u.item_no == null) return;
@@ -197,7 +211,7 @@ export default function ShoppingList() {
         const results = await Promise.all(
           Array.from(keys.values()).map(async (u) => {
             const { name, image } = await fetchItemDetail({
-              category: u.category, // 이미 'seal' 체계
+              category: u.category,
               id: Number(u.item_no),
             });
             return { key: `${u.category}|${u.item_no}`, name, image };
@@ -214,7 +228,7 @@ export default function ShoppingList() {
           if (!found) return u;
           return {
             ...u,
-            name: u.name?.trim() ? u.name : found.name ?? '',
+            name: u.name?.trim() ? u.name : (found.name ?? ''),
             image: u.image ?? found.image,
           };
         });
@@ -239,14 +253,17 @@ export default function ShoppingList() {
     }
   }, [selectedTab]);
 
+  /** 구매 버튼 클릭 시: 잔액 로딩 중/부족 가드 */
   const handleBuy = (item: any) => {
-    if (userMC < (item.price ?? 0)) {
+    if (userMC === null) {
+      toast.loading('잔액 확인 중입니다…', { id: 'bal-check' });
+      setTimeout(() => toast.dismiss('bal-check'), 600);
+      return;
+    }
+    const balance = userMC;
+    if (balance < (item.price ?? 0)) {
       toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? 'animate-enter' : 'animate-leave'
-          } bg-white rounded-xl shadow-md px-6 py-4 w-[330px] text-center`}
-        >
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} bg-white rounded-xl shadow-md px-6 py-4 w-[330px] text-center`}>
           <p className="text-base font-base text-black mb-2">몽코인이 부족합니다</p>
           <button
             onClick={() => {
@@ -265,7 +282,7 @@ export default function ShoppingList() {
     setIsModalOpen(true);
   };
 
-  /** 구매 확정 → /api/shopping/item_buy, 성공/중복 모두 보관함 갱신 */
+  /** 구매 확정 → /api/shopping/item_buy, 성공/중복 모두 보관함 + 잔액 갱신 */
   const handleConfirmBuy = async () => {
     if (!selectedItem || !apiCategory || purchasing) return;
 
@@ -283,7 +300,7 @@ export default function ShoppingList() {
       const event = Number(selectedItem.price ?? 0) === 0;
       const body = {
         category: apiCategory as ApiCategory,
-        user_id: userId, // 문자열 user_id
+        user_id: userId,
         item_no: Number(selectedItem.id),
         price: Number(selectedItem.price ?? 0),
         event,
@@ -298,6 +315,8 @@ export default function ShoppingList() {
 
       if (ok) {
         toast.success(`${selectedItem.name} 구매 완료!`);
+        // 잔액도 갱신
+        fetchBalance();
       } else {
         const reason = data?.error?.reason || data?.success?.message || '';
         if (/Unique constraint|이미 보유/i.test(reason)) {
@@ -307,8 +326,9 @@ export default function ShoppingList() {
         }
       }
 
-      // 보관함 갱신 + 탭 전환
+      // 보관함 갱신 + 탭 전환 + ✅ 잔액 재조회
       await loadUserItems();
+      await fetchBalance();
       setSelectedTab('보관함');
     } catch (err: any) {
       const reason =
@@ -321,6 +341,7 @@ export default function ShoppingList() {
       } else if (/Unique constraint|이미 보유/i.test(String(reason))) {
         toast.success('이미 보유중인 아이템입니다.');
         await loadUserItems();
+        await fetchBalance(); // ✅ 중복 보유여도 잔액 변동 가능성 고려 시 갱신
         setSelectedTab('보관함');
       } else {
         toast.error(reason);
@@ -334,23 +355,24 @@ export default function ShoppingList() {
   };
 
   const getHeaderProps = () => {
-    if (selectedTab === '보관함') {
-      return {
-        title: '아이템 보관함',
-        type: 'filter' as const,
-        options: ['전체 보기', '폰트', '편지지', '편지봉투'],
-      };
+    switch (selectedTab) {
+      case '보관함':
+        return {
+          title: '아이템 보관함',
+          type: 'filter' as const,
+          options: ['전체 보기', '폰트', '편지지', '편지봉투'],
+        };
+      default:
+        return {
+          title: '신규 출시',
+          type: 'sort' as const,
+          options: ['최신 출시', '최초 출시', '높은 가격순', '낮은 가격순'],
+        };
     }
-    return {
-      title: '신규 출시',
-      type: 'sort' as const,
-      options: ['최신 출시', '최초 출시', '높은 가격순', '낮은 가격순'],
-    };
   };
 
   const [selectedOption, setSelectedOption] = useState(getHeaderProps().options[0]);
   useEffect(() => {
-    // 탭이 바뀌면 헤더 옵션도 기본값으로 초기화
     setSelectedOption(getHeaderProps().options[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
@@ -381,9 +403,18 @@ export default function ShoppingList() {
           <ItemCard
             key={it.holditem_id}
             id={String(it.holditem_id)}
-            name={it.name?.trim() || '(이름 없음)'}
+            name={it.name?.trim() || '이름 없음'}
             imageUrl={it.image}
             priceLabel="보유중"
+            onClick={() =>
+              setSelectedItem({
+                id: it.item_no,                  // 상세 조회에 쓰는 원본 아이템 id
+                name: it.name,
+                image: it.image,
+                category: it.category,           // 'font' | 'paper' | 'seal'
+                price: undefined,
+              })
+            }
           />
         ))}
       </div>
@@ -393,7 +424,7 @@ export default function ShoppingList() {
   return (
     <div className="min-h-screen max-w-[393px] mx-auto flex flex-col justify-between bg-white">
       <div className="w-full flex flex-col relative">
-        <ShoppingTopBar userMC={userMC} />
+        <ShoppingTopBar userMC={userMC ?? 0} />
         <TopMenu selected={selectedTab} onChange={setSelectedTab} />
         <ShopHeader
           title={getHeaderProps().title}
@@ -402,11 +433,6 @@ export default function ShoppingList() {
           selected={selectedOption}
           onSelect={setSelectedOption}
         />
-
-        {/* 필요 시 배너 */}
-        {/* {selectedTab !== '보관함' && (
-          <AdBanner imageUrl={bannerImages[selectedTab as '폰트' | '편지지' | '우표']} />
-        )} */}
 
         {/* 아이템 목록 / 보관함 전환 렌더 */}
         {selectedTab === '보관함' ? (
@@ -419,8 +445,7 @@ export default function ShoppingList() {
               {!loading && !loadError && (
                 <div className="grid grid-cols-2 gap-3">
                   {items.map((it) => {
-                    const priceLabel =
-                      (it.price ?? 0) === 0 ? '무료' : `${it.price.toLocaleString()}MC`;
+                    const priceLabel = (it.price ?? 0) === 0 ? '무료' : `${it.price.toLocaleString()}MC`;
                     return (
                       <ItemCard
                         key={it.item_no}
@@ -446,14 +471,14 @@ export default function ShoppingList() {
           )
         )}
 
-        {/* 상세 카드 오버레이 (상점 리스트에서만 열림) */}
-        {selectedItem && selectedTab !== '보관함' && (
+        {/* 상세 카드 오버레이 */}
+        {selectedItem && (
           <div
             className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
             onClick={() => setSelectedItem(null)}
           >
-            <div className="relative z-60" onClick={(e) => e.stopPropagation()}>
-              <ItemCardDetail item={selectedItem} onBuy={handleBuy} category={apiCategory!} />
+            <div className="relative z-120" onClick={(e) => e.stopPropagation()}>
+              <ItemCardDetail item={selectedItem} onBuy={handleBuy} category={selectedItem.category} />
             </div>
           </div>
         )}

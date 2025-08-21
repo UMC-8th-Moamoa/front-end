@@ -8,7 +8,7 @@ import OAuthCallback from './pages/Login/OAuthCallback';
 // 로그인/회원가입 관련 페이지
 import Login from "./pages/Login/Login";
 import FindIdPage from "./pages/Login/FindIdPage";
-import ResetPasswordPage from "./pages/Login/ResetPasswordPage";
+// import ResetPasswordPage from "./pages/Login/ResetPasswordPage";
 import SignUpPage from "./pages/Login/SignUpPage";
 import SignupNamePage from "./pages/Login/SignUpNamePage";
 import SignupBirthdayPage from "./pages/Login/SignUpBirthdayPage";
@@ -68,6 +68,9 @@ import CustomerServiceDetailPage from './pages/MyPage/CustomerServiceDetailPage'
 import OtherUserFollowListPage from './pages/MyPage/OtherUserFollowListPage';
 import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage'; 
 import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
+import KakaoBridge from './pages/Login/KakaoBridge';
+import MyParticipationPage from './pages/Home/MyParticipationPage';
+import BankTransferPage from './pages/Home/MoaMoney/BankTransferPage';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -131,6 +134,9 @@ function AppRoutes() {
     "/convert-to-mong-complete",
     "/alarm",
     "/gift-certification",
+    "/myparticipation",
+    "/bank-transfer",
+    "/signup",
 
     "/login",
     "/find-id",
@@ -167,8 +173,10 @@ function AppRoutes() {
           {/* 로그인/회원가입 */}
           <Route path="/login" element={<Login />} />
           <Route path="/find-id" element={<FindIdPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          {/* <Route path="/reset-password" element={<ResetPasswordPage />} /> */}
           <Route path="/auth/callback" element={<OAuthCallback />} />
+          <Route path="/auth/kakao/success"  element={<OAuthCallback />} />
+          <Route path="/auth/kakao/complete-profile" element={<KakaoBridge />} />
 
           {/* 회원가입(스텝) */}
           <Route
@@ -209,6 +217,7 @@ function AppRoutes() {
           <Route path="/wishlist/select-photo" element={<SelectWishPhotoPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/participation" element={<ParticipationPage />} />
+          <Route path="/myparticipation" element={<MyParticipationPage/>} />
           <Route path="/vote-wish" element={<VoteWishPage />} />
           <Route path="/moa-collected" element={<MoaCollectedPage/>} />
           <Route path="/pick-gift" element={<PickGiftPage />} />
@@ -219,6 +228,7 @@ function AppRoutes() {
           <Route path="/donation-select" element={<DonationSelectPage />} />
           <Route path="/donation-complete" element={<DonationCompletePage />} />
           <Route path="/convert-to-mong" element={<ConvertToMongPage />} />
+          <Route path="/bank-transfer" element={<BankTransferPage />} />
           <Route path="/convert-to-mong-complete" element={<ConvertToMongCompletePage />} />
           <Route path="/select-remittance" element={<SelectRemittancePage />} />
           <Route path="/alarm" element={<AlarmPage />} />

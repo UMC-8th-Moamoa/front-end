@@ -178,7 +178,7 @@ const Calendar = () => {
   };
 
   return (
-    <div className="mt-[20px] mb-[20px] rounded-[16px] p-4 w-[350px] min-h-[360px] bg-white border-[1px] border-[#97B1FF] flex flex-col items-center relative overflow-visible">
+    <div className="mt-[20px] mb-[10px] rounded-[16px] p-4 w-[350px] min-h-[360px] bg-white border-[1px] border-[#97B1FF] flex flex-col items-center relative overflow-visible">
       {/* 월 제목 및 좌우 화살표 */}
       <div className="flex items-center justify-between w-full px-2 mb-1">
         <button onClick={handlePrevMonth} aria-label="이전 달">

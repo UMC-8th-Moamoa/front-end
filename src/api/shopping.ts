@@ -1,5 +1,5 @@
 // src/api/shopping.ts
-import api from '../api/axiosInstance';
+import api from './axiosInstance'; 
 
 /** ---------- Types (server payloads) ---------- */
 export type ShopItem = {
@@ -17,7 +17,7 @@ export type ItemListResponse = {
 
 /** 보관함(내 아이템) */
 export type UserItem = {
-  holditem_id: number;                 // 표준화된 보관함 아이템 고유번호
+  holditem_id: number;
   category: 'font' | 'paper' | 'seal';
   name: string;
   image?: string;
@@ -66,7 +66,10 @@ type UserItemsPayload = {
 
 /** ---------- Normalizers ---------- */
 function normalizeItemList(p?: ItemListPayload | null): ItemListResponse {
-  const list = p?.itemListEntry ?? p?.item ?? [];
+  const list = (p?.itemListEntry ?? p?.item ?? []).map((it: any) => ({
+    ...it,
+    image: it.image ?? it.imageUrl ?? it.img ?? null,
+  }));
   return {
     success: Boolean(p?.success ?? Array.isArray(list)),
     num: Number(p?.num ?? list.length),
@@ -97,7 +100,30 @@ function normalizeUserItems(p?: UserItemsPayload | null): UserItemsResponse {
   };
 }
 
-/** ---------- API functions ---------- */
+
+/** ---------- API: 잔액 ---------- */
+export type BalanceInfo = { balance: number; userId?: string; name?: string };
+
+/** GET /api/payment/balance */
+export async function fetchBalance(): Promise<BalanceInfo> {
+  const { data } = await api.get('/payment/balance', {
+    headers: { 'Cache-Control': 'no-cache' },
+    params: { _t: Date.now() },
+    withCredentials: true,
+  });
+
+  // 래퍼/비래퍼 모두 흡수
+  const body = (data as any)?.success ?? data;
+  const core = body?.data ?? body;
+
+  return {
+    balance: Number(core?.balance ?? 0),
+    userId: core?.userId ?? core?.user_id ?? undefined,
+    name: core?.name ?? undefined,
+  };
+}
+
+/** ---------- API: 쇼핑 ---------- */
 
 /** 쇼핑 아이템 목록 */
 export async function fetchItemList(
@@ -108,35 +134,82 @@ export async function fetchItemList(
     params: { category, num, _t: Date.now() },
     headers: { 'Cache-Control': 'no-cache' },
   });
-  return normalizeItemList((data as any)?.success);
+  return normalizeItemList((data as any)?.success ?? (data as any));
 }
 
-/** 내 보관함 아이템 목록 (JWT 필요) */
+/** 상세 보기(단건) */
+export async function fetchItemDetail(opts: {
+  category: 'font' | 'paper' | 'seal';
+  id: number;
+}) {
+  const { data } = await api.get('/shopping/item_detail', {
+    params: { category: opts.category, id: opts.id, _t: Date.now() },
+    headers: { 'Cache-Control': 'no-cache' },
+  });
+
+  const payload = (data as any)?.success ?? (data as any);
+  const arr = Array.isArray(payload?.item) ? payload.item : [];
+  const first: any = arr[0] ?? {};
+
+  return {
+    name: first?.name,
+    image: first?.image ?? first?.imageUrl ?? first?.img ?? null,
+    detail: first?.detail ?? first?.description ?? '',
+    price: first?.price,
+  };
+}
+
+/** 이름/이미지 비어있는 보관함 아이템 보강 */
+async function enrichUserItems(items: UserItem[]): Promise<UserItem[]> {
+  const targets = items.filter(
+    (u) => (!u.name || !u.name.trim()) && u.item_no != null
+  );
+  if (!targets.length) return items;
+
+  const uniqueKeys = Array.from(
+    new Set(targets.map((u) => `${u.category}|${u.item_no}`))
+  );
+
+  const detailMap = new Map<string, { name?: string; image?: string }>();
+  await Promise.all(
+    uniqueKeys.map(async (key) => {
+      const [category, idStr] = key.split('|');
+      const id = Number(idStr);
+      try {
+        const detail = await fetchItemDetail({
+          category: category as 'font' | 'paper' | 'seal',
+          id,
+        });
+        detailMap.set(key, { name: detail.name, image: detail.image ?? undefined });
+      } catch {
+        // ignore and continue
+      }
+    })
+  );
+
+  return items.map((u) => {
+    if (u.item_no == null) return u;
+    const key = `${u.category}|${u.item_no}`;
+    const found = detailMap.get(key);
+    if (!found) return u;
+    return {
+      ...u,
+      name: u.name?.trim() ? u.name : (found.name ?? ''),
+      image: u.image ?? found.image,
+    };
+  });
+}
+
+/** 내 보관함 아이템 목록 (JWT 필요) — 이름/이미지 자동 보강 */
 export async function fetchUserItems(num: number): Promise<UserItemsResponse> {
   const { data } = await api.get<Envelope<UserItemsPayload>>('/shopping/user_item', {
     params: { num, _t: Date.now() },
     headers: { 'Cache-Control': 'no-cache' },
   });
-  return normalizeUserItems((data as any)?.success ?? (data as any));
-}
 
-/** 상세 보기 — 스웨거 준수: /shopping/item_detail?id= */
-export async function fetchItemDetail(opts: {
-  id: number;
-}): Promise<{ name?: string; image?: string; detail?: string; price?: number }> {
-  const { data } = await api.get('/shopping/item_detail', {
-    params: { id: opts.id, _t: Date.now() },
-    headers: { 'Cache-Control': 'no-cache' },
-  });
-
-  // 예시: { success: true, itemDetailEntry: {...} }
-  const entry = (data as any)?.itemDetailEntry ?? {};
-  return {
-    name: entry?.name,
-    image: entry?.image,
-    detail: entry?.detail,
-    price: entry?.price,
-  };
+  const normalized = normalizeUserItems((data as any)?.success ?? (data as any));
+  const enrichedList = await enrichUserItems(normalized.itemListEntry);
+  return { ...normalized, itemListEntry: enrichedList };
 }
 
 /** 구매 API */
@@ -149,3 +222,4 @@ export async function buyItem(payload: {
 }) {
   return api.post('/shopping/item_buy', payload);
 }
+

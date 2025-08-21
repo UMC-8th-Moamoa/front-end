@@ -1,16 +1,15 @@
 // components/Purchase/PaidChargeSection.tsx
 import ChangeOptionList from "./ChargeOptionList";
-import QuantityCounter from "./QuantityCounter";
+// import QuantityCounter from "./QuantityCounter";
 import Button from "../common/Button";
 import { useNavigate } from "react-router-dom";
-
-
 
 type Option = {
   id: number;
   label: string;
   price: number;
   discount?: number;
+  packageId: string;   
 };
 
 type Props = {
@@ -31,6 +30,8 @@ export default function PaidChargeSection({
   totalPrice,
 }: Props) {
   const navigate = useNavigate();
+  const selected = options.find(o => o.id === selectedId);
+
   return (
     <>
       <div className="px-5 py-4">
@@ -56,14 +57,19 @@ export default function PaidChargeSection({
       <div className="px-5 py-4 mt-auto fixed bottom-0 bg-white w-full max-w-[393px]">
         <div className="flex justify-between items-center mb-3">
           <p className="text-xl font-semibold">₩ {totalPrice.toLocaleString()}</p>
-          <QuantityCounter value={quantity} onChange={onChangeQuantity} />
+          {/* <QuantityCounter value={quantity} onChange={onChangeQuantity} /> */}
         </div>
         <Button
           variant="primary"
           className="w-full mb-4"
           onClick={() => {
+            if (!selected) return;
             navigate('/purchase/payment', {
-              state: { price: totalPrice }, 
+              state: {
+                price: totalPrice,
+                quantity,
+                packageId: selected.packageId,  
+              },
             });
           }}
         >

@@ -2,13 +2,32 @@ import { useNavigate } from "react-router-dom";
 
 interface UpcomingFriendItemProps {
   name: string;
-  displayDate: string;   // API: "8월 23일"
-  dday: number;          // API: dDay
-  image?: string | null; // 친구 프로필 이미지 URL
+  displayDate: string;   // 예: "8월 23일"
+  dday: number;          // 서버 제공값(표시 보정용으로만 참고)
+  image?: string | null;
   eventId?: number | string | null;
 }
 
 const DEFAULT_PROFILE = "/assets/profile.svg";
+
+// "8월 23일" → {month, day}
+function parseMonthDayFromDisplay(s: string): { month: number; day: number } | null {
+  const m = String(s ?? "").match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일/);
+  if (!m) return null;
+  const month = +m[1], day = +m[2];
+  if (month >= 1 && month <= 12 && day >= 1 && day <= 31) return { month, day };
+  return null;
+}
+
+// 다음 발생(올해 또는 내년)까지 남은 '정수 일수'
+function daysUntilNext(md: { month: number; day: number }): number {
+  const now = new Date();
+  const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let target0 = new Date(now.getFullYear(), md.month - 1, md.day, 0, 0, 0, 0);
+  if (target0 < today0) target0 = new Date(now.getFullYear() + 1, md.month - 1, md.day, 0, 0, 0, 0);
+  const diff = Math.floor((target0.getTime() - today0.getTime()) / 86400000);
+  return Math.max(0, diff);
+}
 
 const UpcomingFriendItem = ({
   name,
@@ -18,7 +37,12 @@ const UpcomingFriendItem = ({
   eventId,
 }: UpcomingFriendItemProps) => {
   const navigate = useNavigate();
-  const isUrgent = dday <= 7;
+
+  const md = parseMonthDayFromDisplay(displayDate);
+  const displayDday = md ? daysUntilNext(md) : Math.max(0, Math.floor(dday ?? 0));
+
+  const dText = displayDday === 0 ? "D-DAY" : `D-${displayDday}`;
+  const isUrgent = displayDday <= 7;
 
   const handleClick = () => {
     const n = Number(eventId);
@@ -26,7 +50,6 @@ const UpcomingFriendItem = ({
     else navigate(`/participation`);
   };
 
-  // 프로필 이미지: 없으면 기본 이미지로 표시
   const src = (image ?? "").trim() || DEFAULT_PROFILE;
 
   return (
@@ -38,7 +61,6 @@ const UpcomingFriendItem = ({
         className="w-[64px] h-[64px] rounded-full object-cover bg-gray-300"
         onError={(e) => {
           const img = e.currentTarget as HTMLImageElement;
-          // 깨진 링크일 때 기본 이미지로 폴백 (무한 루프 방지)
           if (!img.src.endsWith("profile.svg")) {
             img.src = DEFAULT_PROFILE;
           }
@@ -51,7 +73,7 @@ const UpcomingFriendItem = ({
           {displayDate}
           <span className={isUrgent ? "text-red-500" : "text-[#B7B7B7]"}>
             {" "}
-            (D-{dday})
+            ({dText})
           </span>
         </p>
       </div>

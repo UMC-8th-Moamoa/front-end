@@ -15,7 +15,6 @@ interface FriendLetterItemProps {
 function parseMonthDay(input: unknown): { month: number; day: number } | null {
   if (input == null) return null;
 
-  // 숫자(타임스탬프)
   if (typeof input === "number") {
     const d = new Date(input);
     if (!Number.isNaN(d.getTime())) return { month: d.getMonth() + 1, day: d.getDate() };
@@ -25,39 +24,45 @@ function parseMonthDay(input: unknown): { month: number; day: number } | null {
   const s = String(input).trim();
   if (!s) return null;
 
-  // 1) YYYY-MM-DD / YYYY/MM/DD / YYYY.MM.DD
   let m = s.match(/^\s*\d{4}[-/.](\d{1,2})[-/.](\d{1,2})/);
   if (m) {
     const mm = +m[1], dd = +m[2];
     if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) return { month: mm, day: dd };
   }
 
-  // 2) MM-DD / MM/DD / MM.DD
   m = s.match(/^\s*(\d{1,2})[-/.](\d{1,2})\s*$/);
   if (m) {
     const mm = +m[1], dd = +m[2];
     if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) return { month: mm, day: dd };
   }
 
-  // 3) "MM월 DD일"
   m = s.match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일/);
   if (m) {
     const mm = +m[1], dd = +m[2];
     if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) return { month: mm, day: dd };
   }
 
-  // 4) YYYYMMDD
   m = s.match(/^\s*(\d{4})(\d{2})(\d{2})\s*$/);
   if (m) {
     const mm = +m[2], dd = +m[3];
     if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) return { month: mm, day: dd };
   }
 
-  // 5) Date 파서 마지막 시도 (브라우저가 이해 가능한 문자열)
   const d = new Date(s);
   if (!Number.isNaN(d.getTime())) return { month: d.getMonth() + 1, day: d.getDate() };
-
   return null;
+}
+
+/** 오늘(로컬) 0시 기준, 다음 생일까지 남은 ‘정수 일수’ 계산 */
+function calcDaysUntilNextBirthday(md: {month:number; day:number}): number {
+  const now = new Date();
+  const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  let target = new Date(now.getFullYear(), md.month - 1, md.day, 0, 0, 0, 0);
+  if (target < today0) {
+    target = new Date(now.getFullYear() + 1, md.month - 1, md.day, 0, 0, 0, 0);
+  }
+  const diffMs = target.getTime() - today0.getTime();
+  return Math.max(0, Math.floor(diffMs / 86400000)); // 86,400,000ms = 1day
 }
 
 const FriendLetterItem = ({
@@ -75,6 +80,14 @@ const FriendLetterItem = ({
     return md ? `${md.month}월 ${md.day}일` : "날짜 미정";
   }, [birthday]);
 
+  // ✅ 표시용 D-day(오프바이원 보정)
+  const displayDaysLeft = useMemo(() => {
+    const md = parseMonthDay(birthday);
+    return md ? calcDaysUntilNextBirthday(md) : Math.max(0, Math.floor(daysLeft ?? 0));
+  }, [birthday, daysLeft]);
+
+  const dText = displayDaysLeft === 0 ? "D-DAY" : `D-${displayDaysLeft}`;
+
   const handleClick = () => {
     if (hasLetter && letterId) {
       navigate(`/moaletter/edit/${letterId}`);
@@ -90,7 +103,7 @@ const FriendLetterItem = ({
         <div>
           <p className="text-[16px]">{name}</p>
           <p className="text-[16px] text-[#B7B7B7]">
-            {formattedDate} (D-{daysLeft})
+            {formattedDate} ({dText})
           </p>
         </div>
       </div>

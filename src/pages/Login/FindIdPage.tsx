@@ -127,7 +127,7 @@ function FindIdPage() {
           </Button>
         </Link>
 
-        <span>|</span>
+        {/* <span>|</span>
 
         <Link to="/reset-password">
           <Button
@@ -140,7 +140,7 @@ function FindIdPage() {
           >
             비밀번호 변경
           </Button>
-        </Link>
+        </Link> */}
 
         <span>|</span>
 

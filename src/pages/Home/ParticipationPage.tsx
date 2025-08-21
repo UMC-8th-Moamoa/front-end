@@ -8,7 +8,6 @@ import ParticipantList from "../../components/HomePage/Participation/Participant
 import RecipientBanner from "../../components/HomePage/Participation/RecipientBanner";
 import MemberWishList from "../../components/HomePage/Participation/MemberWishList";
 import ParticipationActionBox from "../../components/HomePage/Participation/ParticipationActionBox";
-import ShareModal from "../../components/mypage/ShareModal";
 
 import {
   getBirthdayEventDetail,
@@ -18,6 +17,7 @@ import {
   type WishlistUi,
   type ParticipationScreenDTO,
 } from "../../services/user/event"; // ✅ 경로 통일
+import ShareModal from "../../components/HomePage/Participation/ShareModal";
 
 type SimpleParticipant = {
   id: number;
@@ -149,15 +149,15 @@ const ParticipationPage = () => {
         {/* 참여자 리스트 */}
         <div className="px-4">
           {loading ? (
-            <div className="text-sm text-[#97B1FF] py-2">불러오는 중…</div>
+            <div className="text-sm text-[#97B1FF]">불러오는 중…</div>
           ) : err ? (
-            <div className="text-sm text-red-600 py-2">{err}</div>
+            <div className="text-sm text-red-600">{err}</div>
           ) : (
             <ParticipantList participants={participants} />
           )}
         </div>
 
-        <div className="w-[350px] h-px bg-[#D3D3D3] mx-auto mt-1 mb-5" />
+        <div className="w-[345px] h-px bg-[#D3D3D3] mx-auto mb-5" />
 
         {/* 수신자/디데이 배너 */}
         <div className="px-4">
