@@ -39,8 +39,15 @@ const VoteWishContainer = () => {
         setErr(null);
         setLoading(true);
         const res = await getWishlistForVote(eventId);
+
+        // 디버깅 도움 (필요 시 확인)
+        // console.table(res.wishlists.map((w: any) => ({
+        //   id: w.id, wishlistId: w.wishlistId, itemId: w.itemId, name: w.name
+        // })));
+
         if (ignore) return;
-        setItems(toUiItems(res.wishlists));
+        const mapped = toUiItems(res.wishlists);
+        setItems(mapped);
       } catch (e: any) {
         if (ignore) return;
         setErr(e?.response?.data?.message || e?.message || "목록을 불러오지 못했어요.");
@@ -58,7 +65,8 @@ const VoteWishContainer = () => {
     try {
       setLoading(true);
       setErr(null);
-      // 단일 선택(스펙상 배열)
+
+      // 단일 선택(스펙상 배열로 전달)
       await submitWishlistVote(eventId, [selectedId]);
 
       // 결과 조회

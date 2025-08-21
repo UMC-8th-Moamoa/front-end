@@ -1,13 +1,20 @@
 import instance from "../../api/axiosInstance";
 
 export type VoteListItem = {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  totalVotes: number;
-  userVoted: boolean;
-  addedAt: string;
+  id?: number;                 // 백엔드가 id 대신 다른 키를 줄 수 있어 optional
+  wishlistId?: number;
+  itemId?: number;
+  name?: string;
+  productName?: string;
+  title?: string;
+  price?: number;
+  image?: string;
+  imageUrl?: string;
+  productImageUrl?: string;
+  totalVotes?: number;
+  voteCount?: number;
+  userVoted?: boolean;
+  addedAt?: string;
 };
 
 export type VoteListSuccess = {
@@ -68,12 +75,24 @@ export type VoteUiItem = {
 };
 
 export function toUiItems(list: VoteListItem[]): VoteUiItem[] {
-  return (list ?? []).map((i: any) => ({
-    id: i.id,
-    imageUrl: i.image ?? i.imageUrl ?? i.productImageUrl ?? "",
-    title: i.name ?? i.productName ?? i.title ?? "",
-    price: i.price ?? 0,
-    totalVotes: i.totalVotes ?? i.voteCount,
-    userVoted: i.userVoted,
-  }));
+  return (list ?? [])
+    .map((i: VoteListItem) => {
+      const rawId =
+        i.id ??
+        i.wishlistId ??
+        i.itemId ??
+        null;
+
+      const id = typeof rawId === "string" ? Number(rawId) : rawId;
+
+      return {
+        id: id as number,
+        imageUrl: i.image ?? i.imageUrl ?? i.productImageUrl ?? "",
+        title: i.name ?? i.productName ?? i.title ?? "",
+        price: i.price ?? 0,
+        totalVotes: i.totalVotes ?? i.voteCount,
+        userVoted: i.userVoted,
+      } as VoteUiItem;
+    })
+    .filter((v) => typeof v.id === "number" && !Number.isNaN(v.id));
 }

@@ -4,7 +4,7 @@ import { type VoteUiItem } from "../../../services/wishlist/vote";
 interface VoteWishListProps {
   items: VoteUiItem[];
   selectedId: number | null;
-  setSelectedId: (id: number) => void;
+  setSelectedId: (id: number | null) => void; // 선택 취소 허용
   loading?: boolean;
 }
 
@@ -39,7 +39,9 @@ const VoteWishList = ({
           title={item.title}
           price={item.price}
           selected={selectedId === item.id}
-          onSelect={() => setSelectedId(item.id)}
+          onSelect={() =>
+            setSelectedId(selectedId === item.id ? null : item.id)
+          }
         />
       ))}
     </div>
