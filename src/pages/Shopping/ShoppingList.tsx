@@ -347,9 +347,18 @@ export default function ShoppingList() {
           <ItemCard
             key={it.holditem_id}
             id={String(it.holditem_id)}
-            name={it.name?.trim() || '(이름 없음)'}
+            name={it.name?.trim() || '이름 없음'}
             imageUrl={it.image}
             priceLabel="보유중"
+            onClick={() =>
+              setSelectedItem({
+                id: it.item_no,                  // 상세 조회에 쓰는 원본 아이템 id
+                name: it.name,
+                image: it.image,
+                category: it.category,           // 'font' | 'paper' | 'seal'
+                price: undefined,
+            })
+          }
           />
         ))}
       </div>
@@ -407,13 +416,13 @@ export default function ShoppingList() {
         )}
 
         {/* 상세 카드 오버레이 (상점 리스트에서만 열림) */}
-        {selectedItem && selectedTab !== '보관함' && (
+        {selectedItem && (
           <div
             className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
             onClick={() => setSelectedItem(null)}
           >
-            <div className="relative z-60" onClick={(e) => e.stopPropagation()}>
-              <ItemCardDetail item={selectedItem} onBuy={handleBuy} category={apiCategory!} />
+            <div className="relative z-120" onClick={(e) => e.stopPropagation()}>
+              <ItemCardDetail item={selectedItem} onBuy={handleBuy} category={selectedItem.category} />
             </div>
           </div>
         )}

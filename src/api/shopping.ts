@@ -17,11 +17,11 @@ export type ItemListResponse = {
 
 /** 보관함(내 아이템) */
 export type UserItem = {
-  holditem_id: number;                 // 표준화된 보관함 아이템 고유번호
+  holditem_id: number;
   category: 'font' | 'paper' | 'seal';
-  name: string;                        // 서버가 주면 사용, 없으면 빈 문자열
+  name: string;
   image?: string;
-  item_no?: number;                    // 원본 아이템 번호(있으면 유지)
+  item_no?: number;
 };
 
 export type UserItemsResponse = {
@@ -50,7 +50,7 @@ type RawUserItem = {
   holditem_id?: number;
   holditem_no?: number;
   item_no?: number;
-  category: 'font' | 'paper' | 'seal'; 
+  category: 'font' | 'paper' | 'seal';
   name?: string;
   image?: string;
   user_id?: string;
@@ -68,7 +68,7 @@ type UserItemsPayload = {
 function normalizeItemList(p?: ItemListPayload | null): ItemListResponse {
   const list = (p?.itemListEntry ?? p?.item ?? []).map((it: any) => ({
     ...it,
-    image: it.image ?? it.imageUrl ?? it.img ?? null, 
+    image: it.image ?? it.imageUrl ?? it.img ?? null,
   }));
   return {
     success: Boolean(p?.success ?? Array.isArray(list)),
@@ -76,7 +76,6 @@ function normalizeItemList(p?: ItemListPayload | null): ItemListResponse {
     item: list,
   };
 }
-
 
 function normalizeUserItems(p?: UserItemsPayload | null): UserItemsResponse {
   const anyP = (p as any) ?? {};
@@ -88,7 +87,7 @@ function normalizeUserItems(p?: UserItemsPayload | null): UserItemsResponse {
     return {
       holditem_id: Number(holdId),
       category: u.category as UserItem['category'],
-      name: u.name ?? '',
+      name: u.name ?? '', // 빈 값이면 이후 보강 단계에서 채움
       image: u.image,
       item_no: u.item_no,
     };
@@ -112,24 +111,15 @@ export async function fetchItemList(
     params: { category, num, _t: Date.now() },
     headers: { 'Cache-Control': 'no-cache' },
   });
-  return normalizeItemList((data as any)?.success);
+  return normalizeItemList((data as any)?.success ?? (data as any));
 }
 
-/** 내 보관함 아이템 목록 (JWT 필요) */
-export async function fetchUserItems(num: number): Promise<UserItemsResponse> {
-  const { data } = await api.get<Envelope<UserItemsPayload>>('/shopping/user_item', {
-    params: { num, _t: Date.now() },
-    headers: { 'Cache-Control': 'no-cache' },
-  });
-  return normalizeUserItems((data as any)?.success ?? (data as any));
-}
-
-/** 상세 보기 */
+/** 상세 보기(단건) */
 export async function fetchItemDetail(opts: {
   category: 'font' | 'paper' | 'seal';
   id: number;
 }) {
-  const { data } = await api.get('/shopping/item_list', {
+  const { data } = await api.get('/shopping/item_detail', {
     params: { category: opts.category, id: opts.id, _t: Date.now() },
     headers: { 'Cache-Control': 'no-cache' },
   });
@@ -146,15 +136,72 @@ export async function fetchItemDetail(opts: {
   };
 }
 
+/** 이름/이미지 비어있는 보관함 아이템 보강 */
+async function enrichUserItems(items: UserItem[]): Promise<UserItem[]> {
+  // 보강 필요한 아이템만 추출
+  const targets = items.filter(
+    (u) => (!u.name || !u.name.trim()) && u.item_no != null
+  );
+  if (!targets.length) return items;
+
+  // (category|item_no) 기준으로 중복 제거
+  const uniqueKeys = Array.from(
+    new Set(targets.map((u) => `${u.category}|${u.item_no}`))
+  );
+
+  // 상세 병렬 조회
+  const detailMap = new Map<string, { name?: string; image?: string }>();
+  await Promise.all(
+    uniqueKeys.map(async (key) => {
+      const [category, idStr] = key.split('|');
+      const id = Number(idStr);
+      try {
+        const detail = await fetchItemDetail({
+          category: category as 'font' | 'paper' | 'seal',
+          id,
+        });
+        detailMap.set(key, { name: detail.name, image: detail.image ?? undefined });
+      } catch {
+        // 실패해도 다른 항목은 계속
+      }
+    })
+  );
+
+  // 원본에 머지
+  return items.map((u) => {
+    if (u.item_no == null) return u;
+    const key = `${u.category}|${u.item_no}`;
+    const found = detailMap.get(key);
+    if (!found) return u;
+    return {
+      ...u,
+      name: u.name?.trim() ? u.name : (found.name ?? ''),
+      image: u.image ?? found.image,
+    };
+  });
+}
+
+/** 내 보관함 아이템 목록 (JWT 필요) — 이름/이미지 자동 보강 */
+export async function fetchUserItems(num: number): Promise<UserItemsResponse> {
+  const { data } = await api.get<Envelope<UserItemsPayload>>('/shopping/user_item', {
+    params: { num, _t: Date.now() },
+    headers: { 'Cache-Control': 'no-cache' },
+  });
+
+  const normalized = normalizeUserItems((data as any)?.success ?? (data as any));
+
+  // 이름이 비어있으면 상세조회로 보강
+  const enrichedList = await enrichUserItems(normalized.itemListEntry);
+  return { ...normalized, itemListEntry: enrichedList };
+}
+
 /** 구매 API */
 export async function buyItem(payload: {
   category: 'font' | 'paper' | 'seal';
   user_id: string;
-
   item_no: number;
   price: number;
   event: boolean;
 }) {
-
   return api.post('/shopping/item_buy', payload);
 }

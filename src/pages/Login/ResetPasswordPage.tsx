@@ -5,6 +5,7 @@ import InputBox from "../../components/common/InputBox";
 import BackButton from "../../components/common/BackButton";
 import VisibilityToggle from "../../components/common/VisibilityToggle";
 import { Link, useNavigate } from "react-router-dom";
+import { resetPassword } from '../../api/auth'; 
 
 function ResetPasswordPage() {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
@@ -84,7 +85,7 @@ function ResetPasswordPage() {
   };
 
   // STEP 3: 비밀번호 변경
-  const handleStep3 = async () => {
+    const handleStep3 = async () => {
     if (!newPw || !confirmPw) {
       setError("• 비밀번호를 입력해 주세요");
       return;
@@ -100,29 +101,33 @@ function ResetPasswordPage() {
 
     try {
       setError("");
-      const res = await fetch("/api/auth/change-password", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          currentPassword: "",
-          newPassword: newPw,
-          confirmPassword: confirmPw,
-        }),
+      const res = await resetPassword({
+        currentPassword: "",
+        newPassword: newPw,
+        confirmPassword: confirmPw,
       });
 
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data?.resultType === "SUCCESS") {
+      const ok =
+        res?.resultType === "SUCCESS" ||
+        res?.success === true ||
+        res?.success?.success === true;
+
+      if (ok) {
         setStep(4);
       } else {
         const reason =
-          data?.error?.reason ||
-          data?.message ||
+          res?.error?.reason ||
+          res?.message ||
           "비밀번호 변경에 실패했습니다";
         setError(reason);
       }
-    } catch (e) {
+    } catch (e: any) {
+      const msg =
+        e?.response?.data?.error?.reason ||
+        e?.message ||
+        "서버 오류로 비밀번호 변경에 실패했습니다";
       console.error(e);
-      setError("서버 오류로 비밀번호 변경에 실패했습니다");
+      setError(msg);
     }
   };
 
@@ -154,7 +159,7 @@ function ResetPasswordPage() {
             />
             <InputBox
               type="text"
-              placeholder="이메일 혹은 전화번호를 입력해 주세요"
+              placeholder="이메일을 입력해 주세요"
               value={phone}
               hasBorder={false}
               onChange={(e) => {
