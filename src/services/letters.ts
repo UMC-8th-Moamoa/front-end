@@ -38,18 +38,18 @@ export type CreateLetterPayload = {
   senderId: number;
   receiverId: number;
   content: string;
-  letterPaperId: number; // holditem_id
-  envelopeId: number;    // holditem_id
-  fontId: number;        // holditem_id
-  envelopeImageUrl: string; // 업로드 URL 권장
+  letterPaperId: number;      // holditem_id
+  envelopeId?: number;        // ✅ 선택: 보내지 않을 수도 있음
+  fontId?: number;            // ✅ 선택
+  envelopeImageUrl?: string;  // 선택
 };
 
 export type UpdateLetterPayload = {
   content: string;
-  letterPaperId: number; // holditem_id
-  envelopeId: number;    // holditem_id
-  fontId: number;        // holditem_id
-  envelopeImageUrl: string; // 업로드 URL 권장
+  letterPaperId: number;      // holditem_id
+  envelopeId?: number;        // ✅ 선택
+  fontId?: number;            // ✅ 선택
+  envelopeImageUrl?: string;
 };
 
 function pickEventId(input?: number): number {
