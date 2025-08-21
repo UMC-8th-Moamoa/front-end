@@ -111,7 +111,7 @@ export interface FollowSuccess {
   };
 }
 
-// ✅ [추가] 프로필 이미지 업데이트 요청/응답 스키마
+//  [추가] 프로필 이미지 업데이트 요청/응답 스키마
 export interface ProfileImageUpdateBody {
   imageUrl: string;
 }

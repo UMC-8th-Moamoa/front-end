@@ -51,11 +51,9 @@ const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeConte
         // 무료 우표 동기화(멱등). 유저가 없을 땐 조용히 스킵.
         if (meUserId) {
           await ensureFreeItems("seal", meUserId);
-        } else {
-          console.error("사용자 ID를 찾을 수 없어 무료 아이템을 동기화할 수 없습니다.");
         }
 
-        // 내 보관함에서 seal만 뽑아온다.
+        // 내 보관함에서 seal만 뽑아온다. (신규 /letters/user/items 우선)
         const res = await fetchUserItems(200);
         const seals = res.itemListEntry.filter((x) => x.category === "seal");
         setItems(seals);
@@ -208,21 +206,24 @@ const EnvelopeContent = forwardRef<EnvelopeHandle, Props>(function EnvelopeConte
         style={{ height: "calc(100vh - 540px)" }}
       >
         <div className="grid grid-cols-2 gap-[10px] w-full max-w-[350px]">
-          {isLoading
-            ? (
-              <div className="col-span-2 text-center text-sm text-gray-500">불러오는 중…</div>
-            ) : items.map((it) => (
+          {isLoading ? (
+            <div className="col-span-2 text-center text-sm text-gray-500">불러오는 중…</div>
+          ) : (
+            items.map((it) => (
               <button
                 key={it.holditem_id}
                 onClick={() => handlePickSeal(it.holditem_id, it.image)}
                 className={`rounded-[12px] overflow-hidden border ${
-                  selectedSealHoldId === it.holditem_id ? "border-[#6282E1]" : "border-transparent"
+                  selectedSealHoldId === it.holditem_id
+                    ? "border-[#6282E1]"
+                    : "border-transparent"
                 }`}
               >
                 {/* 라벨은 보기 용도로 item_no를 노출하되, 로직은 holditem_id만 사용 */}
                 <ItemCard imageSrc={it.image} label={it.name || String(it.item_no ?? "")} />
               </button>
-            ))}
+            ))
+          )}
         </div>
       </div>
     </div>
