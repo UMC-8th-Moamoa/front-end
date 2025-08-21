@@ -1,5 +1,5 @@
 // src/api/shopping.ts
-import api from '../api/axiosInstance';
+import api from './axiosInstance'; // ✅ 같은 폴더이므로 ./ 로 수정
 
 /** ---------- Types (server payloads) ---------- */
 export type ShopItem = {
@@ -87,7 +87,7 @@ function normalizeUserItems(p?: UserItemsPayload | null): UserItemsResponse {
     return {
       holditem_id: Number(holdId),
       category: u.category as UserItem['category'],
-      name: u.name ?? '', // 빈 값이면 이후 보강 단계에서 채움
+      name: u.name ?? '',
       image: u.image,
       item_no: u.item_no,
     };
@@ -100,7 +100,29 @@ function normalizeUserItems(p?: UserItemsPayload | null): UserItemsResponse {
   };
 }
 
-/** ---------- API functions ---------- */
+/** ---------- API: 잔액 ---------- */
+export type BalanceInfo = { balance: number; userId?: string; name?: string };
+
+/** GET /api/payment/balance */
+export async function fetchBalance(): Promise<BalanceInfo> {
+  const { data } = await api.get('/payment/balance', {
+    headers: { 'Cache-Control': 'no-cache' },
+    params: { _t: Date.now() },
+    withCredentials: true,
+  });
+
+  // 래퍼/비래퍼 모두 흡수
+  const body = (data as any)?.success ?? data;
+  const core = body?.data ?? body;
+
+  return {
+    balance: Number(core?.balance ?? 0),
+    userId: core?.userId ?? core?.user_id ?? undefined,
+    name: core?.name ?? undefined,
+  };
+}
+
+/** ---------- API: 쇼핑 ---------- */
 
 /** 쇼핑 아이템 목록 */
 export async function fetchItemList(
@@ -138,18 +160,15 @@ export async function fetchItemDetail(opts: {
 
 /** 이름/이미지 비어있는 보관함 아이템 보강 */
 async function enrichUserItems(items: UserItem[]): Promise<UserItem[]> {
-  // 보강 필요한 아이템만 추출
   const targets = items.filter(
     (u) => (!u.name || !u.name.trim()) && u.item_no != null
   );
   if (!targets.length) return items;
 
-  // (category|item_no) 기준으로 중복 제거
   const uniqueKeys = Array.from(
     new Set(targets.map((u) => `${u.category}|${u.item_no}`))
   );
 
-  // 상세 병렬 조회
   const detailMap = new Map<string, { name?: string; image?: string }>();
   await Promise.all(
     uniqueKeys.map(async (key) => {
@@ -162,12 +181,11 @@ async function enrichUserItems(items: UserItem[]): Promise<UserItem[]> {
         });
         detailMap.set(key, { name: detail.name, image: detail.image ?? undefined });
       } catch {
-        // 실패해도 다른 항목은 계속
+        // ignore and continue
       }
     })
   );
 
-  // 원본에 머지
   return items.map((u) => {
     if (u.item_no == null) return u;
     const key = `${u.category}|${u.item_no}`;
@@ -189,8 +207,6 @@ export async function fetchUserItems(num: number): Promise<UserItemsResponse> {
   });
 
   const normalized = normalizeUserItems((data as any)?.success ?? (data as any));
-
-  // 이름이 비어있으면 상세조회로 보강
   const enrichedList = await enrichUserItems(normalized.itemListEntry);
   return { ...normalized, itemListEntry: enrichedList };
 }

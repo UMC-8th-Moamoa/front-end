@@ -91,11 +91,38 @@ export default function ShoppingList() {
   const [userError, setUserError] = useState<string | null>(null);
 
   // UI 상태
-  const userMC = 20; // 예시
+  // const userMC = 20; // 예시
+  const [userMC, setUserMC] = useState<number | null>(null);
+  const [balanceError, setBalanceError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<UiTab>('폰트');
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [purchasing, setPurchasing] = useState(false); // 이중 클릭 방지
+
+  const fetchBalance = async () => {
+  try {
+    setBalanceError(null);
+    const { data } = await api.get('/payment/balance', {
+      headers: { 'Cache-Control': 'no-cache' },
+      params: { _t: Date.now() }, // 캐시 버스터
+      withCredentials: true,       // RT를 쿠키에 둘 때
+    });
+
+    // 래퍼/비래퍼 모두 흡수
+    const s = data?.success ?? data;
+    const core = s?.data ?? s;
+    const bal = Number(core?.balance);
+    if (!Number.isFinite(bal)) throw new Error('잔액 값을 파싱할 수 없습니다.');
+    setUserMC(bal);
+  } catch (e: any) {
+    setUserMC(0);
+    if (e?.response?.status === 401) {
+      setBalanceError('로그인이 필요합니다.');
+    } else {
+      setBalanceError(e?.message || '잔액 조회에 실패했습니다.');
+    }
+  }
+};
 
   // API 카테고리 (envelope 제거, seal 사용)
   const apiCategory = useMemo<ApiCategory | null>(() => {
@@ -200,7 +227,8 @@ export default function ShoppingList() {
   }, [selectedTab]);
 
   const handleBuy = (item: any) => {
-    if (userMC < (item.price ?? 0)) {
+    const balance = userMC ?? 0;
+      if (balance < (item.price ?? 0)) {
       toast.custom((t) => (
         <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} bg-white rounded-xl shadow-md px-6 py-4 w-[330px] text-center`}>
           <p className="text-base font-base text-black mb-2">몽코인이 부족합니다</p>
@@ -368,7 +396,7 @@ export default function ShoppingList() {
   return (
     <div className="min-h-screen max-w-[393px] mx-auto flex flex_col justify-between bg-white">
       <div className="w-full flex flex-col relative">
-        <ShoppingTopBar userMC={userMC} />
+        <ShoppingTopBar userMC={userMC ?? 0} />
         <TopMenu selected={selectedTab} onChange={setSelectedTab} />
         <ShopHeader
           title={getHeaderProps().title}

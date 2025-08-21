@@ -1,6 +1,6 @@
 // components/Purchase/PaidChargeSection.tsx
 import ChangeOptionList from "./ChargeOptionList";
-import QuantityCounter from "./QuantityCounter";
+// import QuantityCounter from "./QuantityCounter";
 import Button from "../common/Button";
 import { useNavigate } from "react-router-dom";
 
@@ -56,7 +56,7 @@ export default function PaidChargeSection({
       <div className="px-5 py-4 mt-auto fixed bottom-0 bg-white w-full max-w-[393px]">
         <div className="flex justify-between items-center mb-3">
           <p className="text-xl font-semibold">₩ {totalPrice.toLocaleString()}</p>
-          <QuantityCounter value={quantity} onChange={onChangeQuantity} />
+          {/* <QuantityCounter value={quantity} onChange={onChangeQuantity} /> */}
         </div>
         <Button
           variant="primary"
