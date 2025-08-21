@@ -4,13 +4,12 @@ import ChangeOptionList from "./ChargeOptionList";
 import Button from "../common/Button";
 import { useNavigate } from "react-router-dom";
 
-
-
 type Option = {
   id: number;
   label: string;
   price: number;
   discount?: number;
+  packageId: string;   
 };
 
 type Props = {
@@ -31,6 +30,8 @@ export default function PaidChargeSection({
   totalPrice,
 }: Props) {
   const navigate = useNavigate();
+  const selected = options.find(o => o.id === selectedId);
+
   return (
     <>
       <div className="px-5 py-4">
@@ -62,8 +63,13 @@ export default function PaidChargeSection({
           variant="primary"
           className="w-full mb-4"
           onClick={() => {
+            if (!selected) return;
             navigate('/purchase/payment', {
-              state: { price: totalPrice }, 
+              state: {
+                price: totalPrice,
+                quantity,
+                packageId: selected.packageId,  
+              },
             });
           }}
         >

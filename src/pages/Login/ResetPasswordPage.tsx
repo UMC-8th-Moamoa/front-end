@@ -175,7 +175,33 @@
 //       setError(msg);
 //     }
 //   };
+//       if (ok) {
+//         setStep(4);
+//       } else {
+//         const reason =
+//           res?.error?.reason ||
+//           res?.message ||
+//           "비밀번호 변경에 실패했습니다";
+//         setError(reason);
+//       }
+//     } catch (e: any) {
+//       const msg =
+//         e?.response?.data?.error?.reason ||
+//         e?.message ||
+//         "서버 오류로 비밀번호 변경에 실패했습니다";
+//       console.error(e);
+//       setError(msg);
+//     }
+//   };
 
+//   return (
+//     <div className="relative min-h-screen max-w-[393px] mx-auto px-4 pt-20 pb-10 flex flex-col items-center justify-between">
+//       <div className="w-full flex flex-col items-center">
+//         <div className="absolute top-6 left-0 z-10">
+//           <BackButton />
+//         </div>
+//         <img src="/assets/MoamoaLogo.svg" alt="moa logo" className="w-40 h-20 mb-2 mt-10" />
+//         <h1 className="text-xl text-[#6282E1] font-semibold mb-20">비밀번호 변경</h1>
 //   return (
 //     <div className="relative min-h-screen max-w-[393px] mx-auto px-4 pt-20 pb-10 flex flex-col items-center justify-between">
 //       <div className="w-full flex flex-col items-center">
@@ -222,6 +248,12 @@
 //           </>
 //         )}
 
+//         {/* STEP 2 */}
+//         {step === 2 && (
+//           <>
+//             <div className="h-5 mb-1 w-full text-left text-sm text-red-500">
+//               {error ? `• ${error}` : <>&nbsp;</>}
+//             </div>
 //         {/* STEP 2 */}
 //         {step === 2 && (
 //           <>
@@ -290,7 +322,45 @@
 //                 <VisibilityToggle onToggle={setVisibleNewPw} />
 //               </div>
 //             </div>
+//         {/* STEP 3 */}
+//         {step === 3 && (
+//           <>
+//             <div className="h-5 mb-1 w-full text-left text-sm text-red-500">
+//               {error ? error : <>&nbsp;</>}
+//             </div>
+//             <div className="relative mb-2 w-full max-w-[350px] mx-auto">
+//               <InputBox
+//                 type={visibleNewPw ? 'text' : 'password'}
+//                 placeholder="새로운 비밀번호를 입력해 주세요"
+//                 hasBorder={false}
+//                 value={newPw}
+//                 onChange={(e) => {
+//                   setNewPw(e.target.value);
+//                   setError("");
+//                 }}
+//                 className="pr-10"
+//               />
+//               <div className="absolute right-3 top-1/2 -translate-y-1/2">
+//                 <VisibilityToggle onToggle={setVisibleNewPw} />
+//               </div>
+//             </div>
 
+//             <div className="relative mb-4 w-full max-w-[350px] mx-auto">
+//               <InputBox
+//                 type={visibleConfirmPw ? 'text' : 'password'}
+//                 placeholder="비밀번호를 다시 입력해 주세요"
+//                 hasBorder={false}
+//                 value={confirmPw}
+//                 onChange={(e) => {
+//                   setConfirmPw(e.target.value);
+//                   setError("");
+//                 }}
+//                 className="pr-10"
+//               />
+//               <div className="absolute right-3 top-1/2 -translate-y-1/2">
+//                 <VisibilityToggle onToggle={setVisibleConfirmPw} />
+//               </div>
+//             </div>
 //             <div className="relative mb-4 w-full max-w-[350px] mx-auto">
 //               <InputBox
 //                 type={visibleConfirmPw ? 'text' : 'password'}
@@ -313,7 +383,24 @@
 //             </Button>
 //           </>
 //         )}
+//             <Button variant="primary" fontSize="xl" onClick={handleStep3}>
+//               확인
+//             </Button>
+//           </>
+//         )}
 
+//         {/* STEP 4 */}
+//         {step === 4 && (
+//           <>
+//             <p className="text-md text-center mt-8 mb-10">
+//               비밀번호가 변경되었습니다<br />다시 로그인해 주세요
+//             </p>
+//             <Button variant="primary" fontSize="xl" onClick={() => navigate("/login")}>
+//               로그인하러 가기
+//             </Button>
+//           </>
+//         )}
+//       </div>
 //         {/* STEP 4 */}
 //         {step === 4 && (
 //           <>
@@ -351,4 +438,5 @@
 //   );
 // }
 
+// export default ResetPasswordPage;
 // export default ResetPasswordPage;
