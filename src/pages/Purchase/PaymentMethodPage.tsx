@@ -1,10 +1,6 @@
 // PaymentMethodPage.tsx
 import { useState } from 'react';
-<<<<<<< HEAD
-import { useLocation, useNavigate } from 'react-router-dom'; // ✅ navigate 추가
-=======
-import { useLocation } from 'react-router-dom';
->>>>>>> feat/shopping
+import { useLocation, useNavigate } from 'react-router-dom'; 
 import PaymentSelector from '../../components/Purchase/PaymentSelector';
 import Button from '../../components/common/Button';
 import KakaoIcon from '../../assets/payment_kakao.svg';
@@ -15,10 +11,7 @@ import { Toaster, toast } from 'react-hot-toast';
 
 const PaymentMethodPage = () => {
   const location = useLocation();
-<<<<<<< HEAD
-  const navigate = useNavigate(); // ✅ 라우팅 훅
-=======
->>>>>>> feat/shopping
+  const navigate = useNavigate(); 
   const { price: priceFromState } = (location.state as { price?: number }) || {};
 
   const [selectedMethod, setSelectedMethod] = useState<'kakao' | 'bank'>('kakao');
@@ -30,30 +23,17 @@ const PaymentMethodPage = () => {
 
   const handleKakaoPay = async () => {
     try {
-      // 여기에 실제 결제 API 연동
-<<<<<<< HEAD
-=======
-      // 예시: POST /api/payments
->>>>>>> feat/shopping
       const res = await fetch('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-<<<<<<< HEAD
           amount: price,
-=======
-          amount: price,          // ✅ 선택한 금액 전달
->>>>>>> feat/shopping
           method: 'kakao',
         }),
       });
       const data = await res.json();
       if (data.success) {
         toast.success('카카오페이 결제 요청 성공');
-<<<<<<< HEAD
-=======
-        // 필요 시 결제 페이지로 이동
->>>>>>> feat/shopping
         window.location.href = data.redirectUrl;
       } else {
         toast.error(data.error?.reason || '결제 요청 실패');
@@ -66,22 +46,13 @@ const PaymentMethodPage = () => {
 
   return (
     <div className="min-h-screen max-w-[393px] mx-auto bg-white px-4 pt-6 pb-10 relative">
-<<<<<<< HEAD
-=======
-
-
->>>>>>> feat/shopping
       {/* 상단 뒤로가기 */}
       <div className="absolute top-4 left-4">
         <BackButton />
       </div>
 
       <div className="mt-20 mb-10 mx-2 text-left">
-<<<<<<< HEAD
-        <img src={MoamoaLogo} alt="MOA MOA" className="h-5 mb-3" />
-=======
         <img src="/assets/MoamoaLogo.svg" alt="MOA MOA" className="h-5 mb-3" />
->>>>>>> feat/shopping
         <h2 className="text-mb text-[#6C6C6C] font-base">결제 수단을 선택해 주세요</h2>
       </div>
 
@@ -102,11 +73,7 @@ const PaymentMethodPage = () => {
               size="md"
               width="full"
               className="flex items-center justify-center gap-3 mt-3"
-<<<<<<< HEAD
               onClick={handleKakaoPay}
-=======
-              onClick={handleKakaoPay} // ✅ 결제 요청 실행
->>>>>>> feat/shopping
             >
               <img src={KakaoIcon} alt="Kakao Icon" className="w-5 h-5" />
               카카오페이로 결제하기
@@ -122,11 +89,8 @@ const PaymentMethodPage = () => {
             deadline={depositDeadline}
             onConfirm={() => {
               console.log('입금 확인 요청', depositName, price);
-<<<<<<< HEAD
               toast.success('입금 확인 요청 완료');
               navigate('/home'); // ✅ 무통장 입금 확인 후 홈으로 이동
-=======
->>>>>>> feat/shopping
             }}
           />
         )}
