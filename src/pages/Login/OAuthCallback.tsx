@@ -1,61 +1,84 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 function OAuthCallback() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
 
   useEffect(() => {
-    const code = new URL(window.location.href).searchParams.get("code");
+    const accessToken = params.get("accessToken");
+    const refreshToken = params.get("refreshToken");
+    const code = params.get("code");
 
-    if (!code) {
-      alert("인가 코드가 없습니다.");
-      navigate("/login");
-      return;
+    async function finishLogin(at: string | null, rt: string | null) {
+      if (at) localStorage.setItem("accessToken", at);
+      if (rt) localStorage.setItem("refreshToken", rt);
+      // (선택) 여기서 /auth/me 등으로 사용자 정보 동기화 가능
+      navigate("/", { replace: true });
     }
 
-    const handleKakaoLogin = async () => {
+    async function exchangeCode(authCode: string) {
       try {
         const baseUrl = import.meta.env.VITE_API_BASE_URL;
+        if (!baseUrl) throw new Error("VITE_API_BASE_URL 미설정");
 
-        if (!baseUrl) {
-          throw new Error("환경변수 VITE_API_BASE_URL이 설정되지 않았습니다.");
-        }
-
-        console.log("✅ OAuth 인가 코드:", code);
-        console.log("✅ API 호출 URL:", `${baseUrl}/auth/kakao/callback?code=${code}`);
-
-        const res = await fetch(`${baseUrl}/auth/kakao/callback?code=${code}`, {
+        // 백엔드에 코드 교환 요청
+        const url = `${baseUrl}/auth/kakao/callback?code=${encodeURIComponent(authCode)}`;
+        const res = await fetch(url, {
           method: "GET",
-          credentials: "include", // 쿠키 인증 필요 시 유지
+          credentials: "include",
         });
 
         if (!res.ok) {
-          const errorText = await res.text();
-          console.error("❌ 서버 응답 오류:", res.status, errorText);
-          throw new Error("서버 오류 발생");
+          const text = await res.text().catch(() => "");
+          console.error("❌ kakao/callback 실패:", res.status, text);
+          throw new Error(`callback 실패: ${res.status}`);
         }
 
-        const data = await res.json();
-        console.log("✅ 로그인 성공 응답:", data);
+        const data = await res.json().catch(() => ({}));
 
-        // 응답 데이터에 따라 토큰 키가 다를 수 있음
-        const token = data.token || data.access_token;
+        // 가능한 키 전부 흡수
+        const at =
+          data?.accessToken ||
+          data?.access_token ||
+          data?.token ||
+          data?.success?.accessToken ||
+          data?.success?.token ||
+          null;
 
-        if (!token) {
-          throw new Error("토큰 정보가 응답에 없습니다.");
-        }
+        const rt =
+          data?.refreshToken ||
+          data?.refresh_token ||
+          data?.success?.refreshToken ||
+          null;
 
-        localStorage.setItem("accessToken", token);
-        navigate("/");
-      } catch (err) {
-        console.error("❌ 카카오 로그인 실패:", err);
+        if (!at) throw new Error("응답에 accessToken이 없습니다.");
+        await finishLogin(at, rt);
+      } catch (e) {
+        console.error("❌ 코드 교환 실패:", e);
         alert("로그인 중 오류가 발생했습니다.");
-        navigate("/login");
+        navigate("/login", { replace: true });
       }
-    };
+    }
 
-    handleKakaoLogin();
-  }, [navigate]);
+    (async () => {
+      // 1) 토큰이 직접 붙어온 형태
+      if (accessToken || refreshToken) {
+        await finishLogin(accessToken, refreshToken);
+        return;
+      }
+
+      // 2) 코드만 있는 형태 → 백엔드에 교환 요청
+      if (code) {
+        await exchangeCode(code);
+        return;
+      }
+
+      // 아무 쿼리도 없는 경우
+      alert("유효하지 않은 로그인 콜백입니다.");
+      navigate("/login", { replace: true });
+    })();
+  }, [navigate, params]);
 
   return <div>로그인 처리 중입니다...</div>;
 }

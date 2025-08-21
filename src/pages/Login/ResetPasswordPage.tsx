@@ -1,42 +1,61 @@
 // src/pages/ResetPasswordPage.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "../../components/common/Button";
 import InputBox from "../../components/common/InputBox";
 import BackButton from "../../components/common/BackButton";
 import VisibilityToggle from "../../components/common/VisibilityToggle";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 function ResetPasswordPage() {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState(""); // UI 문구 유지(여기에 이메일 입력)
+  const [email, setEmail] = useState(""); // 이메일 입력
   const [code, setCode] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
+  const [resetToken, setResetToken] = useState(""); // ✅ 백엔드 토큰 저장
   const [error, setError] = useState("");
   const [visibleNewPw, setVisibleNewPw] = useState(false);
   const [visibleConfirmPw, setVisibleConfirmPw] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // STEP 1: 이메일로 인증 코드 전송
+  // ✅ 이메일 링크(?token=...)로 복귀 시 자동 수집 → 3단계로 점프
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const t = params.get("token");
+    if (t) {
+      setResetToken(t);
+      setStep(3);
+    }
+  }, [location.search]);
+
+  // STEP 1: 재설정 코드(토큰) 전송
   const handleStep1 = async () => {
-    const email = phone.trim(); // 두 번째 인풋에 이메일을 입력받음
-    if (!name.trim() || !email) {
+    const trimmedEmail = email.trim();
+    if (!name.trim() || !trimmedEmail) {
       setError("* 이름과 이메일을 입력해 주세요");
       return;
     }
 
     try {
       setError("");
-      const res = await fetch("/api/auth/email/verify-email", {
+      const res = await fetch("/api/auth/find-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), email, purpose: "reset" }),
+        body: JSON.stringify({ email: trimmedEmail, purpose: "reset" }),
       });
 
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data?.resultType === "SUCCESS") {
+      const ok =
+        res.ok &&
+        (data?.resultType === "SUCCESS" ||
+          data?.success?.success === true ||
+          data?.success === true);
+
+      if (ok) {
+        setResetToken(""); // 메일 링크/코드 기반으로 2단계 진행
         setStep(2);
       } else {
         const reason =
@@ -51,24 +70,41 @@ function ResetPasswordPage() {
     }
   };
 
-  // STEP 2: 이메일로 받은 코드 검증
+  // STEP 2: 메일로 받은 코드 검증 (POST /api/auth/verify-reset-code, purpose=reset)
   const handleStep2 = async () => {
-    const email = phone.trim();
-    if (code.length !== 6) {
-      setError("본인인증 번호를 정확히 입력해 주세요");
+    const trimmedEmail = email.trim();
+    if (!code.trim()) {
+      setError("본인인증 번호(코드/토큰)를 입력해 주세요");
       return;
     }
 
     try {
       setError("");
-      const res = await fetch("/api/auth/email/send-code", {
+      const res = await fetch("/api/auth/verify-reset-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code, purpose: "reset" }),
+        body: JSON.stringify({
+          email: trimmedEmail,
+          code: code.trim(),
+          purpose: "reset",
+        }),
       });
 
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data?.resultType === "SUCCESS") {
+      const ok =
+        res.ok &&
+        (data?.resultType === "SUCCESS" ||
+          data?.success?.success === true ||
+          data?.success === true);
+
+      if (ok) {
+        // 서버가 토큰을 응답에 주면 사용, 없으면 입력한 code를 토큰으로 사용
+        const tokenFromApi =
+          data?.success?.token ||
+          data?.token ||
+          data?.success?.resetToken ||
+          "";
+        setResetToken(String(tokenFromApi || code.trim()));
         setStep(3);
       } else {
         const reason =
@@ -83,7 +119,7 @@ function ResetPasswordPage() {
     }
   };
 
-  // STEP 3: 비밀번호 변경
+  // STEP 3: 새 비밀번호 설정 (POST /api/auth/reset-password)
   const handleStep3 = async () => {
     if (!newPw || !confirmPw) {
       setError("• 비밀번호를 입력해 주세요");
@@ -97,21 +133,31 @@ function ResetPasswordPage() {
       setError("• 비밀번호가 일치하지 않습니다");
       return;
     }
+    if (!resetToken) {
+      setError("• 토큰이 없습니다. 이메일 링크로 접속하거나 코드를 입력해 주세요");
+      return;
+    }
 
     try {
       setError("");
-      const res = await fetch("/api/auth/change-password", {
-        method: "PUT",
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST", // 스펙상 POST
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          currentPassword: "",
+          token: resetToken,
           newPassword: newPw,
           confirmPassword: confirmPw,
         }),
       });
 
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data?.resultType === "SUCCESS") {
+      const ok =
+        res.ok &&
+        (data?.resultType === "SUCCESS" ||
+          data?.success?.success === true ||
+          data?.success === true);
+
+      if (ok) {
         setStep(4);
       } else {
         const reason =
@@ -154,20 +200,20 @@ function ResetPasswordPage() {
             />
             <InputBox
               type="text"
-              placeholder="이메일 혹은 전화번호를 입력해 주세요"
-              value={phone}
+              placeholder="이메일을 입력해 주세요"
+              value={email}
               hasBorder={false}
               onChange={(e) => {
-                setPhone(e.target.value);
+                setEmail(e.target.value);
                 setError("");
               }}
               className="mb-4"
             />
-            <Button variant="primary" fontSize="xl" onClick={handleStep1} disabled={!name || !phone}>
+            <Button variant="primary" fontSize="xl" onClick={handleStep1} disabled={!name || !email}>
               확인
             </Button>
             <div className="text-sm text-[#6282E1] mt-3 mb-4 text-start w-full">
-              <p>• 이메일로 본인인증 번호가 전달됩니다</p>
+              <p>• 이메일로 비밀번호 재설정 링크/코드가 전송됩니다</p>
             </div>
           </>
         )}
@@ -180,25 +226,26 @@ function ResetPasswordPage() {
             </div>
 
             <div className="relative flex gap-2 mb-4 justify-center">
+              {/* 숨은 실제 입력 */}
               <input
                 type="text"
-                inputMode="numeric"
+                inputMode="text"
                 value={code}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                  const val = e.target.value.trim().slice(0, 100);
                   setCode(val);
                   setError("");
                 }}
-                maxLength={6}
                 className="absolute w-full h-full opacity-0 z-10"
                 autoFocus
               />
 
+              {/* UI는 6칸 프리뷰이지만 실제로는 더 길 수 있음 */}
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
                   className={`
-                    w-13 h-17 flex items-center justify-center rounded-md text-3xl font-bold mb-3
+                    w-12 h-15 flex items-center justify-center rounded-md text-3xl font-bold mb-1
                     ${error ? 'text-red-500 bg-[#E7EDFF]' : 'text-black bg-[#E7EDFF]'}
                   `}
                 >
@@ -207,12 +254,12 @@ function ResetPasswordPage() {
               ))}
             </div>
 
-            <Button variant="primary" fontSize="xl" onClick={handleStep2} disabled={code.length !== 6}>
+            <Button variant="primary" fontSize="xl" onClick={handleStep2} disabled={!code}>
               확인
             </Button>
 
             <div className="text-sm text-[#6282E1] mt-3 mb-4 text-start w-full">
-              • 이메일로 본인인증 번호가 전달됩니다
+              • 이메일에 도착한 코드를 입력하세요
             </div>
           </>
         )}
@@ -280,20 +327,16 @@ function ResetPasswordPage() {
       <div className="flex justify-center items-center text-xs text-[#6282E1] mb-55">
         <Link to="/find-id">
           <Button variant="text" size="sm" fontSize="sm" fontWeight="medium" width="fit" className="text-[#6282E1]">
-          아이디 찾기
+            아이디 찾기
           </Button>
         </Link>
-
         <span>|</span>
-
         <Link to="/reset-password">
           <Button variant="text" size="sm" fontSize="sm" fontWeight="medium" width="fit" className="text-[#6282E1]">
             비밀번호 변경
           </Button>
         </Link>
-
         <span>|</span>
-
         <Link to="/signup">
           <Button variant="text" size="sm" fontSize="sm" fontWeight="medium" width="fit" className="text-[#6282E1]">
             회원가입

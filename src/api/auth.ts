@@ -1,11 +1,5 @@
-// src/api/auth.ts
-import axiosProxy from './axiosInstance'; 
-import axios from 'axios';
+import axiosProxy from './axiosInstance';
 
-// 인증 도메인(절대 URL)
-const AUTH_BASE = 'https://www.moamoas.com/api';
-
-// ===== 공통 타입 =====
 type ApiEnvelope<T> = {
   resultType: 'SUCCESS' | 'FAIL';
   error: null | { errorCode: string; reason?: string | null; data?: unknown };
@@ -13,56 +7,96 @@ type ApiEnvelope<T> = {
 };
 
 type CheckNicknameSuccess = { available: boolean; message: string };
-type SendEmailSuccess = { message: string };
+type SendEmailSuccess = { message: string; token?: string };
 type VerifyEmailSuccess = { verified: boolean; message: string };
 type RegisterSuccess = {
   user: { id: number; email: string; name: string };
   tokens?: { accessToken: string; refreshToken: string };
 };
 type FindIdSuccess = {
-  user_id?: string;  
-  message?: string;   
+  user_id?: string;
+  message?: string;
 };
 
-// 1) 아이디(닉네임) 중복 확인 — 프록시 사용
-export async function checkNicknameDuplicate(
-  nickname: string,
-  signal?: AbortSignal
-): Promise<ApiEnvelope<CheckNicknameSuccess>> {
-  const res = await axiosProxy.get(`/auth/nickname/${nickname}/check`, { signal });
-  return res.data;
+/** ---------- 닉네임 중복 확인 ---------- */
+export async function checkNicknameDuplicate(nickname: string, signal?: AbortSignal) {
+  return checkUserIdDuplicate(nickname, signal);
 }
 
-// 2) 이메일 인증코드 전송 
+/** ---------- 아이디 중복 확인 ---------- */
+export async function checkUserIdDuplicate(
+  userId: string,
+  signal?: AbortSignal
+) {
+  const id = userId.trim();                 // 백엔드가 대소문자 구분하면 toLowerCase() 하지 마세요
+  const path = `/auth/user-id/${encodeURIComponent(id)}/check`;
+  try {
+    const { data } = await axiosProxy.get(path, { signal });
+    return data; // { resultType, success: { available: boolean } } 기대
+  } catch (e: any) {
+    console.error('[USERID CHECK ERROR]', {
+      url: path,
+      status: e?.response?.status,
+      data: e?.response?.data,             // <- 백엔드에 reason 전달
+    });
+    throw e;
+  }
+}
+
+/** (1) 비밀번호 재설정 코드 전송 */
+export async function sendPasswordResetCode(email: string) {
+  const { data } = await axiosProxy.post('/api/auth/find-password', {
+    email,
+    purpose: 'reset',
+  });
+  return data as ApiEnvelope<SendEmailSuccess>;
+}
+
+/** (2) 비밀번호 재설정 코드 검증 */
+export async function verifyPasswordResetCode(email: string, code: string) {
+  const { data } = await axiosProxy.post('/api/auth/verify-reset-code', {
+    email,
+    code,
+    purpose: 'reset',
+  });
+  return data as ApiEnvelope<VerifyEmailSuccess>;
+}
+
+/** (3) 비밀번호 재설정 최종 */
+export async function resetPassword(payload: {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}) {
+  const { data } = await axiosProxy.post('/api/auth/reset-password', payload);
+  return data as ApiEnvelope<{ message?: string }>;
+}
+
+/** ---------- 회원가입: 이메일 인증 ---------- */
 export async function sendEmailCode(
   email: string,
-  purpose: 'signup' | 'reset'
+  purpose: 'signup' | 'reset' = 'signup'
 ): Promise<ApiEnvelope<SendEmailSuccess>> {
-  const res = await axios.post<ApiEnvelope<SendEmailSuccess>>(
-    `${AUTH_BASE}/auth/email/verify-email`,
-    { email, purpose },
-    { withCredentials: false }
+  const res = await axiosProxy.post<ApiEnvelope<SendEmailSuccess>>(
+    '/api/auth/email/verify-email',
+    { email, purpose }
   );
   return res.data;
 }
-
-// 3) 이메일 인증코드 확인
-const SEND_CODE_CREDENTIALS = false;
 
 export async function verifyEmailCode(
   email: string,
   code: string,
   purpose: 'signup' | 'reset' = 'signup'
 ): Promise<ApiEnvelope<VerifyEmailSuccess>> {
-  const res = await axios.post<ApiEnvelope<VerifyEmailSuccess>>(
-    `${AUTH_BASE}/auth/email/send-code`,
-    { email, code, purpose },
-    { withCredentials: SEND_CODE_CREDENTIALS }
+  const res = await axiosProxy.post<ApiEnvelope<VerifyEmailSuccess>>(
+    '/api/auth/email/send-code',
+    { email, code, purpose }
   );
   return res.data;
 }
 
-// 4) 회원가입 — 프록시 사용
+/** ---------- 회원가입 ---------- */
 export async function registerUser(payload: {
   email: string;
   password: string;
@@ -70,10 +104,10 @@ export async function registerUser(payload: {
   phone: string;
   birthday: string;
   nickname: string;
-  user_id: string; // 로그인용 ID (임시: nickname과 동일)
+  user_id: string;
 }): Promise<ApiEnvelope<RegisterSuccess>> {
   try {
-    const res = await axiosProxy.post('/auth/register', payload);
+    const res = await axiosProxy.post('/api/auth/register', payload);
     return res.data;
   } catch (err: any) {
     console.error('[REGISTER ERROR]', {
@@ -86,20 +120,8 @@ export async function registerUser(payload: {
   }
 }
 
-  export async function findUserId(email: string) {
-    const res = await axiosProxy.post('/auth/find-id', { email });
-    return res.data;
-}
-
-export async function resetPassword(payload: {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}) {
-  const res = await fetch("/api/auth/change-password", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return res.json();
+/** ---------- 아이디 찾기 ---------- */
+export async function findUserId(email: string) {
+  const res = await axiosProxy.post<ApiEnvelope<FindIdSuccess>>('/api/auth/find-id', { email });
+  return res.data;
 }
