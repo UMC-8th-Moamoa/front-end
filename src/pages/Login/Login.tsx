@@ -215,12 +215,12 @@ function Login() {
             아이디 찾기
           </Button>
         </Link>
-        <span>|</span>
+        {/* <span>|</span>
         <Link to="/reset-password">
           <Button variant="text" size="sm" fontSize="sm" fontWeight="medium" width="fit" className="px-2">
             비밀번호 변경
           </Button>
-        </Link>
+        </Link> */}
         <span>|</span>
         <Link to="/signup">
           <Button variant="text" size="sm" fontSize="sm" fontWeight="medium" width="fit" className="px-2">

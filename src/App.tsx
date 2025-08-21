@@ -13,6 +13,7 @@ import SignUpPage from "./pages/Login/SignUpPage";
 import SignupNamePage from "./pages/Login/SignUpNamePage";
 import SignupBirthdayPage from "./pages/Login/SignUpBirthdayPage";
 import SignupSuccessPage from "./pages/Login/SignUpSuccessPage";
+import KakaoCompleteProfile from "./pages/Login/KakaoBridge";
 
 // 홈/기능 관련 페이지
 import HomePage from "./pages/Home/HomePage";
@@ -63,6 +64,7 @@ import CustomerServiceDetailPage from './pages/MyPage/CustomerServiceDetailPage'
 import OtherUserFollowListPage from './pages/MyPage/OtherUserFollowListPage';
 import OtherUserProfilePage from './pages/MyPage/OtherUserProfilePage'; 
 import OtherUserWishlistPage from './pages/MyPage/OtherUserWishlistPage';
+import KakaoBridge from './pages/Login/KakaoBridge';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -163,7 +165,8 @@ function AppRoutes() {
           <Route path="/find-id" element={<FindIdPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/auth/callback" element={<OAuthCallback />} />
-          <Route path="/auth/success"  element={<OAuthCallback />} />
+          <Route path="/auth/kakao/success"  element={<OAuthCallback />} />
+          <Route path="/auth/kakao/complete-profile" element={<KakaoBridge />} />
 
           {/* 회원가입(스텝) */}
           <Route

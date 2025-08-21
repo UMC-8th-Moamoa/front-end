@@ -5,6 +5,7 @@
 
     { "source": "/api/(.*)", "destination": "https://www.moamoas.com/api/$1" },
 
+    { "source": "/auth/(.*)", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
