@@ -23,48 +23,75 @@ type VerifyEmailSuccess = { verified: boolean; message: string };
 type CheckNicknameSuccess = { available: boolean; message: string };
 type FindIdSuccess = { user_id?: string; message?: string };
 
-/** ---------- 유틸: 토큰/래퍼 정규화 ---------- */
-function extractTokens(data: any): { accessToken?: string; refreshToken?: string } {
-  const s = data?.success ?? data;
-  return {
-    accessToken: s?.tokens?.accessToken ?? s?.accessToken,
-    refreshToken: s?.tokens?.refreshToken ?? s?.refreshToken,
-  };
+/** ---------- 닉네임 중복 확인 ---------- */
+export async function checkNicknameDuplicate(nickname: string, signal?: AbortSignal) {
+  return checkUserIdDuplicate(nickname, signal);
 }
 
-function normalizeEnvelope<T>(data: any): ApiEnvelope<T> {
-  if (data && typeof data === "object" && "resultType" in data) {
-    return data as ApiEnvelope<T>;
-  }
-  // 맨바디로 내려온 성공 응답을 SUCCESS 래퍼로 감싸기
-  return {
-    resultType: "SUCCESS",
-    error: null,
-    success: data as T,
-  };
-}
-
-/* =========================================================================
-   아이디(=user_id) 중복 확인
-   - 백엔드 최신 스펙: GET /auth/user-id/{userId}/check
-   - 호환 위해 기존 checkNicknameDuplicate 이름을 유지하고 내부에서 위 경로 사용
-   ========================================================================= */
-
-/** 내부: 아이디 중복 확인 */
+/** ---------- 아이디 중복 확인 ---------- */
 export async function checkUserIdDuplicate(userId: string, signal?: AbortSignal) {
   const id = userId.trim();
   const path = `/auth/user-id/${encodeURIComponent(id)}/check`;
-  const { data } = await api.get<ApiEnvelope<CheckNicknameSuccess>>(path, { signal });
-  return data;
+
+  // 요청 함수: 캐시 회피 헤더 + 쿼리스트링 버스터
+  const req = async () => {
+    return axiosProxy.get(path, {
+      signal,
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+      },
+      params: { _t: Date.now() },             // 캐시 버스터
+      validateStatus: s => (s >= 200 && s < 300) || s === 304, // 304도 일단 통과
+    });
+  };
+
+  try {
+    let res = await req();
+
+    // 혹시 304로 바디가 비었으면 한 번 더 강제 버스터로 재시도
+    if (res.status === 304 || !res.data) {
+      res = await req();
+    }
+
+    return res.data; // { resultType, success: { available: boolean } } 기대
+  } catch (e: any) {
+    console.error('[USERID CHECK ERROR]', {
+      url: path,
+      status: e?.response?.status,
+      data: e?.response?.data,
+    });
+    throw e;
+  }
 }
 
-/** 호환 API: 닉네임 중복확인 → 실제로는 user_id 중복확인 호출 */
-export async function checkNicknameDuplicate(nickname: string, signal?: AbortSignal) {
-  const res = await api.get<ApiEnvelope<CheckNicknameSuccess>>(
-    `/auth/nickname/${nickname}/check`,
-    { signal }
-  );
-  return res.data;
+/** (1) 비밀번호 재설정 코드 전송 */
+export async function sendPasswordResetCode(email: string) {
+  const { data } = await axiosProxy.post('/api/auth/find-password', {
+    email,
+    purpose: 'reset',
+  });
+  return data as ApiEnvelope<SendEmailSuccess>;
+}
+
+/** (2) 비밀번호 재설정 코드 검증 */
+export async function verifyPasswordResetCode(email: string, code: string) {
+  const { data } = await axiosProxy.post('/api/auth/verify-reset-code', {
+    email,
+    code,
+    purpose: 'reset',
+  });
+  return data as ApiEnvelope<VerifyEmailSuccess>;
+}
+
+/** (3) 비밀번호 재설정 최종 */
+export async function resetPassword(payload: {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}) {
+  const { data } = await axiosProxy.post('/api/auth/reset-password', payload);
+  return data as ApiEnvelope<{ message?: string }>;
 }
 
 /** 2) 이메일 인증코드 전송 (프록시 경유) */
