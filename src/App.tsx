@@ -13,7 +13,6 @@ import SignUpPage from "./pages/Login/SignUpPage";
 import SignupNamePage from "./pages/Login/SignUpNamePage";
 import SignupBirthdayPage from "./pages/Login/SignUpBirthdayPage";
 import SignupSuccessPage from "./pages/Login/SignUpSuccessPage";
-import KakaoCompleteProfile from "./pages/Login/KakaoBridge";
 
 // 홈/기능 관련 페이지
 import HomePage from "./pages/Home/HomePage";

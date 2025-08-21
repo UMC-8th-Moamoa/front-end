@@ -8,7 +8,6 @@ import ParticipantList from "../../components/HomePage/Participation/Participant
 import RecipientBanner from "../../components/HomePage/Participation/RecipientBanner";
 import MemberWishList from "../../components/HomePage/Participation/MemberWishList";
 import ParticipationActionBox from "../../components/HomePage/Participation/ParticipationActionBox";
-import ShareModal from "../../components/mypage/ShareModal";
 
 import {
   getBirthdayEventDetail,
@@ -18,6 +17,7 @@ import {
   type WishlistUi,
   type ParticipationScreenDTO,
 } from "../../services/user/event"; // ✅ 경로 통일
+import ShareModal from "../../components/HomePage/Participation/ShareModal";
 
 type SimpleParticipant = {
   id: number;
