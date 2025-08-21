@@ -9,7 +9,22 @@ import {
   fetchMyMerged,
   setMyProfileImageFromFile,
   getMyUserId,
+  updateProfileImage,
 } from '../../services/mypage';
+
+// ===== [추가] 이미지 버전/버스터 유틸 =====
+const KEY_PROFILE_VER = 'profile_image_ver';
+const getImageVer = () => localStorage.getItem(KEY_PROFILE_VER) || '';
+const setImageVer = (ver: number | string) => {
+  localStorage.setItem(KEY_PROFILE_VER, String(ver));
+  window.dispatchEvent(new CustomEvent('profile_image_ver_updated', { detail: String(ver) }));
+};
+const bust = (url?: string | null, ver?: string | number) => {
+  if (!url) return null;
+  const v = ver ?? getImageVer();
+  if (!v) return url;
+  return url + (url.includes('?') ? '&' : '?') + `v=${v}`;
+};
 
 // YYYY-MM-DD -> YYYY.MM.DD
 function fmtBirthday(iso?: string | null) {
@@ -22,7 +37,8 @@ function fmtBirthday(iso?: string | null) {
 // 로컬 프리셋 파일명에서 presetId 추출: ".../profile3.png" → "profile3"
 function extractPresetIdByUrl(src: string): string | null {
   try {
-    const m = src.match(/profile(\d)\.(png|jpg|jpeg|webp|svg)$/i) || src.match(/profile(\d)/i);
+    const m =
+      src.match(/profile(\d)\.(png|jpg|jpeg|webp|svg)$/i) || src.match(/profile(\d)/i);
     if (!m) return null;
     const idx = m[1];
     if (!idx) return null;
@@ -76,7 +92,8 @@ function ProfileEditPage() {
         setEmail(m.email || '');
         setPhone(m.phone || '');
         setBirthday(fmtBirthday(m.birthday));
-        setImageUrl(m.image || null);
+        // ⬇️ bust 적용
+        setImageUrl(bust(m.image || m.photo || null));
       }
     } catch {}
 
@@ -92,7 +109,7 @@ function ProfileEditPage() {
         setEmail(merged.email || '');
         setPhone(merged.phone || '');
         setBirthday(fmtBirthday(merged.birthday));
-        setImageUrl(merged.image || null);
+        setImageUrl(bust(merged.image || merged.photo || null));
 
         localStorage.setItem('cached_profile', JSON.stringify(merged));
       } catch (err: any) {
@@ -102,12 +119,14 @@ function ProfileEditPage() {
       }
     })();
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // ===== 모달 선택 처리: 파일 업로드 or 프리셋 선택 =====
+   // ===== 모달 선택 처리: 파일 업로드 or 프리셋 선택 =====
   const handleSelectPhoto = async (imgUrl: string, file?: File) => {
-    // 미리보기 반영
+    // 임시 미리보기
     setImageUrl(imgUrl);
 
     // 내 userId
@@ -117,39 +136,47 @@ function ProfileEditPage() {
       setLoading(true);
       setLoadErr('');
 
+      let finalImageUrl: string;
+
       if (file) {
-        // 파일 업로드 (멀티파트 자동 업로드 전략)
+        // 파일 업로드 (setMyProfileImageFromFile에서 PATCH까지 한 번에 처리)
         const r = await setMyProfileImageFromFile(file, {
           doRefresh: true,
           refreshUserId: uid,
-          strategy: 'auto', // ← 스웨거의 /api/upload/user-image/auto 사용
+          strategy: 'auto',
         });
         if (!r.ok) {
           throw new Error(r.reason || '이미지 업로드에 실패했습니다.');
         }
+        finalImageUrl = r.imageUrl!;
+        // S3 업로드 + DB 업데이트까지 완료된 상태
         if (r.merged) {
           localStorage.setItem('cached_profile', JSON.stringify(r.merged));
-          setImageUrl(r.merged.image || r.imageUrl || imgUrl);
           setUserId(r.merged.userId || uid);
           setName(r.merged.name || '');
           setEmail(r.merged.email || '');
           setPhone(r.merged.phone || '');
-          setBirthday(fmtBirthday(r.merged.birthday));
-          // ★ 전역 알림
-          window.dispatchEvent(new CustomEvent('my_profile_updated', { detail: r.merged }));
-        } else if (r.imageUrl) {
-          setImageUrl(r.imageUrl);
-          window.dispatchEvent(new CustomEvent('my_profile_updated', { detail: { image: r.imageUrl } }));
+          setBirthday(r.merged.birthday);
+          setImageUrl(bust(finalImageUrl, Date.now()));
+          window.dispatchEvent(
+            new CustomEvent('my_profile_updated', {
+              detail: { ...r.merged, imageVer: Date.now() },
+            }),
+          );
         }
       } else {
-        // 프리셋 선택 → Blob으로 받아서 파일처럼 업로드 (전략 동일: auto)
+        // 프리셋 선택
+        // 1. 프리셋 이미지 URL을 Blob으로 변환
         const presetId = extractPresetIdByUrl(imgUrl) || 'preset';
         const resp = await fetch(imgUrl);
         if (!resp.ok) throw new Error('프리셋 이미지를 불러오지 못했습니다.');
         const blob = await resp.blob();
         const ext = (blob.type && blob.type.split('/')[1]) || 'png';
-        const presetFile = new File([blob], `${presetId}.${ext}`, { type: blob.type || 'image/png' });
-
+        const presetFile = new File([blob], `${presetId}.${ext}`, {
+          type: blob.type || 'image/png',
+        });
+        
+        // 2. 변환된 파일을 S3에 업로드하고 DB에 저장
         const r = await setMyProfileImageFromFile(presetFile, {
           doRefresh: true,
           refreshUserId: uid,
@@ -158,6 +185,7 @@ function ProfileEditPage() {
         if (!r.ok) {
           throw new Error(r.reason || '프리셋 적용에 실패했습니다.');
         }
+        finalImageUrl = r.imageUrl!;
 
         if (r.merged) {
           localStorage.setItem('cached_profile', JSON.stringify(r.merged));
@@ -165,14 +193,31 @@ function ProfileEditPage() {
           setName(r.merged.name || '');
           setEmail(r.merged.email || '');
           setPhone(r.merged.phone || '');
-          setBirthday(fmtBirthday(r.merged.birthday));
-          setImageUrl(r.merged.image || r.imageUrl || imgUrl);
-          // ★ 전역 알림
-          window.dispatchEvent(new CustomEvent('my_profile_updated', { detail: r.merged }));
-        } else if (r.imageUrl) {
-          setImageUrl(r.imageUrl);
-          window.dispatchEvent(new CustomEvent('my_profile_updated', { detail: { image: r.imageUrl } }));
+          setBirthday(r.merged.birthday);
+          setImageUrl(bust(finalImageUrl, Date.now()));
+          window.dispatchEvent(
+            new CustomEvent('my_profile_updated', {
+              detail: { ...r.merged, imageVer: Date.now() },
+            }),
+          );
         }
+      }
+
+      // 최종 이미지 URL을 사용하여 UI 업데이트 및 로컬 캐시 갱신
+      if (finalImageUrl) {
+        const ver = Date.now();
+        setImageVer(ver);
+        setImageUrl(bust(finalImageUrl, ver));
+        try {
+          const cachedRaw = localStorage.getItem('cached_profile');
+          const cached = cachedRaw ? JSON.parse(cachedRaw) : {};
+          localStorage.setItem('cached_profile', JSON.stringify({ ...cached, image: finalImageUrl, photo: finalImageUrl }));
+        } catch {}
+        window.dispatchEvent(
+          new CustomEvent('my_profile_updated', {
+            detail: { image: finalImageUrl, photo: finalImageUrl, imageVer: ver },
+          }),
+        );
       }
 
       setIsModalOpen(false);
@@ -286,31 +331,43 @@ function ProfileEditPage() {
 
       {/* 프로필 사진 모달 */}
       {isModalOpen && (
-        <ProfilePhotoModal
-          onClose={() => setIsModalOpen(false)}
-          onSelect={handleSelectPhoto}
-        />
+        <ProfilePhotoModal onClose={() => setIsModalOpen(false)} onSelect={handleSelectPhoto} />
       )}
     </div>
   );
 }
 
 // 공통 Row
-function Row({ label, value, actionLabel, onActionClick }: {
+function Row({
+  label,
+  value,
+  actionLabel,
+  onActionClick,
+}: {
   label: string;
   value: string;
   actionLabel?: string;
   onActionClick?: () => void;
 }) {
   return (
-    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', width:'100%' }}>
-      <span style={{ color:'#B7B7B7', fontSize:'16px', minWidth:'80px', flexShrink:0 }}>{label}</span>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', flex:1, overflow:'hidden' }}>
-        <span style={{ color:'#1F1F1F', fontSize:'18px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+      <span style={{ color: '#B7B7B7', fontSize: '16px', minWidth: '80px', flexShrink: 0 }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flex: 1, overflow: 'hidden' }}>
+        <span style={{ color: '#1F1F1F', fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {value}
         </span>
         {actionLabel && (
-          <span onClick={onActionClick} style={{ color:'#B6B6B6', fontSize:'16px', cursor:'pointer', whiteSpace:'nowrap', marginLeft:'8px', flexShrink:0 }}>
+          <span
+            onClick={onActionClick}
+            style={{
+              color: '#B6B6B6',
+              fontSize: '16px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              marginLeft: '8px',
+              flexShrink: 0,
+            }}
+          >
             {actionLabel}
           </span>
         )}

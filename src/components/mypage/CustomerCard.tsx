@@ -22,11 +22,20 @@ export default function CustomerCard({
   const isAnswerAvailable = status === '답변 보기';
 
   return (
-    <div
-      className={`flex flex-col justify-center items-end w-[340px] px-[16px] py-[12px] rounded-[7px] border border-[#E1E1E1] bg-white 
-        ${isAnswerAvailable ? 'cursor-pointer' : 'cursor-default'}`}
-      onClick={isAnswerAvailable ? onClick : undefined}
-    >
+<div
+  role="button"
+  tabIndex={0}
+  className={`flex flex-col justify-center items-end w-[340px] px-[16px] py-[12px] rounded-[7px] border border-[#E1E1E1] bg-white ${
+    isAnswerAvailable ? 'cursor-pointer' : 'cursor-pointer' // 시각은 원하면 구분, 클릭은 항상 가능
+  }`}
+  onClick={onClick}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick?.();
+    }
+  }}
+>
       {/* 제목 + 날짜 */}
       <div className="flex justify-between w-full items-start">
         <p className="text-[#1F1F1F] text-[18px] font-semibold w-[244px] truncate font-pretendard">

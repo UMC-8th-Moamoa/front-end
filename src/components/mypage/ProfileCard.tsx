@@ -4,6 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import ProfileImg from '../../assets/profile.svg';
 import { fetchMySelfInfo, fetchMyMerged } from '../../services/mypage';
 
+// ===== [추가] 이미지 버전/버스터 유틸 =====
+const KEY_PROFILE_VER = 'profile_image_ver';
+const getImageVer = () => localStorage.getItem(KEY_PROFILE_VER) || '';
+const setImageVer = (ver: number | string) => localStorage.setItem(KEY_PROFILE_VER, String(ver));
+const bust = (url?: string | null, ver?: string | number) => {
+  if (!url) return null;
+  const v = ver ?? getImageVer();
+  if (!v) return url;
+  return url + (url.includes('?') ? '&' : '?') + `v=${v}`;
+};
+
 // YYYY-MM-DD -> YYYY.MM.DD
 function fmtBirthday(iso?: string | null) {
   if (!iso) return '';
@@ -26,14 +37,14 @@ function ProfileCard() {
   const [loading, setLoading] = useState(false);
   const [loadErr, setLoadErr] = useState('');
 
-  const applyMerged = (m: any, fallbackUid?: string) => {
+  const applyMerged = (m: any, fallbackUid?: string, ver?: number | string) => {
     const uid = m?.userId || fallbackUid || '';
     setUserId(uid);
     setName(m?.name || '');
     setBirthday(fmtBirthday(m?.birthday));
     setFollowers(typeof m?.followers === 'number' ? m.followers : 0);
     setFollowing(typeof m?.following === 'number' ? m.following : 0);
-    setImageUrl(m?.image || null);
+    setImageUrl(bust(m?.image || m?.photo || null, ver));
   };
 
   useEffect(() => {
@@ -68,14 +79,15 @@ function ProfileCard() {
           const res = await fetchMySelfInfo(uid);
           if (mounted && res.resultType === 'SUCCESS' && res.success) {
             const p = res.success.profile;
-            const mergedLike = {
-              userId: p.userId,
-              name: p.name,
-              birthday: p.birthday,
-              image: p.image,
-              followers: p.followers,
-              following: p.following,
-            };
+          const mergedLike = {
+            userId: p.userId,
+            name: p.name,
+            birthday: p.birthday,
+            image: p.image || (p as any).photo || '', // ★ photo도 고려
+            photo: (p as any).photo || p.image || '',
+            followers: p.followers,
+            following: p.following,
+          };
             applyMerged(mergedLike, uid);
             localStorage.setItem('cached_profile', JSON.stringify(mergedLike));
           } else if (mounted) {
@@ -98,25 +110,45 @@ function ProfileCard() {
         const cached = cachedRaw ? JSON.parse(cachedRaw) : {};
         const merged = { ...cached, ...detail };
         localStorage.setItem('cached_profile', JSON.stringify(merged));
-        applyMerged(merged, uid);
+        // 이벤트에 imageVer가 오면 저장
+        if (detail.imageVer) setImageVer(detail.imageVer);
+        applyMerged(merged, uid, detail.imageVer);
       } catch {}
     };
     window.addEventListener('my_profile_updated', onProfileUpdated as EventListener);
 
-    // 3) 다른 탭: storage 이벤트로 캐시 변경 추적
+    // 3) 다른 탭/버전 변경: storage 이벤트로 추적
     const onStorage = (e: StorageEvent) => {
-      if (e.key !== 'cached_profile' || !e.newValue) return;
+      if (!e.key) return;
       try {
-        const m = JSON.parse(e.newValue);
-        applyMerged(m, uid);
+        if (e.key === 'cached_profile' && e.newValue) {
+          const m = JSON.parse(e.newValue);
+          applyMerged(m, uid);
+        }
+        if (e.key === KEY_PROFILE_VER && e.newValue) {
+          // 버전만 바뀐 경우도 bust 다시 적용
+          const cachedRaw = localStorage.getItem('cached_profile');
+          const cached = cachedRaw ? JSON.parse(cachedRaw) : {};
+          applyMerged(cached, uid, e.newValue);
+        }
       } catch {}
     };
     window.addEventListener('storage', onStorage);
+
+    // 4) 같은 탭에서 버전만 갱신될 때
+    const onVerOnly = (e: Event) => {
+      const ver = (e as CustomEvent).detail;
+      const cachedRaw = localStorage.getItem('cached_profile');
+      const cached = cachedRaw ? JSON.parse(cachedRaw) : {};
+      applyMerged(cached, uid, ver);
+    };
+    window.addEventListener('profile_image_ver_updated', onVerOnly as EventListener);
 
     return () => {
       mounted = false;
       window.removeEventListener('my_profile_updated', onProfileUpdated as EventListener);
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener('profile_image_ver_updated', onVerOnly as EventListener);
     };
   }, []);
 

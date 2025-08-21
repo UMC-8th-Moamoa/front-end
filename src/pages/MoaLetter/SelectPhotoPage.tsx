@@ -61,7 +61,7 @@ export default function SelectPhotoPage() {
       <input
         ref={albumInputRef}
         type="file"
-        accept="image/*"
+        accept="image/png,image/jpeg,image/jpg,image/gif,image/bmp"
         style={{ display: "none" }}
         onChange={(e) => handlePick(e.target.files)}
       />
@@ -70,7 +70,7 @@ export default function SelectPhotoPage() {
       <input
         ref={cameraInputRef}
         type="file"
-        accept="image/*"
+        accept="image/png,image/jpeg,image/jpg,image/gif,image/bmp"
         capture="environment" // 필요 시 'user'로 전면 카메라 우선
         style={{ display: "none" }}
         onChange={(e) => handlePick(e.target.files)}

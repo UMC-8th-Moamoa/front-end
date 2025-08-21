@@ -11,6 +11,21 @@ import {
 
 const ITEMS_PER_PAGE = 8;
 
+
+// [추가] KST 포맷터
+function fmtKST(iso?: string) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  // 로컬(KST) 기준 포맷. 필요하면 초는 제거.
+  const yy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return `${yy}.${mm}.${dd} ${hh}:${mi}`;
+}
+
+
 export default function CustomerServicePage() {
   const navigate = useNavigate();
 
@@ -91,26 +106,22 @@ export default function CustomerServicePage() {
         ) : currentItems.length === 0 ? (
           <div className="w-[350px] text-center text-[#B7B7B7]">문의 내역이 없습니다.</div>
         ) : (
-          currentItems.map((item) => (
-            <CustomerCard
-              key={item.id}
-              title={item.title}
-              content={item.content}
-              date={item.date}
-              status={item.status}
-              // [핵심 수정] boolean | undefined → boolean 강제 변환
-              isLocked={!!item.isLocked}
-              username={item.username}
-              onClick={() => {
-                if (item.status === "답변 보기") {
-                  // 기존 라우트 형식 유지: state로 id만 넘김 → 상세에서 조회
-                  navigate("/mypage/customer-service/detail", {
-                    state: { inquiryId: item.id },
-                  });
-                }
-              }}
-            />
-          ))
+          
+currentItems.map((item) => (
+  <CustomerCard
+    key={item.id}
+    title={item.title}
+    content={item.content}
+    date={fmtKST(item.date)}           // 포맷 적용
+    status={item.status}
+    isLocked={!!item.isLocked}
+    username={item.username}
+    onClick={() => {
+      // 답변 여부 관계없이 상세로 이동
+      navigate("/customer-service/detail", { state: { inquiryId: item.id } });
+    }}
+  />
+))
         )}
       </div>
 

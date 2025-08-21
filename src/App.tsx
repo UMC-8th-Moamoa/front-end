@@ -189,7 +189,8 @@ function AppRoutes() {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/customer-service" element={<CustomerServicePage />} />
           <Route path="/customer-service/write" element={<CustomerServiceWritePage />} />
-          <Route path="/mypage/customer-service/detail" element={<CustomerServiceDetailPage />} />
+          <Route path="/customer-service/detail" element={<CustomerServiceDetailPage />} />
+          <Route path="/mypage/customer-service/*" element={<Navigate to="/customer-service" replace />} />
           <Route path="/notice" element={<NoticePage />} />
           <Route path="/purchase-history" element={<PurchaseHistoryPage />} />
           <Route path="/mypage/follow-list" element={<OtherUserFollowListPage />} />

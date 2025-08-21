@@ -28,17 +28,15 @@ export default function CustomerServiceWritePage() {
 
     try {
       const res = await createCustomerInquiry({
-        user_id: userId,     // ★ 서버가 필수 요구
+        user_id: userId,
         title,
         content,
-        private: true,       // ★ 서버가 필수 요구
+        privacyAgreed: agreed, // 서버가 요구하는 정확한 키
       });
 
       if (res.success) {
         alert("문의가 등록되었습니다.");
-        // 라우팅 일관화: 목록이 /mypage/customer-service 라우트라면 아래로 변경
-        navigate("/mypage/customer-service");
-        // 만약 프로젝트가 /customer-service 를 쓰고 있으면 위 한 줄을 "/customer-service"로 바꿔줘.
+        navigate("/customer-service");
       } else {
         alert(res.message || "등록에 실패했습니다.");
       }
