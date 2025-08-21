@@ -24,20 +24,37 @@ export async function checkNicknameDuplicate(nickname: string, signal?: AbortSig
 }
 
 /** ---------- 아이디 중복 확인 ---------- */
-export async function checkUserIdDuplicate(
-  userId: string,
-  signal?: AbortSignal
-) {
-  const id = userId.trim();                 // 백엔드가 대소문자 구분하면 toLowerCase() 하지 마세요
+export async function checkUserIdDuplicate(userId: string, signal?: AbortSignal) {
+  const id = userId.trim();
   const path = `/auth/user-id/${encodeURIComponent(id)}/check`;
+
+  // 요청 함수: 캐시 회피 헤더 + 쿼리스트링 버스터
+  const req = async () => {
+    return axiosProxy.get(path, {
+      signal,
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+      },
+      params: { _t: Date.now() },             // 캐시 버스터
+      validateStatus: s => (s >= 200 && s < 300) || s === 304, // 304도 일단 통과
+    });
+  };
+
   try {
-    const { data } = await axiosProxy.get(path, { signal });
-    return data; // { resultType, success: { available: boolean } } 기대
+    let res = await req();
+
+    // 혹시 304로 바디가 비었으면 한 번 더 강제 버스터로 재시도
+    if (res.status === 304 || !res.data) {
+      res = await req();
+    }
+
+    return res.data; // { resultType, success: { available: boolean } } 기대
   } catch (e: any) {
     console.error('[USERID CHECK ERROR]', {
       url: path,
       status: e?.response?.status,
-      data: e?.response?.data,             // <- 백엔드에 reason 전달
+      data: e?.response?.data,
     });
     throw e;
   }
