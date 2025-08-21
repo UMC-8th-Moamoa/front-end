@@ -773,31 +773,48 @@ export async function uploadUserImageAuto(
  * @param imageUrl S3에 업로드된 이미지 URL
  * @returns 업데이트 성공 여부 및 메시지
  */
+// [after] 맨바디({imageUrl})와 Envelope 둘 다 지원
 export async function updateProfileImage(
   imageUrl: string
 ): Promise<ProfileImageUpdateResponse> {
   try {
-    const { data } = await instance.patch<Envelope<ProfileImageUpdateSuccess>>(
+    const { data } = await instance.patch(
       EP_PROFILE_IMAGE_UPDATE,
       { imageUrl }
     );
     console.log('[PROFILE_IMAGE_UPDATE_RAW]', JSON.stringify(data, null, 2));
 
-    if (data?.resultType === "SUCCESS" && data.success) {
+    // 1) Envelope: { resultType, error, success: { imageUrl, message } }
+    if (data?.resultType === "SUCCESS" && data?.success) {
+      const s = data.success;
       return {
         resultType: "SUCCESS",
         error: null,
         success: {
-          imageUrl: data.success.imageUrl,
-          message: data.success.message,
+          imageUrl: s.imageUrl,
+          message: s.message || "프로필 이미지가 성공적으로 변경되었습니다.",
+        },
+      };
+    }
+    if (data?.resultType === "FAIL") {
+      return { resultType: "FAIL", error: data?.error || "UPDATE_FAILED" };
+    }
+
+    // 2) 맨바디: { imageUrl } 또는 { imageUrl, message }
+    if (data && typeof data === "object" && data.imageUrl) {
+      return {
+        resultType: "SUCCESS",
+        error: null,
+        success: {
+          imageUrl: data.imageUrl,
+          message: data.message || "프로필 이미지가 성공적으로 변경되었습니다.",
         },
       };
     }
 
-    // ⭐ 문제 해결: data 객체에는 message가 없으므로 error 필드만 사용
     return {
       resultType: "FAIL",
-      error: data?.error ?? "이미지 업데이트에 실패했습니다.",
+      error: data?.error || data?.message || "이미지 업데이트에 실패했습니다.",
     };
   } catch (e: any) {
     const msg =
@@ -808,6 +825,7 @@ export async function updateProfileImage(
     return { resultType: "FAIL", error: msg };
   }
 }
+
 
 /** 고수준: 파일로 프사 한 번에 변경(Presigned 플로우) */
 export async function setMyProfileImageFromFile(
